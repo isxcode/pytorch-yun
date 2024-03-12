@@ -1,0 +1,110 @@
+plugins {
+  id 'java'
+  id 'checkstyle'
+  id 'org.springframework.boot' version "${SPRING_VERSION}"
+  id 'io.spring.dependency-management' version "${SPRING_MANAGER_VERSION}"
+  id "com.diffplug.spotless" version "${SPOTLESS_VERSION}"
+}
+
+def version_number = new File(rootDir.getAbsolutePath(), 'VERSION').readLines()[0].trim()
+
+allprojects {
+
+  apply plugin: 'org.springframework.boot'
+  apply plugin: 'io.spring.dependency-management'
+  apply plugin: 'java-library'
+  apply plugin: 'checkstyle'
+
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+
+  group = 'com.isxcode.pytorch'
+  version = version_number
+
+  repositories {
+    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+
+  configurations.configureEach {
+    exclude group: "org.apache.logging.log4j", module: "log4j-slf4j-impl"
+    exclude group: "org.slf4j", module: "slf4j-reload4j"
+  }
+
+  dependencies {
+
+    // spring-web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // spring-aop
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // spring-validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // spring-configuration
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // spring-test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // spring-openapi
+    implementation "org.springdoc:springdoc-openapi-ui:${OPENAPI_VERSION}"
+
+    // lombok
+    compileOnly "org.projectlombok:lombok:${LOMBOK_VERSION}"
+    annotationProcessor "org.projectlombok:lombok:${LOMBOK_VERSION}"
+
+    // fastjson
+    implementation "com.alibaba:fastjson:${FASTJSON_VERSION}"
+
+    // junit
+    implementation "org.junit.jupiter:junit-jupiter:${JUPITER_VERSION}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${JUPITER_VERSION}"
+
+    // mapstruct
+    implementation "org.mapstruct:mapstruct:${MAPSTRUCT_VERSION}"
+    implementation "org.mapstruct:mapstruct-processor:${MAPSTRUCT_VERSION}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${MAPSTRUCT_VERSION}"
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor:${MAPSTRUCT_VERSION}"
+  }
+
+  configurations {
+    compileOnly {
+      extendsFrom annotationProcessor
+    }
+  }
+
+  // checkstyle
+  tasks.withType(Checkstyle).configureEach {
+    maxWarnings = 100
+    maxErrors = 0
+    ignoreFailures = false
+    config resources.text.fromFile(rootDir.getAbsolutePath() + '/.checkstyle/checkstyle.xml')
+    reports {
+      xml.required = false
+      html.required = true
+      html.stylesheet resources.text.fromFile(rootDir.getAbsolutePath() + '/.checkstyle/checkstyle-simple.xsl')
+    }
+  }
+}
+
+// spotless
+spotless {
+  java {
+    target '*/**/*.java'
+    targetExclude('*/build/**/*.java')
+    targetExclude('pytorch-yun-vip/**/*.java')
+    eclipse()
+    removeUnusedImports()
+  }
+}
+
+// gradle format，格式化代码
+tasks.register('format', GradleBuild) {
+
+  tasks = [":spotlessApply", ":checkstyleMain"]
+}

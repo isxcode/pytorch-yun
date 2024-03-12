@@ -1,0 +1,29 @@
+**/build/
+!src/**/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Cache of project
+.gradletasknamecache
+
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# .idea不提交
+.idea
+*/.idea
+!.idea/icon.svg
+*/.idea/icon.svg
+
+# gradle不提交
+.gradle
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# 企业版代码，不提交
+pytorch-yun-vip/**
+pytorch-yun-vip
