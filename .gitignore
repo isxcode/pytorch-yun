@@ -1,29 +1,43 @@
-**/build/
-!src/**/build/
+# idea配置不提交
+**/.idea/**
+!**/.idea/icon.svg
 
-# Ignore Gradle GUI config
-gradle-app.setting
-
-# Cache of project
-.gradletasknamecache
-
-# Eclipse Gradle plugin generated files
-# Eclipse Core
-.project
-# JDT-specific (Eclipse Java Development Tools)
-.classpath
-
-# .idea不提交
-.idea
-*/.idea
-!.idea/icon.svg
-*/.idea/icon.svg
-
-# gradle不提交
+# gradle缓存不提交
 .gradle
 !gradle-wrapper.jar
-!gradle-wrapper.properties
 
-# 企业版代码，不提交
-pytorch-yun-vip/**
+# 后端打包文件不提交
+**/build
+**/bin
+**/dist
+
+# .DS_Store不提交
+**/.DS_Store
+
+# 前端打包不提交
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/templates
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/static
+
+# 代理安装包不提交
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/agent
+
+# 企业版代码不提交
 pytorch-yun-vip
+
+# 资源文件不提交
+resources/file
+resources/jdbc
+resources/libs
+resources/license
+resources/tmp
+resources/cdc
+
+# flink-min不提交
+pytorch-yun-dist/flink-min
+
+# 日志不提交
+logs
+
+# prql二进制文件不提交
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/libprql_java-osx-arm64.dylib
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/libprql_java-linux64.so

@@ -1,0 +1,22 @@
+dependencies {
+
+  api(project(':pytorch-yun-backend:pytorch-yun-common'))
+  api(project(':pytorch-yun-backend:pytorch-yun-security'))
+
+  // spring-cache
+  api 'org.springframework.boot:spring-boot-starter-cache'
+
+  // mysql
+  runtimeOnly 'com.mysql:mysql-connector-j'
+
+  // h2
+  runtimeOnly 'com.h2database:h2'
+
+  // calcite
+  implementation "org.apache.calcite:calcite-core:${CALCITE_VERSION}"
+
+  // kafka-client
+  implementation group: 'org.apache.kafka', name: 'kafka-clients', version: '3.1.2'
+
+  implementation fileTree(dir: rootDir.getAbsolutePath() + '/resources/libs', include: [ 'prql-java-0.5.2.jar'])
+}

@@ -1,0 +1,25 @@
+${AnsiColor.RED}
+
+EEEEEEEEEEEEEEEEEEEEEE                   hhhhhhh                                                           tttt                                YYYYYYY       YYYYYYY
+E::::::::::::::::::::E                   h:::::h                                                        ttt:::t                                Y:::::Y       Y:::::Y
+E::::::::::::::::::::E                   h:::::h                                                        t:::::t                                Y:::::Y       Y:::::Y
+EE::::::EEEEEEEEE::::E                   h:::::h                                                        t:::::t                                Y::::::Y     Y::::::Y
+  E:::::E       EEEEEE    cccccccccccccccch::::h hhhhh         aaaaaaaaaaaaa  rrrrr   rrrrrrrrr   ttttttt:::::ttttttt        ssssssssss        YYY:::::Y   Y:::::YYYuuuuuu    uuuuuunnnn  nnnnnnnn
+  E:::::E               cc:::::::::::::::ch::::hh:::::hhh      a::::::::::::a r::::rrr:::::::::r  t:::::::::::::::::t      ss::::::::::s          Y:::::Y Y:::::Y   u::::u    u::::un:::nn::::::::nn
+  E::::::EEEEEEEEEE    c:::::::::::::::::ch::::::::::::::hh    aaaaaaaaa:::::ar:::::::::::::::::r t:::::::::::::::::t    ss:::::::::::::s          Y:::::Y:::::Y    u::::u    u::::un::::::::::::::nn
+  E:::::::::::::::E   c:::::::cccccc:::::ch:::::::hhh::::::h            a::::arr::::::rrrrr::::::rtttttt:::::::tttttt    s::::::ssss:::::s          Y:::::::::Y     u::::u    u::::unn:::::::::::::::n
+  E:::::::::::::::E   c::::::c     ccccccch::::::h   h::::::h    aaaaaaa:::::a r:::::r     r:::::r      t:::::t           s:::::s  ssssss            Y:::::::Y      u::::u    u::::u  n:::::nnnn:::::n
+  E::::::EEEEEEEEEE   c:::::c             h:::::h     h:::::h  aa::::::::::::a r:::::r     rrrrrrr      t:::::t             s::::::s                  Y:::::Y       u::::u    u::::u  n::::n    n::::n
+  E:::::E             c:::::c             h:::::h     h:::::h a::::aaaa::::::a r:::::r                  t:::::t                s::::::s               Y:::::Y       u::::u    u::::u  n::::n    n::::n
+  E:::::E       EEEEEEc::::::c     ccccccch:::::h     h:::::ha::::a    a:::::a r:::::r                  t:::::t    ttttttssssss   s:::::s             Y:::::Y       u:::::uuuu:::::u  n::::n    n::::n
+EE::::::EEEEEEEE:::::Ec:::::::cccccc:::::ch:::::h     h:::::ha::::a    a:::::a r:::::r                  t::::::tttt:::::ts:::::ssss::::::s            Y:::::Y       u:::::::::::::::uun::::n    n::::n
+E::::::::::::::::::::E c:::::::::::::::::ch:::::h     h:::::ha:::::aaaa::::::a r:::::r                  tt::::::::::::::ts::::::::::::::s          YYYY:::::YYYY     u:::::::::::::::un::::n    n::::n
+E::::::::::::::::::::E  cc:::::::::::::::ch:::::h     h:::::h a::::::::::aa:::ar:::::r                    tt:::::::::::tt s:::::::::::ss           Y:::::::::::Y      uu::::::::uu:::un::::n    n::::n
+EEEEEEEEEEEEEEEEEEEEEE    cccccccccccccccchhhhhhh     hhhhhhh  aaaaaaaaaa  aaaarrrrrrr                      ttttttttttt    sssssssssss             YYYYYYYYYYYYY        uuuuuuuu  uuuunnnnnn    nnnnnn
+
+${AnsiColor.RED}
+项目: ${application.title}
+官网: ${application.website}
+描述: ${application.describe}
+
+${AnsiColor.WHITE}
