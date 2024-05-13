@@ -1,0 +1,108 @@
+// 构建lib文件夹
+tasks.register('build_agent_lib', Copy) {
+
+  dependsOn(":pytorch-yun-agent:bootJar")
+  dependsOn(":pytorch-yun-backend:pytorch-yun-api:jar")
+
+  def dependencies = configurations.runtimeClasspath.findAll {
+    it.name.contains('fastjson2') ||
+      it.name.contains('fastjson') ||
+      it.name.contains('pytorch-yun-api') ||
+      it.name.contains('log4j-api')
+  }
+  dependencies.each { dependency ->
+    from dependency
+    into 'build/zhihuiyun_agent/lib'
+  }
+
+  from rootDir.getAbsolutePath() + '/pytorch-yun-backend/pytorch-yun-api/build/libs'
+  from rootDir.getAbsolutePath() + '/pytorch-yun-agent/build/libs'
+  from rootDir.getAbsolutePath() + '/resources/jdbc/system'
+  from rootDir.getAbsolutePath() + '/resources/cdc'
+  into 'build/zhihuiyun-agent/lib'
+}
+
+// 构建plugins文件夹
+tasks.register('build_agent_plugins', Copy) {
+
+
+}
+
+// 构建至轻云代理
+tasks.register('build_agent', Tar) {
+
+  mustRunAfter(":pytorch-yun-frontend:make")
+
+  dependsOn('build_agent_lib')
+  dependsOn('build_agent_plugins')
+
+  compression = Compression.GZIP
+  archiveFileName = 'zhihuiyun-agent.tar.gz'
+
+  from(rootDir.getAbsolutePath() + "/pytorch-yun-dist/flink-min") {
+    into 'zhihuiyun-agent/flink-min'
+  }
+  from('zhihuiyun-agent/bin') {
+    into 'zhihuiyun-agent/bin'
+  }
+  from(rootDir.getAbsolutePath() + "/pytorch-yun-agent/src/main/resources/application.yml") {
+    into 'zhihuiyun-agent/conf'
+  }
+  from('zhihuiyun-agent/logs') {
+    into 'zhihuiyun-agent/logs'
+  }
+  from('build/zhihuiyun-agent/plugins') {
+    into 'zhihuiyun-agent/plugins'
+  }
+  from('zhihuiyun-agent/works') {
+    into 'zhihuiyun-agent/works'
+  }
+  from('zhihuiyun-agent/file') {
+    into 'zhihuiyun-agent/file'
+  }
+  from('build/zhihuiyun-agent/lib') {
+    into 'zhihuiyun-agent/lib'
+  }
+  from('../README.md') {
+    into 'zhihuiyun-agent/'
+  }
+}
+
+// 构建至轻云
+tasks.register('build_zhihuiyun', Tar) {
+
+  mustRunAfter(":pytorch-yun-backend:make")
+
+  compression = Compression.GZIP
+  archiveFileName = 'zhihuiyun.tar.gz'
+
+  from('zhihuiyun/bin') {
+    into 'zhihuiyun/bin'
+  }
+  from('zhihuiyun/conf') {
+    into 'zhihuiyun/conf'
+  }
+  from(rootDir.getAbsolutePath() + '/pytorch-yun-backend/pytorch-yun-main/src/main/resources/application-local.yml') {
+    into 'zhihuiyun/conf'
+  }
+  from(rootDir.getAbsolutePath() + '/resources/jdbc/system') {
+    into 'zhihuiyun/resources/jdbc/system'
+  }
+  from(rootDir.getAbsolutePath() + '/pytorch-yun-backend/pytorch-yun-main/build/libs/zhihuiyun.jar') {
+    into 'zhihuiyun/lib'
+  }
+  from(rootDir.getAbsolutePath() + '/README.md') {
+    into 'zhihuiyun/'
+  }
+}
+
+// 打包
+tasks.register('make', GradleBuild) {
+
+  tasks = [":pytorch-yun-frontend:make", "build_agent", ":pytorch-yun-backend:make", "build_zhihuiyun"]
+}
+
+// 添加依赖
+dependencies {
+
+}
