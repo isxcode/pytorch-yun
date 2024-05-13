@@ -19,7 +19,7 @@
           <div class="link" @click="clickZhiqingyun">至轻云</div>
           <div class="link" @click="clickZhiliuyun">至流云</div>
           <div class="link" @click="clickZhishuyun">至数云</div>
-          <div class="link" @click="clickZhishiyun">至慧云</div>
+          <div class="link" @click="clickZhishiyun">至视云</div>
           <div class="link" @click="clickZhihuiyun">至慧云</div>
           <div class="link" @click="clickOther">更多</div>
         </div>
@@ -218,7 +218,7 @@ $primary-color: #ee4c2c;
     height: 50px;
     line-height: 50px;
     text-align: center;
-    background: #6cd9d9;
+    background: #ffc8bd;
 
     .content {
       width: 130px;

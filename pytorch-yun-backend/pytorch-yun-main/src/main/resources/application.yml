@@ -1,7 +1,7 @@
 application:
   title: 至慧云
   website: https://zhihuiyun.isxcode.com
-  describe: 打造企业级流式大数据平台
+  describe: 打造企业级智能微模型平台
 
 server:
   tomcat:
