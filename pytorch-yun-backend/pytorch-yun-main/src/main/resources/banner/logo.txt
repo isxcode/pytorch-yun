@@ -22,7 +22,7 @@ PPPPPPPPPP                 y:::::y                     ttttttttttt     ooooooooo
                        y:::::y
                       yyyyyyy
 
-${AnsiColor.RED}
+${AnsiColor.BLUE}
 项目: ${application.title}
 官网: ${application.website}
 描述: ${application.describe}

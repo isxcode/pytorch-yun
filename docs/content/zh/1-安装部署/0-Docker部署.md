@@ -2,7 +2,7 @@
 title: "Docker部署"
 ---
 
-?> 至轻云平台镜像由Docker Hub官方镜像仓库管理
+?> 至慧云平台镜像由Docker Hub官方镜像仓库管理
 
 <br/>
 

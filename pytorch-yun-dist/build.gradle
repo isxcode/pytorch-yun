@@ -28,7 +28,7 @@ tasks.register('build_agent_plugins', Copy) {
 
 }
 
-// 构建至轻云代理
+// 构建至慧云代理
 tasks.register('build_agent', Tar) {
 
   mustRunAfter(":pytorch-yun-frontend:make")
@@ -68,7 +68,7 @@ tasks.register('build_agent', Tar) {
   }
 }
 
-// 构建至轻云
+// 构建至慧云
 tasks.register('build_zhihuiyun', Tar) {
 
   mustRunAfter(":pytorch-yun-backend:make")
