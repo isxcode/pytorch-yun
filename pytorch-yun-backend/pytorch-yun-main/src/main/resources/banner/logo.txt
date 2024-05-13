@@ -1,21 +1,26 @@
 ${AnsiColor.RED}
 
-EEEEEEEEEEEEEEEEEEEEEE                   hhhhhhh                                                           tttt                                YYYYYYY       YYYYYYY
-E::::::::::::::::::::E                   h:::::h                                                        ttt:::t                                Y:::::Y       Y:::::Y
-E::::::::::::::::::::E                   h:::::h                                                        t:::::t                                Y:::::Y       Y:::::Y
-EE::::::EEEEEEEEE::::E                   h:::::h                                                        t:::::t                                Y::::::Y     Y::::::Y
-  E:::::E       EEEEEE    cccccccccccccccch::::h hhhhh         aaaaaaaaaaaaa  rrrrr   rrrrrrrrr   ttttttt:::::ttttttt        ssssssssss        YYY:::::Y   Y:::::YYYuuuuuu    uuuuuunnnn  nnnnnnnn
-  E:::::E               cc:::::::::::::::ch::::hh:::::hhh      a::::::::::::a r::::rrr:::::::::r  t:::::::::::::::::t      ss::::::::::s          Y:::::Y Y:::::Y   u::::u    u::::un:::nn::::::::nn
-  E::::::EEEEEEEEEE    c:::::::::::::::::ch::::::::::::::hh    aaaaaaaaa:::::ar:::::::::::::::::r t:::::::::::::::::t    ss:::::::::::::s          Y:::::Y:::::Y    u::::u    u::::un::::::::::::::nn
-  E:::::::::::::::E   c:::::::cccccc:::::ch:::::::hhh::::::h            a::::arr::::::rrrrr::::::rtttttt:::::::tttttt    s::::::ssss:::::s          Y:::::::::Y     u::::u    u::::unn:::::::::::::::n
-  E:::::::::::::::E   c::::::c     ccccccch::::::h   h::::::h    aaaaaaa:::::a r:::::r     r:::::r      t:::::t           s:::::s  ssssss            Y:::::::Y      u::::u    u::::u  n:::::nnnn:::::n
-  E::::::EEEEEEEEEE   c:::::c             h:::::h     h:::::h  aa::::::::::::a r:::::r     rrrrrrr      t:::::t             s::::::s                  Y:::::Y       u::::u    u::::u  n::::n    n::::n
-  E:::::E             c:::::c             h:::::h     h:::::h a::::aaaa::::::a r:::::r                  t:::::t                s::::::s               Y:::::Y       u::::u    u::::u  n::::n    n::::n
-  E:::::E       EEEEEEc::::::c     ccccccch:::::h     h:::::ha::::a    a:::::a r:::::r                  t:::::t    ttttttssssss   s:::::s             Y:::::Y       u:::::uuuu:::::u  n::::n    n::::n
-EE::::::EEEEEEEE:::::Ec:::::::cccccc:::::ch:::::h     h:::::ha::::a    a:::::a r:::::r                  t::::::tttt:::::ts:::::ssss::::::s            Y:::::Y       u:::::::::::::::uun::::n    n::::n
-E::::::::::::::::::::E c:::::::::::::::::ch:::::h     h:::::ha:::::aaaa::::::a r:::::r                  tt::::::::::::::ts::::::::::::::s          YYYY:::::YYYY     u:::::::::::::::un::::n    n::::n
-E::::::::::::::::::::E  cc:::::::::::::::ch:::::h     h:::::h a::::::::::aa:::ar:::::r                    tt:::::::::::tt s:::::::::::ss           Y:::::::::::Y      uu::::::::uu:::un::::n    n::::n
-EEEEEEEEEEEEEEEEEEEEEE    cccccccccccccccchhhhhhh     hhhhhhh  aaaaaaaaaa  aaaarrrrrrr                      ttttttttttt    sssssssssss             YYYYYYYYYYYYY        uuuuuuuu  uuuunnnnnn    nnnnnn
+PPPPPPPPPPPPPPPPP                                     tttt                                                                  hhhhhhh                  YYYYYYY       YYYYYYY
+P::::::::::::::::P                                 ttt:::t                                                                  h:::::h                  Y:::::Y       Y:::::Y
+P::::::PPPPPP:::::P                                t:::::t                                                                  h:::::h                  Y:::::Y       Y:::::Y
+PP:::::P     P:::::P                               t:::::t                                                                  h:::::h                  Y::::::Y     Y::::::Y
+  P::::P     P:::::Pyyyyyyy           yyyyyyyttttttt:::::ttttttt       ooooooooooo   rrrrr   rrrrrrrrr       cccccccccccccccch::::h hhhhh            YYY:::::Y   Y:::::YYYuuuuuu    uuuuuunnnn  nnnnnnnn
+  P::::P     P:::::P y:::::y         y:::::y t:::::::::::::::::t     oo:::::::::::oo r::::rrr:::::::::r    cc:::::::::::::::ch::::hh:::::hhh            Y:::::Y Y:::::Y   u::::u    u::::un:::nn::::::::nn
+  P::::PPPPPP:::::P   y:::::y       y:::::y  t:::::::::::::::::t    o:::::::::::::::or:::::::::::::::::r  c:::::::::::::::::ch::::::::::::::hh           Y:::::Y:::::Y    u::::u    u::::un::::::::::::::nn
+  P:::::::::::::PP     y:::::y     y:::::y   tttttt:::::::tttttt    o:::::ooooo:::::orr::::::rrrrr::::::rc:::::::cccccc:::::ch:::::::hhh::::::h           Y:::::::::Y     u::::u    u::::unn:::::::::::::::n
+  P::::PPPPPPPPP        y:::::y   y:::::y          t:::::t          o::::o     o::::o r:::::r     r:::::rc::::::c     ccccccch::::::h   h::::::h           Y:::::::Y      u::::u    u::::u  n:::::nnnn:::::n
+  P::::P                 y:::::y y:::::y           t:::::t          o::::o     o::::o r:::::r     rrrrrrrc:::::c             h:::::h     h:::::h            Y:::::Y       u::::u    u::::u  n::::n    n::::n
+  P::::P                  y:::::y:::::y            t:::::t          o::::o     o::::o r:::::r            c:::::c             h:::::h     h:::::h            Y:::::Y       u::::u    u::::u  n::::n    n::::n
+  P::::P                   y:::::::::y             t:::::t    tttttto::::o     o::::o r:::::r            c::::::c     ccccccch:::::h     h:::::h            Y:::::Y       u:::::uuuu:::::u  n::::n    n::::n
+PP::::::PP                  y:::::::y              t::::::tttt:::::to:::::ooooo:::::o r:::::r            c:::::::cccccc:::::ch:::::h     h:::::h            Y:::::Y       u:::::::::::::::uun::::n    n::::n
+P::::::::P                   y:::::y               tt::::::::::::::to:::::::::::::::o r:::::r             c:::::::::::::::::ch:::::h     h:::::h         YYYY:::::YYYY     u:::::::::::::::un::::n    n::::n
+P::::::::P                  y:::::y                  tt:::::::::::tt oo:::::::::::oo  r:::::r              cc:::::::::::::::ch:::::h     h:::::h         Y:::::::::::Y      uu::::::::uu:::un::::n    n::::n
+PPPPPPPPPP                 y:::::y                     ttttttttttt     ooooooooooo    rrrrrrr                cccccccccccccccchhhhhhh     hhhhhhh         YYYYYYYYYYYYY        uuuuuuuu  uuuunnnnnn    nnnnnn
+                          y:::::y
+                         y:::::y
+                        y:::::y
+                       y:::::y
+                      yyyyyyy
 
 ${AnsiColor.RED}
 项目: ${application.title}
