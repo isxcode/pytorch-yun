@@ -50,18 +50,18 @@
           相关技术
         </div>
         <div class="tech-img-div">
-          <img class="tech-img" @click="handleK8sClick"
+          <img class="tech-img"
                src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-k8s.png" alt="">
-          <img class="tech-img" @click="handleHadoopClick"
+          <img class="tech-img"
                src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-hadoop.png" alt="">
-          <img class="tech-img" @click="handleFlinkClick"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-flink.png" alt="">
-          <img class="tech-img" @click="handleEsClick"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-es.png" alt="">
-          <img class="tech-img" @click="handleDorisClick"
+          <img class="tech-img"
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-spark.png" alt="">
+          <img class="tech-img"
                src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-doris.png" alt="">
-          <img class="tech-img" @click="handleMongoClick"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-mongodb.png" alt="">
+          <img class="tech-img"
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-clickhouse.png" alt="">
+          <img class="tech-img"
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-hive.png" alt="">
         </div>
       </div>
     </div>
@@ -206,6 +206,7 @@ onMounted(() => {
   const art = new Artplayer({
     container: '.artplayer-app',
     url: 'https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/product.mp4',
+    poster:'https://isxcode.oss-cn-shanghai.aliyuncs.com/zhiqingyun/product-img/product.jpg',
     fullscreen: true,
     fullscreenWeb: true,
     pip: true,
@@ -217,12 +218,22 @@ onMounted(() => {
 })
 
 function handleGuideClick() {
-  const router = useRouter();
-  router.push("/docs/zh/0/0");
+  // const router = useRouter();
+  // router.push("/docs/zh/0/0");
+   ElMessage({
+      duration: 800,
+      message: '暂未开放',
+      type: 'success',
+    });
 }
 
 function handleQuickClick() {
-  window.open("https://zhihuiyun-demo.isxcode.com");
+  // window.open("https://zhihuiyun-demo.isxcode.com");
+   ElMessage({
+      duration: 800,
+      message: '暂未开放',
+      type: 'success',
+    });
 }
 
 function handleFlinkClick() {
@@ -259,10 +270,10 @@ function handleCommandCopyClick() {
 
 const copyContent = async (text: string) => {
   try {
-    await navigator.clipboard.writeText(text);
+    // await navigator.clipboard.writeText(text);
     ElMessage({
       duration: 800,
-      message: '复制成功',
+      message: '暂未开放',
       type: 'success',
     });
   } catch (err) {

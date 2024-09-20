@@ -18,33 +18,30 @@
           <div class="title">产品</div>
           <div class="link" @click="clickZhiqingyun">至轻云</div>
           <div class="link" @click="clickZhiliuyun">至流云</div>
-          <div class="link" @click="clickZhishuyun">至数云</div>
-          <div class="link" @click="clickZhishiyun">至视云</div>
           <div class="link" @click="clickZhihuiyun">至慧云</div>
-          <div class="link" @click="clickOther">更多</div>
+          <div class="link" @click="clickZhishiyun">至视云</div>
+          <div class="link" @click="clickZhishuyun">至数云</div>
         </div>
         <div class="column">
           <div class="title">社区</div>
           <div class="link" @click="clickGitee">Gitee</div>
           <div class="link" @click="clickGithub">Github</div>
-          <div class="link" @click="clickSlack">Slack</div>
-          <div class="link" @click="clickDiscord">Discord</div>
-          <div class="link" @click="clickLinked">Linkedin</div>
+          <div class="link" @click="notClick">Slack</div>
+          <div class="link" @click="notClick">Discord</div>
         </div>
         <div class="column">
           <div class="title">资源</div>
-          <div class="link" @click="clickDocs">产品手册</div>
-          <div class="link" @click="clickBlogs">博客</div>
-          <div class="link" @click="clickFeishu">飞书文档</div>
-          <div class="link" @click="clickDockerHub">Docker hub</div>
-          <div class="link" @click="downloadPackage">安装包下载</div>
-          <div class="link" @click="downloadLicense">许可证下载</div>
+          <div class="link" @click="notClick">产品手册</div>
+          <div class="link" @click="notClick">博客</div>
+          <div class="link" @click="notClick">Docker hub</div>
+          <div class="link" @click="notClick">安装包下载</div>
+          <div class="link" @click="notClick">许可证下载</div>
         </div>
         <div class="column">
           <div class="title">关于我们</div>
-          <div class="link" @click="clickOther">至爻简介</div>
-          <div class="link" @click="clickOther">加入我们</div>
-          <div class="link" @click="clickGithubProject">开发进度</div>
+          <div class="link" @click="notClick">至爻简介</div>
+          <div class="link" @click="notClick">加入我们</div>
+          <div class="link" @click="notClick">开发进度</div>
         </div>
         <div class="column">
           <div class="title">联系我们</div>
@@ -401,7 +398,15 @@ function clickDockerHub() {
 }
 
 function downloadLicense() {
-  window.open("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/license.lic");
+  // window.open("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/license.lic");
+}
+
+function notClick() {
+  ElMessage({
+    duration: 800,
+    message: '暂未开放',
+    type: 'success',
+  });
 }
 
 function downloadPackage() {
