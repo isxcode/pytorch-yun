@@ -7,7 +7,7 @@
             至慧云
           </div>
           <div class="slogan">
-            企业级智能微模型平台
+            轻量级大模型训练平台
           </div>
           <div class="command">
             <p id="command-shell">docker run -p 8080:8080 isxcode/zhihuiyun</p>
@@ -41,27 +41,27 @@
           选择至慧云
         </div>
         <div class="why-content">
-          至慧云是一款企业级流式大数据平台。具有一键Docker部署，开箱即用特色。无需额外大数据组件安装，即可快速实现企业级大数据离线ETL、实时计算、复杂作业运行等场景。项目持续更新迭代，源码永久免费开源。助力企业快速处理海量数据，获得更多商业价值。
+          至慧云是一款企业级大模型训练平台。具备一键Docker部署，开箱即用特色。无需额外的深度学习框架安装，即可快速实现企业级大模型训练、调优、推理等场景，兼容千义通问和DeepSeek。项目持续更新迭代，源码永久免费开源。
         </div>
         <div class="why-content-mobile">
-          至慧云是一款超轻量级、企业级大数据平台。具有一键Docker部署，开箱即用特色。无需额外大数据组件安装，即可快速实现企业级大数据离线ETL、实时计算、复杂作业运行等场景。
+          至慧云是一款企业级大模型训练平台。具备一键Docker部署，开箱即用特色。无需额外的深度学习框架安装，即可快速实现企业级大模型训练、调优、推理等场景。支持千义通问和DeepSeek接入，进一步扩展了平台的应用场景。
         </div>
         <div class="tech-title">
           相关技术
         </div>
         <div class="tech-img-div">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-k8s.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-pytorch.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-hadoop.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-milvus.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-spark.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-ollama.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-doris.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-deepseek.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-clickhouse.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-ali.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-hive.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-baidu.png" alt="">
         </div>
       </div>
     </div>
@@ -183,8 +183,8 @@ definePageMeta({
 useSeoMeta({
   title: "至慧云",
   ogTitle: "至慧云",
-  description: "打造企业级智能微模型平台",
-  ogDescription: "打造企业级智能微模型平台",
+  description: "轻量级大模型训练平台",
+  ogDescription: "轻量级大模型训练平台",
 });
 
 const isMobile = useMediaQuery('(max-width: 767px)')
@@ -284,30 +284,6 @@ const copyContent = async (text: string) => {
 </script>
 
 <style lang="scss" scoped>
-
-@font-face {
-  font-family: "阿里妈妈数黑体 Bold";
-  font-weight: 700;
-  src: url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/v3X0ZwrJR1iP.woff2") format("woff2"),
-  url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/M4NOc3hs66KU.woff") format("woff");
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "阿里妈妈数黑体 Bold";
-  font-weight: 700;
-  src: url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/GT1SGqOGqdMW.woff2") format("woff2"),
-  url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/p05VmFRLvp7H.woff") format("woff");
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "阿里巴巴普惠体 2.0 45 Light";
-  font-weight: 300;
-  src: url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/aE2qrdrsu4BG.woff2") format("woff2"),
-  url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/cZP0h8SyVUCW.woff") format("woff");
-  font-display: swap;
-}
 
 $font-size: 14px;
 // 介绍的高度
@@ -467,7 +443,7 @@ $module-intro-img-width: 600px;
       .why-content {
         margin: 25px auto auto;
         text-indent: 2em;
-        width: 800px;
+        width: 900px;
         line-height: 24px;
         font-size: 17px;
       }
