@@ -1,11 +1,35 @@
 name: Create bug
-description: 创建缺陷
+description: 提缺陷
+title: '[Bug] '
 labels: ["缺陷"]
 body:
+  - type: dropdown
+    id: operating-systems
+    attributes:
+      label: Which operating systems have you used (操作系统)
+      options:
+        - macOS
+        - Windows
+        - Linux
+      default: 0
+    validations:
+      required: false
+  - type: dropdown
+    id: download_from
+    attributes:
+      label: Download from (安装方式)
+      options:
+        - 源码编译
+        - 官网安装包
+        - 阿里镜像仓库
+        - Docker Hub
+      default: 0
+    validations:
+      required: false
   - type: input
     id: branch
     attributes:
-      label: Branch name (分支名)
+      label: Version number (版本号，版本号获取方式：http://localhost:8080/tools/open/version)
       placeholder: main
       value: main
     validations:
@@ -15,5 +39,19 @@ body:
     attributes:
       label: Bug description (缺陷描述)
       placeholder: Pictures, videos, cUrl, text descriptions, etc.(图片、视频、cUrl、文字描述等)
+    validations:
+      required: false
+  - type: textarea
+    id: frontend
+    attributes:
+      label: Reproduction steps (复现步骤)
+      placeholder: Pictures, videos, etc.(图片、视频等)
+    validations:
+      required: false
+  - type: textarea
+    id: backend
+    attributes:
+      label: cUrls and response (请求和响应)
+      placeholder: 'curl http://localhost:8080/vip/form/pageForm '
     validations:
       required: false
