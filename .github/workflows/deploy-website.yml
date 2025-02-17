@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ env.ADMIN_GITHUB_TOKEN }}
-          repository: ${{ inputs.repository_account }}/pytorch
+          repository: ${{ inputs.repository_account }}/pytorch-yun
           ref: ${{ inputs.branch_number }}
 
       - name: Install pnpm
