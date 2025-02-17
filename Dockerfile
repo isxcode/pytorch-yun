@@ -9,8 +9,8 @@ ARG ADMIN_PASSWORD='admin123'
 ARG ACTIVE_ENV='docker'
 ARG LOG_LEVEL='info'
 
-COPY ./spark-yun-backend/spark-yun-main/build/libs/zhihuiyun.jar /opt/zhihuiyun/zhihuiyun.jar
-COPY ./spark-yun-backend/spark-yun-main/src/main/resources/application-docker.yml /etc/zhihuiyun/conf/
+COPY ./pytorch-yun-backend/pytorch-yun-main/build/libs/zhihuiyun.jar /opt/zhihuiyun/zhihuiyun.jar
+COPY ./pytorch-yun-backend/pytorch-yun-main/src/main/resources/application-docker.yml /etc/zhihuiyun/conf/
 
 EXPOSE 8080
 
