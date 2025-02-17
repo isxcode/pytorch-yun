@@ -38,8 +38,6 @@ public class WorkExecutorFactory {
                 return applicationContext.getBean(SparkContainerSqlExecutor.class);
             case WorkType.API:
                 return applicationContext.getBean(ApiExecutor.class);
-            case WorkType.PRQL:
-                return applicationContext.getBean(PrqlExecutor.class);
             default:
                 throw new IsxAppException("作业类型不存在");
         }
