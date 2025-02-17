@@ -19,8 +19,6 @@
           <div class="link" @click="clickZhiqingyun">至轻云</div>
           <div class="link" @click="clickZhiliuyun">至流云</div>
           <div class="link" @click="clickZhihuiyun">至慧云</div>
-          <div class="link" @click="clickZhishiyun">至视云</div>
-          <div class="link" @click="clickZhishuyun">至数云</div>
         </div>
         <div class="column">
           <div class="title">社区</div>
@@ -180,23 +178,6 @@ $primary-color: #ee4c2c;
 
 .fixed-footer {
   display: none;
-}
-
-@font-face {
-  font-family: "阿里妈妈数黑体 Bold";
-  font-weight: 700;
-  src: url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/T4JjC1yVtRsU.woff2") format("woff2"),
-  url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/Y0ipOh97amn9.woff") format("woff");
-  font-display: swap;
-}
-
-/* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
-@font-face {
-  font-family: "阿里巴巴普惠体 2.0 45 Light";
-  font-weight: 300;
-  src: url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/cHPsZ2tb5Gxv.woff2") format("woff2"),
-  url("//at.alicdn.com/wf/webfont/UMV2yX61q8rB/F8LRQLgsPF37.woff") format("woff");
-  font-display: swap;
 }
 
 .org-info {
