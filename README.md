@@ -18,12 +18,12 @@
 | 许可证下载:    | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/license.lic      |
 | docker镜像: | https://hub.docker.com/r/isxcode/zhihuiyun                              |
 | 阿里云镜像:    | https://zhihuiyun.isxcode.com/zh/docs/zh/1/1-docker                     |
-| 关键词:      | 大模型平台, 模型调用, 人工智能, Pytorch, Docker                                      |
+| 关键词:      | 大模型平台, 模型调用, 模型编排, 人工智能, Pytorch, Docker                                |
 |           |                                                                         |
 
 ### 产品介绍
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;至慧云是一款超轻量级、企业级大模型训练平台，基于Pytorch生态打造。一键部署，开箱即用。快速实现大模型训练、模型调用、机器人代理、作业流调度、自定义接口、等多种功能，为企业提供高效便捷的大模型解决方案。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;至慧云是一款超轻量级、企业级大模型训练平台，基于Pytorch生态打造。一键部署，开箱即用。快速实现大模型训练、模型调用、机器人代理、模型编排、自定义接口、等多种功能，为企业提供高效便捷的大模型解决方案。
 
 ### 功能特点
 
