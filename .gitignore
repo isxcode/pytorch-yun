@@ -8,7 +8,6 @@
 
 # 后端打包文件不提交
 **/build
-**/bin
 **/dist
 
 # .DS_Store不提交
