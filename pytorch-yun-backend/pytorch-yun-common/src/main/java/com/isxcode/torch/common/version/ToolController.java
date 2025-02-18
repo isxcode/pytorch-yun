@@ -62,6 +62,13 @@ public class ToolController {
         return cacheManager.getCacheNames().toString();
     }
 
+    @Operation(summary = "返回当前应用状态")
+    @GetMapping("/open/health")
+    public String health() {
+
+        return "UP";
+    }
+
     @Operation(summary = "获取制定缓存信息")
     @GetMapping("/getCache")
     public String getCache(@RequestParam String name) {
