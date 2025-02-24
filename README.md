@@ -1,6 +1,6 @@
 # 至慧云
 
-### 超轻量级大模型调用平台
+### 超轻量级大模型训练平台
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/isxcode/zhihuiyun)](https://hub.docker.com/r/isxcode/zhihuiyun)
 [![build](https://github.com/isxcode/pytorch-yun/actions/workflows/build-zhihuiyun.yml/badge.svg?branch=main)](https://github.com/isxcode/pytorch-yun/actions/workflows/build-zhihuiyun.yml)
