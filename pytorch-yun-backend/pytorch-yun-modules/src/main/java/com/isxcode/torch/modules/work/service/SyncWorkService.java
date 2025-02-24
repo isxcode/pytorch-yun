@@ -1,41 +1,21 @@
 package com.isxcode.torch.modules.work.service;
 
-import com.isxcode.torch.api.datasource.pojos.dto.ColumnMetaDto;
-import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
-import com.isxcode.torch.modules.datasource.entity.DatasourceEntity;
-import com.isxcode.torch.modules.datasource.repository.DatasourceRepository;
-import com.isxcode.torch.modules.datasource.service.DatasourceService;
+import com.isxcode.torch.api.datasource.dto.ColumnMetaDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-
-import static com.isxcode.torch.api.datasource.constants.DatasourceType.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SyncWorkService {
 
-    private final DatasourceRepository datasourceRepository;
-
-    private final DatasourceService datasourceService;
-
-    /**
-     * 返回筛选后的表名。
-     *
-     * @param metaData 数据库连接的元数据。
-     * @param catalog 数据库名。
-     * @param schema 模式名。
-     * @param tablePattern 表名模式，支持模糊匹配。
-     * @return 筛选后的数据库表名。
-     */
     public List<String> tables(DatabaseMetaData metaData, String catalog, String schema, String tablePattern)
         throws SQLException {
         List<String> list = new ArrayList<>();
@@ -51,14 +31,6 @@ public class SyncWorkService {
         return list;
     }
 
-    /**
-     * 返回筛选后的视图名。
-     *
-     * @param metaData 数据库连接的元数据。
-     * @param catalog 数据库名。
-     * @param schema 模式名。
-     * @return 筛选后的数据库视图名。
-     */
     public List<String> views(DatabaseMetaData metaData, String catalog, String schema, String tablePattern)
         throws SQLException {
         List<String> list = new ArrayList<>();
@@ -74,15 +46,6 @@ public class SyncWorkService {
         return list;
     }
 
-    /**
-     * 返回筛选后的数据表字段信息。
-     *
-     * @param metaData 数据库连接的元数据。
-     * @param catalog 数据库名。
-     * @param schema 模式名。
-     * @param table 表名。
-     * @return 筛选后的数据表字段信息。
-     */
     public List<ColumnMetaDto> columns(DatabaseMetaData metaData, String catalog, String schema, String table)
         throws SQLException {
 
@@ -130,14 +93,6 @@ public class SyncWorkService {
         return primaryKeys;
     }
 
-    /**
-     * 获取处理后的catalog与schema。
-     *
-     * @param dataBase 传入的数据库名称。
-     * @param catalog 数据库名。
-     * @param schema 模式名。
-     * @return 按规则判断数据源类型 得到catalog与schema的值 返回map。
-     */
     public Map<String, String> transform(String dataBase, String catalog, String schema) {
         Map<String, String> result = new HashMap<>();
 
@@ -156,42 +111,5 @@ public class SyncWorkService {
         result.put("schema", schema);
 
         return result;
-    }
-
-    /**
-     * 获取数据库连接。
-     *
-     * @param dataSourceId 数据源唯一id。
-     * @param driver 数据库驱动文件路径。
-     * @param classPath 数据库驱动类名。
-     * @return 数据库连接。
-     */
-    public Connection getConnection(String dataSourceId, String driver, String classPath) throws Exception {
-        Optional<DatasourceEntity> datasourceEntityOptional = datasourceRepository.findById(dataSourceId);
-        if (!datasourceEntityOptional.isPresent()) {
-            throw new IsxAppException("数据源异常，请联系开发者");
-        }
-
-        return datasourceService.getDbConnection(datasourceEntityOptional.get());
-    }
-
-    /**
-     * 获取数据预览SQL。
-     *
-     * @param dataType 数据库类型。
-     * @param tableName 数据库表名。
-     * @return 数据预览SQL。
-     */
-    public String getDataPreviewSql(String dataType, String tableName) {
-        switch (dataType) {
-            case ORACLE:
-                return "SELECT * FROM " + tableName + " WHERE ROWNUM <= 50";
-            case SQL_SERVER:
-                return "SELECT TOP 50 * FROM " + tableName;
-            case HANA_SAP:
-                return "SELECT * FROM \"" + tableName + "\" LIMIT 50";
-            default:
-                return "SELECT * FROM " + tableName + " LIMIT 50";
-        }
     }
 }

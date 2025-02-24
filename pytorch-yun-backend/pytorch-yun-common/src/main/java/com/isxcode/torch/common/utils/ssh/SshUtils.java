@@ -1,24 +1,26 @@
 package com.isxcode.torch.common.utils.ssh;
 
-import com.isxcode.torch.api.cluster.pojos.dto.ScpFileEngineNodeDto;
-import com.jcraft.jsch.*;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.FileSystemResourceLoader;
-
+import com.isxcode.torch.api.cluster.dto.ScpFileEngineNodeDto;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-/**
- * ssh连接工具类.
- */
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResourceLoader;
+
+/** ssh连接工具类. */
 @Slf4j
 public class SshUtils {
 
-    /**
-     * scp传递文件.
-     */
+    /** scp传递文件. */
     public static void scpFile(ScpFileEngineNodeDto engineNode, String srcPath, String dstPath)
         throws JSchException, SftpException, InterruptedException, IOException {
 
@@ -65,9 +67,7 @@ public class SshUtils {
         session.disconnect();
     }
 
-    /**
-     * 执行远程命令.
-     */
+    /** 执行远程命令. */
     public static String executeCommand(ScpFileEngineNodeDto engineNode, String command, boolean pty)
         throws JSchException, InterruptedException, IOException {
 
@@ -130,9 +130,7 @@ public class SshUtils {
         }
     }
 
-    /**
-     * scp传递文本.
-     */
+    /** scp传递文本. */
     public static void scpText(ScpFileEngineNodeDto engineNode, String content, String dstPath)
         throws JSchException, SftpException, InterruptedException {
 
@@ -179,9 +177,7 @@ public class SshUtils {
         session.disconnect();
     }
 
-    /**
-     * scp传递Jar.
-     */
+    /** scp传递Jar. */
     public static void scpJar(ScpFileEngineNodeDto engineNode, String srcPath, String dstPath)
         throws JSchException, SftpException, InterruptedException, IOException {
 

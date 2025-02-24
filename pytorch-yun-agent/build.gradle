@@ -2,26 +2,6 @@ dependencies {
 
     api(project(':pytorch-yun-backend:pytorch-yun-api'))
     api(project(':pytorch-yun-backend:pytorch-yun-common'))
-
-    implementation "org.apache.flink:flink-java:${FLINK_VERSION}"
-
-    implementation "org.apache.flink:flink-clients:${FLINK_VERSION}"
-
-    implementation "org.apache.flink:flink-yarn:${FLINK_VERSION}"
-
-    implementation "org.apache.flink:flink-kubernetes:${FLINK_VERSION}"
-
-    implementation "org.apache.flink:flink-streaming-java:${FLINK_VERSION}"
-
-    implementation "org.apache.flink:flink-table-planner_${FLINK_SCALA_VERSION}:${FLINK_VERSION}"
-
-    implementation "org.apache.flink:flink-table-api-java-bridge:${FLINK_VERSION}"
-
-    implementation 'org.codehaus.woodstox:stax2-api:3.1.1'
-
-    // https://mvnrepository.com/artifact/log4j/log4j
-    implementation 'log4j:log4j:1.2.17'
-
 }
 
 bootJar {

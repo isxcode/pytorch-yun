@@ -7,7 +7,7 @@
       :model="formData"
       :rules="rules"
     >
-      <template v-if="workType === 'FLINK_SQL'">
+      <template v-if="workType === 'SPARK_SQL'">
         <el-form-item
           label="计算引擎"
           prop="clusterId"
@@ -44,7 +44,7 @@
         </el-form-item>
       </template>
       <el-form-item
-        v-if="workType === 'FLINK_SQL'"
+        v-if="workType === 'SPARK_SQL'"
         label="Spark配置"
       >
         <el-input
@@ -124,7 +124,7 @@ function showModal(cb: () => void, data: any): void {
   workType.value = data.workType
   modelConfig.visible = true
 
-  if (workType.value === 'FLINK_SQL') {
+  if (workType.value === 'SPARK_SQL') {
     formData.clusterId = data.clusterId
     formData.sparkConfig = data.sparkConfig
     getComputeEngine()

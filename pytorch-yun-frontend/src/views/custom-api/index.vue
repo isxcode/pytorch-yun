@@ -22,22 +22,19 @@
                     @current-change="handleCurrentChange"
                 >
                     <template #statusTag="scopeSlot">
-                        <div class="btn-group">
-                            <el-tag v-if="scopeSlot.row.status === 'UNPUBLISHED'" class="ml-2" type="danger">未发布</el-tag>
-                            <el-tag v-else class="ml-2" type="success">已发布</el-tag>
-                        </div>
+                        <ZStatusTag :status="scopeSlot.row.status"></ZStatusTag>
                     </template>
                     <template #options="scopeSlot">
                         <div class="btn-group">
-                            <span @click="editData(scopeSlot.row)">编辑</span>
+                            <span v-if="scopeSlot.row.status !== 'UNPUBLISHED'" @click="underlineApi(scopeSlot.row)">下线</span>
+                            <span v-if="scopeSlot.row.status === 'UNPUBLISHED'" @click="publishApi(scopeSlot.row)">发布</span>
                             <el-dropdown trigger="click">
                                 <span class="click-show-more">更多</span>
                                 <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item v-if="scopeSlot.row.status === 'UNPUBLISHED'" @click="deleteData(scopeSlot.row)">删除</el-dropdown-item>
-                                    <el-dropdown-item v-if="scopeSlot.row.status !== 'UNPUBLISHED'" @click="underlineApi(scopeSlot.row)">下线</el-dropdown-item>
-                                    <el-dropdown-item v-if="scopeSlot.row.status === 'UNPUBLISHED'" @click="publishApi(scopeSlot.row)">发布</el-dropdown-item>
+                                    <el-dropdown-item @click="editData(scopeSlot.row)">编辑</el-dropdown-item>
                                     <el-dropdown-item @click="testApi(scopeSlot.row)">测试</el-dropdown-item>
+                                    <el-dropdown-item v-if="scopeSlot.row.status === 'UNPUBLISHED'" @click="deleteData(scopeSlot.row)">删除</el-dropdown-item>
                                     <!-- <el-dropdown-item>历史</el-dropdown-item> -->
                                 </el-dropdown-menu>
                                 </template>
@@ -194,6 +191,8 @@ function handleCurrentChange(e: number) {
 }
 
 onMounted(() => {
+    tableConfig.pagination.currentPage = 1
+    tableConfig.pagination.pageSize = 10
     initData()
 })
 </script>

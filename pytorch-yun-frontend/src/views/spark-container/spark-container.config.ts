@@ -13,6 +13,7 @@ export interface colConfig {
   width?: number;
   minWidth?: number;
   formatter?: any;
+  fixed?: string;
 }
 
 export interface Pagination {
@@ -42,7 +43,7 @@ export interface FormData {
 
 export const BreadCrumbList: Array<BreadCrumb> = [
   {
-    name: 'Spark容器',
+    name: '计算容器',
     code: 'spark-container'
   }
 ]
@@ -50,13 +51,13 @@ export const BreadCrumbList: Array<BreadCrumb> = [
 export const colConfigs: colConfig[] = [
   {
     prop: 'name',
-    title: '容器名称',
+    title: '名称',
     minWidth: 100,
     showOverflowTooltip: true
   },
   {
     prop: 'clusterName',
-    title: '集群',
+    title: '计算集群',
     minWidth: 100,
     showOverflowTooltip: true
   },
@@ -102,7 +103,8 @@ export const colConfigs: colConfig[] = [
     title: '操作',
     align: 'center',
     customSlot: 'options',
-    width: 80
+    width: 80,
+    fixed: 'right'
   }
 ]
 

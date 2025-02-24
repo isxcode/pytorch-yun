@@ -1,12 +1,11 @@
 package com.isxcode.torch.common.utils.jgrapht;
 
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import java.util.List;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.cycle.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-
-import java.util.List;
 
 public class JgraphtUtils {
 

@@ -1,5 +1,6 @@
 package com.isxcode.torch.modules.work.repository;
 
+import com.isxcode.torch.api.main.constants.ModuleCode;
 import com.isxcode.torch.modules.work.entity.WorkInstanceEntity;
 import java.util.List;
 import java.util.Map;
@@ -12,19 +13,22 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@CacheConfig(cacheNames = {"sy_work"})
+@CacheConfig(cacheNames = {ModuleCode.WORK})
 public interface WorkInstanceRepository extends JpaRepository<WorkInstanceEntity, String> {
 
-    @Query(value = "" + "select S.id as id,\n" + "       SW.name  as workName,\n" + "       SWF.name as workflowName,\n"
+    @Query(value = "select S.id as id,\n" + "       SW.name  as workName,\n" + "       SWF.name as workflowName,\n"
         + "       S.instanceType as instanceType,\n" + "       SW.workType as workType,\n"
         + "       S.status as status,\n" + "       S.planStartDateTime as planStartDateTime,\n"
         + "       S.duration as duration,\n" + "       S.execStartDateTime as execStartDateTime,\n"
-        + "       S.execEndDateTime as execEndDateTime,\n" + "       S.nextPlanDateTime as nextPlanDateTime\n"
-        + "from WorkInstanceEntity S \n" + "         left join WorkEntity SW on S.workId = SW.id\n"
-        + "         left join WorkflowEntity SWF on SW.workflowId = SWF.id \n" + "WHERE S.tenantId=:tenantId and "
-        + "(S.id LIKE %:keyword% " + "OR SW.name LIKE %:keyword% " + "OR SWF.name LIKE %:keyword% ) "
-        + "order by S.lastModifiedDateTime desc ")
-    Page<Map> searchAll(@Param("tenantId") String tenantId, @Param("keyword") String searchKeyWord, Pageable pageable);
+        + "       S.execEndDateTime as execEndDateTime,\n" + "       S.nextPlanDateTime as nextPlanDateTime,\n"
+        + "       S.workflowInstanceId as workflowInstanceId\n" + "from WorkInstanceEntity S \n"
+        + "         left join WorkEntity SW on S.workId = SW.id\n"
+        + "         left join WorkflowEntity SWF on SW.workflowId = SWF.id \n"
+        + "WHERE (:executeStatus is null or :executeStatus = '' or S.status = :executeStatus) AND S.tenantId=:tenantId and "
+        + "(S.id LIKE %:keyword% " + "OR SW.name LIKE %:keyword% " + "OR S.workflowInstanceId LIKE %:keyword% "
+        + "OR SWF.name LIKE %:keyword% ) " + "order by S.lastModifiedDateTime desc ")
+    Page<Map> searchAll(@Param("tenantId") String tenantId, @Param("keyword") String searchKeyWord,
+        @Param("executeStatus") String executeStatus, Pageable pageable);
 
     WorkInstanceEntity findByWorkIdAndWorkflowInstanceId(String workId, String workflowInstanceId);
 
@@ -38,4 +42,6 @@ public interface WorkInstanceRepository extends JpaRepository<WorkInstanceEntity
 
     @Query("select W from WorkInstanceEntity W where W.workflowInstanceId = :workflowInstanceId and W.workId in (:workIds)")
     List<WorkInstanceEntity> findAllByWorkflowInstanceIdAndWorkIds(String workflowInstanceId, List<String> workIds);
+
+    void deleteAllByWorkflowInstanceId(String workflowInstanceId);
 }

@@ -5,10 +5,10 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.TypeReference;
 import com.isxcode.torch.api.datasource.constants.DatasourceType;
 import com.isxcode.torch.api.work.constants.SetMode;
-import com.isxcode.torch.api.work.pojos.dto.ClusterConfig;
-import com.isxcode.torch.api.work.pojos.dto.SyncRule;
-import com.isxcode.torch.api.work.pojos.dto.SyncWorkConfig;
-import com.isxcode.torch.api.work.pojos.req.ConfigWorkReq;
+import com.isxcode.torch.api.work.dto.ClusterConfig;
+import com.isxcode.torch.api.work.dto.SyncRule;
+import com.isxcode.torch.api.work.dto.SyncWorkConfig;
+import com.isxcode.torch.api.work.req.ConfigWorkReq;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.datasource.entity.DatasourceEntity;
 import com.isxcode.torch.modules.datasource.repository.DatasourceRepository;
@@ -28,9 +28,6 @@ import javax.transaction.Transactional;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * 用户模块接口的业务逻辑.
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -67,6 +64,7 @@ public class WorkConfigBizService {
                         new TypeReference<Map<String, String>>() {}));
             }
         } catch (Exception e) {
+            log.debug(e.getMessage(), e);
             throw new IsxAppException("集群spark配置json格式不合法");
         }
 
@@ -77,6 +75,7 @@ public class WorkConfigBizService {
                     wocConfigWorkReq.getSyncRule().getSqlConfigJson(), new TypeReference<Map<String, String>>() {}));
             }
         } catch (Exception e) {
+            log.debug(e.getMessage(), e);
             throw new IsxAppException("数据同步sqlConfig配置json格式不合法");
         }
 
@@ -92,6 +91,11 @@ public class WorkConfigBizService {
         // 用户更新数据同步
         if (wocConfigWorkReq.getSyncWorkConfig() != null) {
             workConfig.setSyncWorkConfig(JSON.toJSONString(wocConfigWorkReq.getSyncWorkConfig()));
+        }
+
+        // 用户更新Excel数据同步
+        if (wocConfigWorkReq.getExcelSyncConfig() != null) {
+            workConfig.setExcelSyncConfig(JSON.toJSONString(wocConfigWorkReq.getExcelSyncConfig()));
         }
 
         // 用户更新接口调用
@@ -166,6 +170,11 @@ public class WorkConfigBizService {
             workConfig.setContainerId(wocConfigWorkReq.getContainerId());
         }
 
+        // 设置容器id
+        if (wocConfigWorkReq.getAlarmList() != null) {
+            workConfig.setAlarmList(JSON.toJSONString(wocConfigWorkReq.getAlarmList()));
+        }
+
         // 保存配置
         workConfigRepository.save(workConfig);
     }
@@ -200,11 +209,12 @@ public class WorkConfigBizService {
             clusterConfig.getSparkConfig().put("hive.metastore.uris", hiveMetaStoreUris);
         }
 
-        // 补上spark.executor.instances
+        // 根据分区配置修改并发数instances
         if (!Strings.isEmpty(workConfig.getSyncRule()) && !Strings.isEmpty(workConfig.getSyncWorkConfig())) {
             SyncRule syncRule = JSON.parseObject(workConfig.getSyncRule(), SyncRule.class);
             clusterConfig.getSparkConfig().put("spark.executor.instances",
                 String.valueOf(syncRule.getNumConcurrency()));
+            clusterConfig.getSparkConfig().put("spark.cores.max", String.valueOf(syncRule.getNumConcurrency()));
         }
 
         return clusterConfig;

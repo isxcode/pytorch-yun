@@ -1,7 +1,7 @@
 package com.isxcode.torch.common.exception;
 
 import com.isxcode.torch.backend.api.base.exceptions.AbstractIsxAppException;
-import com.isxcode.torch.backend.api.base.exceptions.AgentResponseException;
+import com.isxcode.torch.backend.api.base.exceptions.IsxErrorException;
 import com.isxcode.torch.backend.api.base.exceptions.SuccessResponseException;
 import com.isxcode.torch.backend.api.base.pojos.BaseResponse;
 import java.nio.file.AccessDeniedException;
@@ -49,20 +49,35 @@ public class GlobalExceptionAdvice extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.OK);
     }
 
+    @ExceptionHandler(IsxErrorException.class)
+    public ResponseEntity<BaseResponse<?>> customException(IsxErrorException isxErrorException) {
+
+        BaseResponse<?> errorResponse = new BaseResponse<>();
+        errorResponse.setMsg(isxErrorException.getMsg());
+        errorResponse.setCode("500");
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(SuccessResponseException.class)
     public ResponseEntity<BaseResponse<Object>> successException(SuccessResponseException successException) {
 
         return new ResponseEntity<>(successException.getBaseResponse(), HttpStatus.OK);
     }
 
-    @ExceptionHandler(AgentResponseException.class)
-    public ResponseEntity<String> agentResponseException(AgentResponseException successException) {
-
-        return new ResponseEntity<>(successException.getMsg(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<BaseResponse<Object>> accessDeniedException(AccessDeniedException accessDeniedException) {
+
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setCode("401");
+        baseResponse.setMsg("当前用户没有权限");
+        baseResponse.setErr(accessDeniedException.getMessage());
+
+        return new ResponseEntity<>(baseResponse, HttpStatus.OK);
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<BaseResponse<Object>> accessDeniedException(
+        org.springframework.security.access.AccessDeniedException accessDeniedException) {
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setCode("401");

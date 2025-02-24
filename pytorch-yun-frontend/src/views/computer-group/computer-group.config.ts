@@ -10,6 +10,7 @@ export interface colConfig {
   align?: string;
   showOverflowTooltip?: boolean;
   customSlot?: string;
+  fixed?: string;
   width?: number;
   minWidth?: number;
 }
@@ -49,8 +50,8 @@ export const BreadCrumbList: Array<BreadCrumb> = [
 export const colConfigs: colConfig[] = [
   {
     prop: 'name',
-    title: '集群名称',
-    minWidth: 100,
+    title: '名称',
+    minWidth: 120,
     customSlot: 'nameSlot',
     showOverflowTooltip: true
   },
@@ -63,19 +64,19 @@ export const colConfigs: colConfig[] = [
   {
     prop: 'node',
     title: '节点',
-    minWidth: 120,
+    minWidth: 60,
     showOverflowTooltip: true
   },
   {
     prop: 'memory',
     title: '内存',
-    minWidth: 120,
+    minWidth: 100,
     showOverflowTooltip: true
   },
   {
     prop: 'storage',
     title: '存储',
-    minWidth: 120,
+    minWidth: 100,
     showOverflowTooltip: true
   },
   {
@@ -86,8 +87,8 @@ export const colConfigs: colConfig[] = [
   },
   {
     prop: 'defaultCluster',
-    title: '是否默认集群',
-    minWidth: 120,
+    title: '默认集群',
+    minWidth: 80,
     customSlot: 'defaultTag'
   },
   {
@@ -105,7 +106,8 @@ export const colConfigs: colConfig[] = [
     title: '操作',
     align: 'center',
     customSlot: 'options',
-    width: 160
+    width: 80,
+    fixed: 'right'
   }
 ]
 
@@ -125,31 +127,31 @@ export const PointColConfigs: colConfig[] = [
   {
     prop: 'name',
     title: '名称',
-    minWidth: 100,
+    minWidth: 120,
     showOverflowTooltip: true
   },
   {
     prop: 'host',
     title: '地址',
-    minWidth: 120,
+    minWidth: 80,
     showOverflowTooltip: true
   },
   {
     prop: 'cpu',
     title: 'CPU',
-    minWidth: 120,
+    minWidth: 60,
     showOverflowTooltip: true
   },
   {
     prop: 'memory',
     title: '内存',
-    minWidth: 120,
+    minWidth: 60,
     showOverflowTooltip: true
   },
   {
     prop: 'storage',
     title: '存储',
-    minWidth: 120,
+    minWidth: 60,
     showOverflowTooltip: true
   },
   {
@@ -172,14 +174,15 @@ export const PointColConfigs: colConfig[] = [
   {
     prop: 'remark',
     title: '备注',
-    minWidth: 100,
+    minWidth: 120,
     showOverflowTooltip: true
   },
   {
     title: '操作',
     align: 'center',
     customSlot: 'options',
-    width: 80
+    width: 80,
+    fixed: 'right'
   }
 ]
 

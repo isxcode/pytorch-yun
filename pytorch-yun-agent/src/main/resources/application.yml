@@ -1,5 +1,5 @@
 server:
-  port: 30178
+  port: 30179
 
 logging:
   exception-conversion-word: '%wEx'

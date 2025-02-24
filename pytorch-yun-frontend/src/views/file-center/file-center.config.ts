@@ -13,6 +13,7 @@ export interface colConfig {
   width?: number;
   minWidth?: number;
   formatter?: any
+  fixed?: string;
 }
 
 export interface Pagination {
@@ -39,13 +40,13 @@ export const BreadCrumbList: Array<BreadCrumb> = [
 export const colConfigs: colConfig[] = [
   {
     prop: 'fileName',
-    title: '文件名称',
+    title: '名称',
     minWidth: 125,
     showOverflowTooltip: true
   },
   {
     prop: 'fileSize',
-    title: '文件大小',
+    title: '大小',
     minWidth: 110
   },
   {
@@ -56,10 +57,16 @@ export const colConfigs: colConfig[] = [
       const obj = {
         JOB: '作业',
         FUNC: '函数',
-        LIB: '依赖'
+        LIB: '依赖',
+        EXCEL: 'Excel'
       }
       return obj[data.cellValue]
     }
+  },
+  {
+    prop: 'createUsername',
+    title: '创建人',
+    minWidth: 120
   },
   {
     prop: 'createDateTime',
@@ -76,7 +83,8 @@ export const colConfigs: colConfig[] = [
     title: '操作',
     align: 'center',
     customSlot: 'options',
-    width: 80
+    width: 80,
+    fixed: 'right'
   }
 ]
 

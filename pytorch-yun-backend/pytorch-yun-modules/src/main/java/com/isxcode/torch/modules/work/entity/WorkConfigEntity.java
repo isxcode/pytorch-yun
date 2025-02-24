@@ -26,9 +26,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Data
 @Entity
-@SQLDelete(sql = "UPDATE SY_WORK_CONFIG SET deleted = 1 WHERE id = ? and version_number = ?")
+@SQLDelete(sql = "UPDATE PY_WORK_CONFIG SET deleted = 1 WHERE id = ? and version_number = ?")
 @Where(clause = "deleted = 0 ${TENANT_FILTER} ")
-@Table(name = "SY_WORK_CONFIG")
+@Table(name = "PY_WORK_CONFIG")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @EntityListeners(AuditingEntityListener.class)
 public class WorkConfigEntity {
@@ -46,7 +46,9 @@ public class WorkConfigEntity {
 
     private String syncWorkConfig;
 
-    private String ApiWorkConfig;
+    private String excelSyncConfig;
+
+    private String apiWorkConfig;
 
     private String syncRule;
 
@@ -59,6 +61,8 @@ public class WorkConfigEntity {
     private String libConfig;
 
     private String containerId;
+
+    private String alarmList;
 
     @CreatedDate
     private LocalDateTime createDateTime;

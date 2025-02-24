@@ -7,13 +7,11 @@
       :model="formData"
       :rules="rules"
     >
-      <el-form-item
-        label="类型"
-        prop="type"
-      >
+      <el-form-item label="类型" prop="type">
         <el-select
           v-model="formData.type"
           placeholder="请选择"
+          :disabled="renderSence === 'edit'"
         >
           <el-option
             v-for="item in typeList"
@@ -34,6 +32,7 @@
       </el-form-item>
     </el-form>
     <el-upload
+      v-if="renderSence === 'new'"
       class="license-upload"
       action=""
       :limit="1"
@@ -70,10 +69,15 @@ const typeList = ref([
   {
     label: '依赖',
     value: 'LIB',
+  },
+  {
+    label: 'Excel',
+    value: 'EXCEL',
   }
 ])
+const renderSence = ref<string>('new')
 const modelConfig = reactive({
-  title: '上传文件',
+  title: '上传资源',
   visible: false,
   width: '520px',
   okConfig: {
@@ -92,6 +96,7 @@ const modelConfig = reactive({
   closeOnClickModal: false
 })
 const formData = reactive({
+  id: null,
   type: '',
   remark: '',
   fileData: null
@@ -106,17 +111,31 @@ const rules = reactive<FormRules>({
   ]
 })
 
-function showModal(cb: () => void): void {
+function showModal(cb: () => void, data: any): void {
   formData.type = ''
   formData.remark = ''
   formData.fileData = null
+  renderSence.value = 'new'
+  modelConfig.title = '上传资源'
+
+  if (data) {
+    modelConfig.title = '编辑资源'
+    formData.type = data.fileType
+    formData.remark = data.remark
+    formData.id = data.id
+    renderSence.value = 'edit'
+  }
 
   callback.value = cb
   modelConfig.visible = true
 }
 
 function okEvent() {
-  form.value?.validate((valid) => {
+  if (!formData.fileData && renderSence.value === 'new') {
+    ElMessage.warning('请上传附件')
+    return
+  }
+  form.value?.validate((valid: boolean) => {
     if (valid) {
       modelConfig.okConfig.loading = true
       callback.value(formData).then((res: any) => {

@@ -1,8 +1,6 @@
 package com.isxcode.torch.api.datasource.constants;
 
-/**
- * 数据源驱动.
- */
+/** 数据源驱动. */
 public interface DatasourceDriver {
 
     String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
@@ -30,4 +28,6 @@ public interface DatasourceDriver {
     String STAR_ROCKS_DRIVER = "com.mysql.jdbc.Driver";
 
     String DB2_DRIVER = "com.ibm.db2.jcc.DB2Driver";
+
+    String H2_DRIVER = "org.h2.Driver";
 }

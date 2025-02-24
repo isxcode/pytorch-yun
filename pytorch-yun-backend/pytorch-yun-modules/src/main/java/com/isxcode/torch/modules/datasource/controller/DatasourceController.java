@@ -1,7 +1,7 @@
 package com.isxcode.torch.modules.datasource.controller;
 
-import com.isxcode.torch.api.datasource.pojos.req.*;
-import com.isxcode.torch.api.datasource.pojos.res.*;
+import com.isxcode.torch.api.datasource.req.*;
+import com.isxcode.torch.api.datasource.res.*;
 import com.isxcode.torch.api.main.constants.ModuleCode;
 import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
@@ -18,14 +18,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "数据源模块")
-@RestController
 @RequestMapping(ModuleCode.DATASOURCE)
+@RestController
 @RequiredArgsConstructor
 public class DatasourceController {
 
     private final DatasourceBizService datasourceBizService;
 
-    @Secured({RoleType.TENANT_ADMIN})
     @Operation(summary = "添加数据源接口")
     @PostMapping("/addDatasource")
     @SuccessResponse("添加成功")
@@ -61,8 +60,7 @@ public class DatasourceController {
         datasourceBizService.deleteDatasource(deleteDatasourceReq);
     }
 
-    @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
-    @Operation(summary = "测试数据源连接接口")
+    @Operation(summary = "测试数据源连接接口(列表中测试)")
     @PostMapping("/testConnect")
     @SuccessResponse("检测完成")
     public TestConnectRes testConnect(@Valid @RequestBody GetConnectLogReq testConnectReq) {
@@ -70,8 +68,16 @@ public class DatasourceController {
         return datasourceBizService.testConnect(testConnectReq);
     }
 
+    @Operation(summary = "测试数据源连接接口(弹窗中测试)")
+    @PostMapping("/checkConnect")
+    @SuccessResponse("检测完成")
+    public CheckConnectRes checkConnect(@Valid @RequestBody CheckConnectReq checkConnectReq) {
+
+        return datasourceBizService.checkConnect(checkConnectReq);
+    }
+
     @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
-    @Operation(summary = "查询连接日志")
+    @Operation(summary = "查询连接日志接口")
     @PostMapping("/getConnectLog")
     @SuccessResponse("获取成功")
     public GetConnectLogRes getConnectLog(@Valid @RequestBody GetConnectLogReq getConnectLogReq) {
@@ -80,7 +86,7 @@ public class DatasourceController {
     }
 
     @PostMapping("/uploadDatabaseDriver")
-    @Operation(summary = "上传数据源驱动(Swagger有Bug不能使用)")
+    @Operation(summary = "上传数据源驱动接口(Swagger有Bug不能使用)")
     @SuccessResponse("上传成功")
     public void uploadDatabaseDriver(@RequestParam("driver") MultipartFile driver,
         @RequestParam("dbType") String dbType, @RequestParam("name") String name,
@@ -90,15 +96,16 @@ public class DatasourceController {
     }
 
     @PostMapping("/pageDatabaseDriver")
-    @Operation(summary = "查询数据库驱动")
+    @Operation(summary = "查询数据库驱动接口")
     @SuccessResponse("查询成功")
     public Page<PageDatabaseDriverRes> pageDatabaseDriver(@RequestBody PageDatabaseDriverReq pageDatabaseDriverReq) {
 
         return datasourceBizService.pageDatabaseDriver(pageDatabaseDriverReq);
     }
 
+    @Secured({RoleType.TENANT_ADMIN})
     @PostMapping("/deleteDatabaseDriver")
-    @Operation(summary = "删除数据库驱动")
+    @Operation(summary = "删除数据库驱动接口")
     @SuccessResponse("删除成功")
     public void deleteDatabaseDriver(@RequestBody DeleteDatabaseDriverReq deleteDatabaseDriverReq) {
 

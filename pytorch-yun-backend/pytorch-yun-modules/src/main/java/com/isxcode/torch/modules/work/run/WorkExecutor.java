@@ -3,25 +3,26 @@ package com.isxcode.torch.modules.work.run;
 import static com.isxcode.torch.common.config.CommonConfig.TENANT_ID;
 import static com.isxcode.torch.common.config.CommonConfig.USER_ID;
 
+import com.isxcode.torch.api.alarm.constants.AlarmEventType;
 import com.isxcode.torch.api.instance.constants.InstanceStatus;
+import com.isxcode.torch.api.instance.constants.InstanceType;
 import com.isxcode.torch.api.work.constants.WorkLog;
-import com.isxcode.torch.api.work.exceptions.WorkRunException;
+import com.isxcode.torch.backend.api.base.exceptions.WorkRunException;
+import com.isxcode.torch.modules.alarm.service.AlarmService;
 import com.isxcode.torch.modules.work.entity.WorkInstanceEntity;
 import com.isxcode.torch.modules.work.repository.WorkInstanceRepository;
+import com.isxcode.torch.modules.work.sql.SqlFunctionService;
 import com.isxcode.torch.modules.workflow.entity.WorkflowInstanceEntity;
 import com.isxcode.torch.modules.workflow.repository.WorkflowInstanceRepository;
+
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.scheduling.annotation.Async;
 
-/**
- * 作业执行器.
- */
 @Slf4j
 @RequiredArgsConstructor
 public abstract class WorkExecutor {
@@ -32,22 +33,22 @@ public abstract class WorkExecutor {
 
     private final WorkflowInstanceRepository workflowInstanceRepository;
 
+    private final AlarmService alarmService;
+
+    private final SqlFunctionService sqlFunctionService;
+
+    public abstract String getWorkType();
+
     protected abstract void execute(WorkRunContext workRunContext, WorkInstanceEntity workInstance);
 
     protected abstract void abort(WorkInstanceEntity workInstance);
 
-    /**
-     * 更新实例的日志和状态
-     */
     public WorkInstanceEntity updateInstance(WorkInstanceEntity workInstance, StringBuilder logBuilder) {
 
         workInstance.setSubmitLog(logBuilder.toString());
         return workInstanceRepository.saveAndFlush(workInstance);
     }
 
-    /**
-     * 异步执行作业.
-     */
     @Async("sparkYunWorkThreadPool")
     public void asyncExecute(WorkRunContext workRunContext) {
 
@@ -58,16 +59,10 @@ public abstract class WorkExecutor {
         syncExecute(workRunContext);
     }
 
-    /**
-     * 同步执行作业.
-     */
     public void syncExecute(WorkRunContext workRunContext) {
 
         // 获取作业实例
         WorkInstanceEntity workInstance = workInstanceRepository.findById(workRunContext.getInstanceId()).get();
-
-        // 将线程存到Map
-        WORK_THREAD.put(workInstance.getId(), Thread.currentThread());
 
         // 初始化日志
         StringBuilder logBuilder = new StringBuilder();
@@ -83,6 +78,11 @@ public abstract class WorkExecutor {
 
             // 日志需要贯穿上下文
             workRunContext.setLogBuilder(logBuilder);
+
+            // 任务开始运行，异步发送消息
+            if (InstanceType.AUTO.equals(workInstance.getInstanceType())) {
+                alarmService.sendWorkMessage(workInstance, AlarmEventType.START_RUN);
+            }
 
             // 开始执行作业
             execute(workRunContext, workInstance);
@@ -109,13 +109,24 @@ public abstract class WorkExecutor {
                 workflowInstanceRepository.setWorkflowLog(workflowInstance.getId(), runLog);
             }
 
+            // 任务运行成功，异步发送消息
+            if (InstanceType.AUTO.equals(workInstance.getInstanceType())) {
+                alarmService.sendWorkMessage(workInstance, AlarmEventType.RUN_SUCCESS);
+            }
+
             // 执行完请求线程
             WORK_THREAD.remove(workInstance.getId());
 
         } catch (WorkRunException e) {
+            log.debug(e.getMsg(), e);
 
             // 重新获取当前最新实例
             workInstance = workInstanceRepository.findById(workRunContext.getInstanceId()).get();
+
+            // 如果是已中止，直接不处理
+            if (InstanceStatus.ABORT.equals(workInstance.getStatus())) {
+                return;
+            }
 
             // 更新作业实例失败状态
             workInstance.setStatus(InstanceStatus.FAIL);
@@ -136,6 +147,16 @@ public abstract class WorkExecutor {
                 workflowInstance.setRunLog(runLog);
                 workflowInstanceRepository.setWorkflowLog(workflowInstance.getId(), runLog);
             }
+
+            // 任务运行失败，异步发送消息
+            if (InstanceType.AUTO.equals(workInstance.getInstanceType())) {
+                alarmService.sendWorkMessage(workInstance, AlarmEventType.RUN_FAIL);
+            }
+        }
+
+        // 任务开始运行，异步发送消息
+        if (InstanceType.AUTO.equals(workInstance.getInstanceType())) {
+            alarmService.sendWorkMessage(workInstance, AlarmEventType.RUN_END);
         }
 
         // 执行完请求线程
@@ -145,5 +166,29 @@ public abstract class WorkExecutor {
     public void syncAbort(WorkInstanceEntity workInstance) {
 
         this.abort(workInstance);
+    }
+
+    /**
+     * 翻译上游的jsonPath.
+     */
+    public String parseJsonPath(String value, WorkInstanceEntity workInstance) {
+
+        if (workInstance.getWorkflowInstanceId() == null) {
+            return value.replace("get_json_value", "get_json_default_value")
+                .replace("get_regex_value", "get_regex_default_value")
+                .replace("get_table_value", "get_table_default_value");
+        }
+
+        List<WorkInstanceEntity> allWorkflowInstance =
+            workInstanceRepository.findAllByWorkflowInstanceId(workInstance.getWorkflowInstanceId());
+
+        for (WorkInstanceEntity e : allWorkflowInstance) {
+            if (InstanceStatus.SUCCESS.equals(e.getStatus()) && e.getResultData() != null) {
+                value = value.replace("${qing." + e.getWorkId() + ".result_data}",
+                    Base64.getEncoder().encodeToString(e.getResultData().getBytes()));
+            }
+        }
+
+        return sqlFunctionService.parseSqlFunction(value);
     }
 }

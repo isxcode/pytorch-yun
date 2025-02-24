@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.isxcode.torch.api.work.constants.ResourceLevel;
 import com.isxcode.torch.api.work.constants.SetMode;
 import com.isxcode.torch.api.work.constants.WorkType;
-import com.isxcode.torch.api.work.pojos.dto.ClusterConfig;
-import com.isxcode.torch.api.work.pojos.dto.CronConfig;
-import com.isxcode.torch.api.work.pojos.dto.SyncRule;
+import com.isxcode.torch.api.work.dto.ClusterConfig;
+import com.isxcode.torch.api.work.dto.CronConfig;
+import com.isxcode.torch.api.work.dto.SyncRule;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.datasource.entity.DatasourceEntity;
 import com.isxcode.torch.modules.datasource.service.DatasourceService;
@@ -22,9 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * 用户模块接口的业务逻辑.
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -47,7 +44,9 @@ public class WorkConfigService {
     public void initWorkScript(WorkConfigEntity workConfig, String workType) {
 
         switch (workType) {
-            case WorkType.EXECUTE_FLINK_SQL:
+            case WorkType.QUERY_SPARK_SQL:
+                workConfig.setScript("select now()");
+                break;
             case WorkType.QUERY_JDBC_SQL:
             case WorkType.EXECUTE_JDBC_SQL:
             case WorkType.SPARK_CONTAINER_SQL:
@@ -94,45 +93,42 @@ public class WorkConfigService {
         Map<String, String> sparkConfig = new HashMap<>();
         switch (resourceLevel) {
             case ResourceLevel.HIGH:
-                sparkConfig.put("spark.executor.instances", "10");
-                sparkConfig.put("spark.executor.cores", "4");
-                sparkConfig.put("spark.executor.memory", "4g");
-                sparkConfig.put("spark.driver.memory", "2g");
                 sparkConfig.put("spark.driver.cores", "1");
-                sparkConfig.put("spark.cores.max", "10");
-                sparkConfig.put("spark.memory.fraction", "0.9");
-                sparkConfig.put("spark.driver.extraJavaOptions", "-Dfile.encoding=utf-8");
-                sparkConfig.put("spark.executor.extraJavaOptions", "-Dfile.encoding=utf-8");
-                sparkConfig.put("spark.sql.storeAssignmentPolicy", "LEGACY");
-                sparkConfig.put("spark.sql.legacy.timeParserPolicy", "LEGACY");
+                sparkConfig.put("spark.driver.memory", "2g");
+                sparkConfig.put("spark.executor.cores", "1");
+                sparkConfig.put("spark.executor.memory", "8g");
+                sparkConfig.put("spark.executor.instances", "3");
+                sparkConfig.put("spark.cores.max", "3");
                 break;
             case ResourceLevel.MEDIUM:
-                sparkConfig.put("spark.executor.instances", "5");
-                sparkConfig.put("spark.executor.cores", "2");
-                sparkConfig.put("spark.executor.memory", "2g");
-                sparkConfig.put("spark.driver.memory", "1g");
                 sparkConfig.put("spark.driver.cores", "1");
-                sparkConfig.put("spark.cores.max", "5");
-                sparkConfig.put("spark.memory.fraction", "0.9");
-                sparkConfig.put("spark.driver.extraJavaOptions", "-Dfile.encoding=utf-8");
-                sparkConfig.put("spark.executor.extraJavaOptions", "-Dfile.encoding=utf-8");
-                sparkConfig.put("spark.sql.storeAssignmentPolicy", "LEGACY");
-                sparkConfig.put("spark.sql.legacy.timeParserPolicy", "LEGACY");
+                sparkConfig.put("spark.driver.memory", "1g");
+                sparkConfig.put("spark.executor.cores", "1");
+                sparkConfig.put("spark.executor.memory", "4g");
+                sparkConfig.put("spark.executor.instances", "2");
+                sparkConfig.put("spark.cores.max", "2");
                 break;
             case ResourceLevel.LOW:
-                sparkConfig.put("spark.executor.instances", "1");
+                sparkConfig.put("spark.driver.cores", "1");
+                sparkConfig.put("spark.driver.memory", "1g");
                 sparkConfig.put("spark.executor.cores", "1");
                 sparkConfig.put("spark.executor.memory", "2g");
-                sparkConfig.put("spark.driver.memory", "1g");
-                sparkConfig.put("spark.driver.cores", "1");
+                sparkConfig.put("spark.executor.instances", "1");
                 sparkConfig.put("spark.cores.max", "1");
-                sparkConfig.put("spark.memory.fraction", "0.9");
-                sparkConfig.put("spark.driver.extraJavaOptions", "-Dfile.encoding=utf-8");
-                sparkConfig.put("spark.executor.extraJavaOptions", "-Dfile.encoding=utf-8");
-                sparkConfig.put("spark.sql.storeAssignmentPolicy", "LEGACY");
-                sparkConfig.put("spark.sql.legacy.timeParserPolicy", "LEGACY");
                 break;
         }
+
+        sparkConfig.put("spark.driver.extraJavaOptions", "-Dfile.encoding=utf-8");
+        sparkConfig.put("spark.executor.extraJavaOptions", "-Dfile.encoding=utf-8");
+        sparkConfig.put("spark.sql.storeAssignmentPolicy", "LEGACY");
+        sparkConfig.put("spark.sql.legacy.timeParserPolicy", "LEGACY");
+        sparkConfig.put("spark.sql.autoBroadcastJoinThreshold", "-1");
+        sparkConfig.put("spark.sql.parquet.writeLegacyFormat", "true");
+        sparkConfig.put("spark.sql.parquet.enableVectorizedReader", "false");
+        sparkConfig.put("spark.sql.parquet.int96RebaseModeInRead", "LEGACY");
+        sparkConfig.put("spark.sql.parquet.int96RebaseModeInWrite", "LEGACY");
+        sparkConfig.put("spark.sql.parquet.datetimeRebaseModeInRead", "LEGACY");
+        sparkConfig.put("spark.sql.parquet.datetimeRebaseModeInWrite", "LEGACY");
         return sparkConfig;
     }
 }

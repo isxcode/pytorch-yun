@@ -11,7 +11,7 @@ interface SerchParams {
   page: number;
   pageSize: number;
   searchKeyWord: string;
-  datasourceType: string
+  datasourceType?: string
 }
 
 export function GetDatasourceList(params: SerchParams): Promise<any> {
@@ -45,6 +45,15 @@ export function CheckDatasourceData(params: any): Promise<any> {
   return http.request({
     method: 'post',
     url: '/datasource/testConnect',
+    params: params
+  })
+}
+
+// 测试数据源链接
+export function TestDatasourceData(params: any): Promise<any> {
+  return http.request({
+    method: 'post',
+    url: '/datasource/checkConnect',
     params: params
   })
 }

@@ -2,30 +2,24 @@ package com.isxcode.torch.modules.work.service.biz;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.isxcode.torch.api.agent.constants.AgentApi;
-import com.isxcode.torch.api.agent.pojos.res.StopJobRes;
-import com.isxcode.torch.api.agent.pojos.res.SubmitJobRes;
-import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
+import com.alibaba.fastjson.JSONPath;
+import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.isxcode.torch.api.instance.constants.InstanceStatus;
 import com.isxcode.torch.api.instance.constants.InstanceType;
-import com.isxcode.torch.api.work.constants.WorkLog;
+import com.isxcode.torch.api.instance.req.*;
+import com.isxcode.torch.api.instance.res.GetWorkInstanceValuePathRes;
+import com.isxcode.torch.api.instance.res.GetWorkflowInstanceRes;
+import com.isxcode.torch.api.instance.res.QueryInstanceRes;
 import com.isxcode.torch.api.work.constants.WorkStatus;
 import com.isxcode.torch.api.work.constants.WorkType;
-import com.isxcode.torch.api.work.exceptions.WorkRunException;
-import com.isxcode.torch.api.work.pojos.dto.*;
-import com.isxcode.torch.api.work.pojos.req.*;
-import com.isxcode.torch.api.work.pojos.res.*;
+import com.isxcode.torch.api.work.dto.*;
+import com.isxcode.torch.api.work.req.*;
+import com.isxcode.torch.api.work.res.*;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
-import com.isxcode.torch.common.utils.http.HttpUrlUtils;
-import com.isxcode.torch.common.utils.http.HttpUtils;
-import com.isxcode.torch.modules.cluster.entity.ClusterEntity;
-import com.isxcode.torch.modules.cluster.entity.ClusterNodeEntity;
-import com.isxcode.torch.modules.cluster.repository.ClusterNodeRepository;
-import com.isxcode.torch.modules.cluster.repository.ClusterRepository;
 import com.isxcode.torch.modules.work.entity.WorkConfigEntity;
 import com.isxcode.torch.modules.work.entity.WorkEntity;
 import com.isxcode.torch.modules.work.entity.WorkInstanceEntity;
-import com.isxcode.torch.modules.work.mapper.WorkConfigMapper;
 import com.isxcode.torch.modules.work.mapper.WorkMapper;
 import com.isxcode.torch.modules.work.repository.WorkConfigRepository;
 import com.isxcode.torch.modules.work.repository.WorkInstanceRepository;
@@ -37,9 +31,9 @@ import com.isxcode.torch.modules.work.service.WorkConfigService;
 import com.isxcode.torch.modules.work.service.WorkService;
 import com.isxcode.torch.modules.workflow.entity.WorkflowConfigEntity;
 import com.isxcode.torch.modules.workflow.entity.WorkflowEntity;
-import com.isxcode.torch.modules.workflow.repository.WorkflowConfigRepository;
-import com.isxcode.torch.modules.workflow.repository.WorkflowRepository;
-import com.isxcode.torch.modules.workflow.run.WorkflowUtils;
+import com.isxcode.torch.modules.workflow.entity.WorkflowInstanceEntity;
+import com.isxcode.torch.modules.workflow.repository.WorkflowInstanceRepository;
+import com.isxcode.torch.modules.workflow.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -48,9 +42,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.isxcode.torch.common.config.CommonConfig.*;
+import static com.isxcode.torch.modules.workflow.run.WorkflowUtils.genWorkRunContext;
 
 @Service
 @RequiredArgsConstructor
@@ -65,25 +63,17 @@ public class WorkBizService {
 
     private final WorkMapper workMapper;
 
-    private final ClusterRepository calculateEngineRepository;
-
-    private final ClusterNodeRepository engineNodeRepository;
-
     private final WorkInstanceRepository workInstanceRepository;
 
     private final WorkConfigBizService workConfigBizService;
 
-    private final WorkflowConfigRepository workflowConfigRepository;
-
-    private final WorkflowRepository workflowRepository;
+    private final WorkflowService workflowService;
 
     private final WorkService workService;
 
-    private final HttpUrlUtils httpUrlUtils;
-
     private final WorkConfigService workConfigService;
 
-    private final WorkConfigMapper workConfigMapper;
+    private final WorkflowInstanceRepository workflowInstanceRepository;
 
     public GetWorkRes addWork(AddWorkReq addWorkReq) {
 
@@ -98,7 +88,7 @@ public class WorkBizService {
         WorkEntity work = workMapper.addWorkReqToWorkEntity(addWorkReq);
 
         // sparkSql要是支持访问hive，必须填写datasourceId
-        if (WorkType.EXECUTE_FLINK_SQL.equals(addWorkReq.getWorkType())) {
+        if (WorkType.QUERY_SPARK_SQL.equals(addWorkReq.getWorkType())) {
             if (addWorkReq.getEnableHive()) {
                 if (Strings.isEmpty(addWorkReq.getDatasourceId())) {
                     throw new IsxAppException("开启hive，必须配置hive数据源");
@@ -114,17 +104,17 @@ public class WorkBizService {
         }
 
         // sparkSql，数据同步，bash，python，必须配置集群
-        if (WorkType.EXECUTE_FLINK_SQL.equals(addWorkReq.getWorkType())
+        if (WorkType.QUERY_SPARK_SQL.equals(addWorkReq.getWorkType())
             || WorkType.DATA_SYNC_JDBC.equals(addWorkReq.getWorkType())
+            || WorkType.EXCEL_SYNC_JDBC.equals(addWorkReq.getWorkType())
             || WorkType.BASH.equals(addWorkReq.getWorkType()) || WorkType.PYTHON.equals(addWorkReq.getWorkType())
-            || WorkType.FLINK_JAR.equals(addWorkReq.getWorkType())) {
+            || WorkType.SPARK_JAR.equals(addWorkReq.getWorkType())) {
             if (Strings.isEmpty(addWorkReq.getClusterId())) {
                 throw new IsxAppException("必须选择计算引擎");
             }
         }
 
-        // 如果jdbc执行和jdbc查询
-        // 或者为prql查询，必填数据源
+        // 如果jdbc执行和jdbc查询 或者为prql查询，必填数据源
         if (WorkType.EXECUTE_JDBC_SQL.equals(addWorkReq.getWorkType())
             || WorkType.QUERY_JDBC_SQL.equals(addWorkReq.getWorkType())
             || WorkType.PRQL.equals(addWorkReq.getWorkType())) {
@@ -140,7 +130,7 @@ public class WorkBizService {
         workConfig.setDatasourceId(addWorkReq.getDatasourceId());
 
         // 如果是sparkSql,jdbcQuerySql,jdbcExecuteSql,bash,python作业，需要初始化脚本内容，方便客户使用
-        if (WorkType.EXECUTE_FLINK_SQL.equals(addWorkReq.getWorkType())
+        if (WorkType.QUERY_SPARK_SQL.equals(addWorkReq.getWorkType())
             || WorkType.EXECUTE_JDBC_SQL.equals(addWorkReq.getWorkType())
             || WorkType.QUERY_JDBC_SQL.equals(addWorkReq.getWorkType())
             || WorkType.BASH.equals(addWorkReq.getWorkType()) || WorkType.PYTHON.equals(addWorkReq.getWorkType())
@@ -150,15 +140,17 @@ public class WorkBizService {
         }
 
         // 初始化数据同步分区值
-        if (WorkType.DATA_SYNC_JDBC.equals(addWorkReq.getWorkType())) {
+        if (WorkType.DATA_SYNC_JDBC.equals(addWorkReq.getWorkType())
+            || (WorkType.EXCEL_SYNC_JDBC.equals(addWorkReq.getWorkType()))) {
             workConfigService.initSyncRule(workConfig);
         }
 
         // 初始化计算引擎
-        if (WorkType.EXECUTE_FLINK_SQL.equals(addWorkReq.getWorkType())
+        if (WorkType.QUERY_SPARK_SQL.equals(addWorkReq.getWorkType())
             || WorkType.DATA_SYNC_JDBC.equals(addWorkReq.getWorkType())
+            || WorkType.EXCEL_SYNC_JDBC.equals(addWorkReq.getWorkType())
             || WorkType.BASH.equals(addWorkReq.getWorkType()) || WorkType.PYTHON.equals(addWorkReq.getWorkType())
-            || WorkType.FLINK_JAR.equals(addWorkReq.getWorkType())) {
+            || WorkType.SPARK_JAR.equals(addWorkReq.getWorkType())) {
             workConfigService.initClusterConfig(workConfig, addWorkReq.getClusterId(), addWorkReq.getClusterNodeId(),
                 addWorkReq.getEnableHive(), addWorkReq.getDatasourceId());
         }
@@ -227,27 +219,26 @@ public class WorkBizService {
 
         WorkEntity work = workService.getWorkEntity(deleteWorkReq.getWorkId());
 
-        // 如果不是已下线状态或者未发布状态
-        // 不让删除
-        if (WorkStatus.UN_PUBLISHED.equals(work.getStatus()) || WorkStatus.STOP.equals(work.getStatus())) {
-            // 删除作业配置
-            Optional<WorkConfigEntity> workConfigEntityOptional = workConfigRepository.findById(work.getConfigId());
-            workConfigEntityOptional
-                .ifPresent(workConfigEntity -> workConfigRepository.deleteById(workConfigEntity.getId()));
-
-            workRepository.deleteById(deleteWorkReq.getWorkId());
-        } else {
-            throw new IsxAppException("请下线作业");
-        }
-
         // 拖拽到DAG中的作业无法删除
-        WorkflowEntity workflow = workflowRepository.findById(work.getWorkflowId()).get();
-        WorkflowConfigEntity workflowConfig = workflowConfigRepository.findById(workflow.getConfigId()).get();
+        WorkflowEntity workflow = workflowService.getWorkflow(work.getWorkflowId());
+        WorkflowConfigEntity workflowConfig = workflowService.getWorkflowConfig(workflow.getConfigId());
         if (workflowConfig.getNodeList() != null) {
             if (JSONArray.parseObject(workflowConfig.getNodeList(), String.class).contains(deleteWorkReq.getWorkId())) {
                 throw new IsxAppException("作业在DAG图中无法删除");
             }
         }
+
+        // 发布的作业无法删除
+        if (WorkStatus.PUBLISHED.equals(work.getStatus())) {
+            throw new IsxAppException("请下线作业");
+        }
+
+        // 删除作业配置
+        WorkConfigEntity workConfig = workConfigService.getWorkConfigEntity(work.getConfigId());
+        workConfigRepository.delete(workConfig);
+
+        // 删除作业
+        workRepository.delete(work);
     }
 
     @Transactional
@@ -274,7 +265,7 @@ public class WorkBizService {
         WorkConfigEntity workConfig = workConfigBizService.getWorkConfigEntity(work.getConfigId());
 
         // 初始化作业运行上下文
-        WorkRunContext workRunContext = WorkflowUtils.genWorkRunContext(workInstance.getId(), work, workConfig);
+        WorkRunContext workRunContext = genWorkRunContext(workInstance.getId(), work, workConfig);
 
         // 异步运行作业
         WorkExecutor workExecutor = workExecutorFactory.create(work.getWorkType());
@@ -300,8 +291,18 @@ public class WorkBizService {
             throw new IsxAppException("请等待作业运行完毕或者对应作业无返回结果");
         }
 
-        if (Strings.isEmpty(workInstanceEntity.getTaskManagerLog())) {
-            return new GetDataRes(JSON.parseArray(workInstanceEntity.getResultData()));
+        // 根据作业类型返回结果
+        WorkEntity workEntity = workService.getWorkEntity(workInstanceEntity.getWorkId());
+        if (WorkType.API.equals(workEntity.getWorkType()) || WorkType.CURL.equals(workEntity.getWorkType())) {
+            return new GetDataRes(null, JSON.toJSONString(JSON.parse(workInstanceEntity.getResultData()), true), null);
+        }
+
+        if (WorkType.BASH.equals(workEntity.getWorkType()) || WorkType.PYTHON.equals(workEntity.getWorkType())) {
+            return new GetDataRes(null, null, workInstanceEntity.getResultData());
+        }
+
+        if (Strings.isEmpty(workInstanceEntity.getYarnLog())) {
+            return new GetDataRes(JSON.parseArray(workInstanceEntity.getResultData()), null, null);
         }
         return JSON.parseObject(workInstanceEntity.getResultData(), GetDataRes.class);
     }
@@ -328,8 +329,7 @@ public class WorkBizService {
     @Transactional
     public void stopJob(StopJobReq stopJobReq) {
 
-        // 通过实例
-        // 获取workId
+        // 通过实例 获取workId
         Optional<WorkInstanceEntity> workInstanceEntityOptional =
             workInstanceRepository.findById(stopJobReq.getInstanceId());
         if (!workInstanceEntityOptional.isPresent()) {
@@ -345,62 +345,11 @@ public class WorkBizService {
             throw new IsxAppException("已中止");
         }
 
-        // 获取中作业id
+        WorkEntity workEntity = workRepository.findById(workInstanceEntity.getWorkId()).get();
+        WorkExecutor workExecutor = workExecutorFactory.create(workEntity.getWorkType());
+
         if (InstanceType.MANUAL.equals(workInstanceEntity.getInstanceType())) {
-            WorkEntity workEntity = workRepository.findById(workInstanceEntity.getWorkId()).get();
-
-            // 作业类型不对返回
-            if (!WorkType.EXECUTE_FLINK_SQL.equals(workEntity.getWorkType())
-                && !WorkType.DATA_SYNC_JDBC.equals(workEntity.getWorkType())
-                && !WorkType.FLINK_JAR.equals(workEntity.getWorkType())) {
-                throw new IsxAppException("只有sparkSql作业才支持中止");
-            }
-
-            WorkConfigEntity workConfigEntity = workConfigRepository.findById(workEntity.getConfigId()).get();
-            String clusterId =
-                JSON.parseObject(workConfigEntity.getClusterConfig(), ClusterConfig.class).getClusterId();
-            List<ClusterNodeEntity> allEngineNodes =
-                engineNodeRepository.findAllByClusterIdAndStatus(clusterId, ClusterNodeStatus.RUNNING);
-            if (allEngineNodes.isEmpty()) {
-                throw new WorkRunException(LocalDateTime.now() + WorkLog.ERROR_INFO + "申请资源失败 : 集群不存在可用节点，请切换一个集群  \n");
-            }
-
-            Optional<ClusterEntity> clusterEntityOptional = calculateEngineRepository.findById(clusterId);
-            if (!clusterEntityOptional.isPresent()) {
-                throw new IsxAppException("集群不存在");
-            }
-
-            // 节点选择随机数
-            ClusterNodeEntity engineNode = allEngineNodes.get(new Random().nextInt(allEngineNodes.size()));
-
-            if (Strings.isEmpty(workInstanceEntity.getSparkStarRes())) {
-                throw new IsxAppException("还未提交，请稍后再试");
-            }
-
-            // 解析实例的状态信息
-            SubmitJobRes submitJobRes = JSON.parseObject(workInstanceEntity.getSparkStarRes(), SubmitJobRes.class);
-
-            com.isxcode.torch.api.agent.pojos.req.StopJobReq agentStopReq =
-                com.isxcode.torch.api.agent.pojos.req.StopJobReq.builder().jobId(submitJobRes.getJobId())
-                    .agentType(clusterEntityOptional.get().getClusterType())
-                    .agentHomePath(engineNode.getFlinkHomePath()).build();
-            try {
-                HttpUtils.doPost(
-                    httpUrlUtils.genHttpUrl(engineNode.getHost(), engineNode.getAgentPort(), AgentApi.stopJob),
-                    agentStopReq, StopJobRes.class);
-            } catch (IOException e) {
-                throw new IsxAppException(e.getMessage());
-            }
-
-            // 修改实例状态
-            workInstanceEntity.setStatus(InstanceStatus.ABORT);
-            String submitLog =
-                workInstanceEntity.getSubmitLog() + LocalDateTime.now() + WorkLog.SUCCESS_INFO + "已中止  \n";
-            workInstanceEntity.setSubmitLog(submitLog);
-            workInstanceEntity.setExecEndDateTime(new Date());
-            workInstanceEntity
-                .setDuration((System.currentTimeMillis() - workInstanceEntity.getExecStartDateTime().getTime()) / 1000);
-            workInstanceRepository.saveAndFlush(workInstanceEntity);
+            workExecutor.syncAbort(workInstanceEntity);
         }
     }
 
@@ -413,10 +362,10 @@ public class WorkBizService {
         }
 
         WorkInstanceEntity workInstanceEntity = workInstanceEntityOptional.get();
-        if (Strings.isEmpty(workInstanceEntity.getTaskManagerLog())) {
-            throw new IsxAppException("请等待作业运行完毕");
+        if (Strings.isEmpty(workInstanceEntity.getYarnLog())) {
+            throw new IsxAppException("日志尚未生成,请等待作业运行完毕");
         }
-        return GetWorkLogRes.builder().yarnLog(workInstanceEntity.getTaskManagerLog()).build();
+        return GetWorkLogRes.builder().yarnLog(workInstanceEntity.getYarnLog()).build();
     }
 
     public GetWorkRes getWork(GetWorkReq getWorkReq) {
@@ -445,19 +394,25 @@ public class WorkBizService {
             getWorkRes.setSyncWorkConfig(JSON.parseObject(workConfig.getSyncWorkConfig(), SyncWorkConfig.class));
         }
 
+        if (!Strings.isEmpty(workConfig.getExcelSyncConfig())) {
+            getWorkRes.setExcelSyncConfig(JSON.parseObject(workConfig.getExcelSyncConfig(), ExcelSyncConfig.class));
+        }
+
         if (!Strings.isEmpty(workConfig.getApiWorkConfig())) {
             getWorkRes.setApiWorkConfig(JSON.parseObject(workConfig.getApiWorkConfig(), ApiWorkConfig.class));
         }
 
         if (!Strings.isEmpty(workConfig.getClusterConfig())) {
             getWorkRes.setClusterConfig(JSON.parseObject(workConfig.getClusterConfig(), ClusterConfig.class));
-            getWorkRes.getClusterConfig()
-                .setSparkConfigJson(JSON.toJSONString(getWorkRes.getClusterConfig().getSparkConfig()));
+            getWorkRes.getClusterConfig().setSparkConfigJson(
+                JSON.toJSONString(getWorkRes.getClusterConfig().getSparkConfig(), SerializerFeature.MapSortField));
         }
 
         if (!Strings.isEmpty(workConfig.getSyncRule())) {
             getWorkRes.setSyncRule(JSON.parseObject(workConfig.getSyncRule(), SyncRule.class));
-            getWorkRes.getSyncRule().setSqlConfigJson(JSON.toJSONString(getWorkRes.getSyncRule().getSqlConfig()));
+            if (getWorkRes.getSyncRule().getSqlConfig() != null) {
+                getWorkRes.getSyncRule().setSqlConfigJson(JSON.toJSONString(getWorkRes.getSyncRule().getSqlConfig()));
+            }
         }
 
         // 翻译依赖配置
@@ -482,26 +437,11 @@ public class WorkBizService {
             getWorkRes.setContainerId(workConfig.getContainerId());
         }
 
+        if (!Strings.isEmpty(workConfig.getAlarmList())) {
+            getWorkRes.setAlarmList(JSON.parseArray(workConfig.getAlarmList(), String.class));
+        }
+
         return getWorkRes;
-    }
-
-    public ClusterNodeEntity getEngineWork(String calculateEngineId) {
-
-        if (Strings.isEmpty(calculateEngineId)) {
-            throw new IsxAppException("作业未配置计算引擎");
-        }
-
-        Optional<ClusterEntity> calculateEngineEntityOptional = calculateEngineRepository.findById(calculateEngineId);
-        if (!calculateEngineEntityOptional.isPresent()) {
-            throw new IsxAppException("计算引擎不存在");
-        }
-
-        List<ClusterNodeEntity> allEngineNodes = engineNodeRepository
-            .findAllByClusterIdAndStatus(calculateEngineEntityOptional.get().getId(), ClusterNodeStatus.RUNNING);
-        if (allEngineNodes.isEmpty()) {
-            throw new IsxAppException("计算引擎无可用节点，请换一个计算引擎");
-        }
-        return allEngineNodes.get(0);
     }
 
     public GetSubmitLogRes getSubmitLog(GetSubmitLogReq getSubmitLogReq) {
@@ -562,23 +502,143 @@ public class WorkBizService {
         workRepository.save(work);
     }
 
-    public void saveSyncWorkConfig(SaveSyncWorkConfigReq saveSyncWorkConfigReq) {
+    public Page<QueryInstanceRes> queryInstance(QueryInstanceReq woiQueryInstanceReq) {
 
-        WorkEntity work = workService.getWorkEntity(saveSyncWorkConfigReq.getWorkId());
-        WorkConfigEntity workConfig = workConfigService.getWorkConfigEntity(work.getConfigId());
+        JPA_TENANT_MODE.set(false);
+        Page<Map> instancePage = workInstanceRepository.searchAll(TENANT_ID.get(),
+            woiQueryInstanceReq.getSearchKeyWord(), woiQueryInstanceReq.getExecuteStatus(),
+            PageRequest.of(woiQueryInstanceReq.getPage(), woiQueryInstanceReq.getPageSize()));
+        JPA_TENANT_MODE.set(true);
 
-        workConfig.setSyncWorkConfig(JSON.toJSONString(saveSyncWorkConfigReq));
-
-        workConfigRepository.save(workConfig);
+        return instancePage.map(workMapper::mapToWoiQueryInstanceRes);
     }
 
-    public GetSyncWorkConfigRes getSyncWorkConfig(GetSyncWorkConfigReq getSyncWorkConfigReq) {
+    public GetWorkflowInstanceRes getWorkflowInstance(GetWorkflowInstanceReq wfiGetWorkflowInstanceReq) {
 
-        WorkEntity work = workService.getWorkEntity(getSyncWorkConfigReq.getWorkId());
-        WorkConfigEntity workConfig = workConfigService.getWorkConfigEntity(work.getConfigId());
+        GetWorkflowInstanceRes result = new GetWorkflowInstanceRes();
 
-        SyncWorkConfig syncWorkConfig = JSON.parseObject(workConfig.getSyncWorkConfig(), SyncWorkConfig.class);
+        // 获取实例中的webConfig
+        WorkflowInstanceEntity workflowInstance =
+            workflowInstanceRepository.findById(wfiGetWorkflowInstanceReq.getWorkflowInstanceId()).get();
+        result.setWebConfig(workflowInstance.getWebConfig());
 
-        return workConfigMapper.syncWorkConfigToGetSyncWorkConfigRes(syncWorkConfig);
+        // 查看其他实例的状态
+        List<WorkInstanceEntity> workInstances =
+            workInstanceRepository.findAllByWorkflowInstanceId(workflowInstance.getId());
+        result.setWorkInstances(
+            workInstances.stream().map(workMapper::workInstanceEntity2WorkInstanceVo).collect(Collectors.toList()));
+
+        // 返回结果
+        return result;
+    }
+
+    public List<GetWorkInstanceValuePathRes> getWorkInstanceJsonPath(
+        GetWorkInstanceJsonPathReq getWorkInstanceJsonPathReq) {
+
+        // 获取实例的结果
+        WorkInstanceEntity workInstanceEntity =
+            workInstanceRepository.findById(getWorkInstanceJsonPathReq.getWorkInstanceId()).get();
+
+        if (!InstanceStatus.SUCCESS.equals(workInstanceEntity.getStatus())) {
+            throw new IsxAppException("只有成功的实例可以查询");
+        }
+
+        // 判断作业类型
+        WorkEntity workEntity = workService.getWorkEntity(workInstanceEntity.getWorkId());
+
+        if (!WorkType.API.equals(workEntity.getWorkType()) && !WorkType.CURL.equals(workEntity.getWorkType())) {
+            throw new IsxAppException("只支持API作业和Curl作业");
+        }
+
+        List<GetWorkInstanceValuePathRes> result = new ArrayList<>();
+        Map<String, Object> allItemPaths =
+            JSONPath.paths(JSON.parseObject(workInstanceEntity.getResultData(), Map.class));
+        allItemPaths.forEach((k, v) -> {
+            GetWorkInstanceValuePathRes metaWorkInstance = new GetWorkInstanceValuePathRes();
+            metaWorkInstance.setJsonPath(k);
+            metaWorkInstance.setValue(String.valueOf(v));
+            metaWorkInstance.setCopyValue("#[[get_json_value('${qing." + workEntity.getId() + ".result_data}','" + k
+                + "','" + Base64.getEncoder().encodeToString(String.valueOf(v).getBytes()) + "')]]");
+            result.add(metaWorkInstance);
+        });
+        return result;
+    }
+
+    public GetWorkInstanceValuePathRes getWorkInstanceRegexPath(
+        GetWorkInstanceRegexPathReq getWorkInstanceRegexPathReq) {
+
+        // 获取实例
+        WorkInstanceEntity workInstanceEntity =
+            workInstanceRepository.findById(getWorkInstanceRegexPathReq.getWorkInstanceId()).get();
+
+        if (!InstanceStatus.SUCCESS.equals(workInstanceEntity.getStatus())) {
+            throw new IsxAppException("只有成功的实例可以查询");
+        }
+
+        // 判断作业类型
+        WorkEntity workEntity = workService.getWorkEntity(workInstanceEntity.getWorkId());
+
+        if (!WorkType.BASH.equals(workEntity.getWorkType()) && !WorkType.PYTHON.equals(workEntity.getWorkType())) {
+            throw new IsxAppException("只支持Bash作业和Python作业");
+        }
+
+        // 返回结果
+        GetWorkInstanceValuePathRes result = new GetWorkInstanceValuePathRes();
+        Pattern pattern = Pattern.compile(getWorkInstanceRegexPathReq.getRegexStr());
+        Matcher matcher = pattern.matcher(workInstanceEntity.getResultData());
+        if (matcher.find()) {
+            result.setValue(matcher.group(1));
+        } else {
+            result.setValue("");
+        }
+        result.setCopyValue("#[[get_regex_value('${qing." + workEntity.getId() + ".result_data}','"
+            + Base64.getEncoder().encodeToString(getWorkInstanceRegexPathReq.getRegexStr().getBytes()) + "','"
+            + Base64.getEncoder().encodeToString(result.getValue().getBytes()) + "')]]");
+        return result;
+    }
+
+    public GetWorkInstanceValuePathRes getWorkInstanceTablePath(
+        GetWorkInstanceTablePathReq getWorkInstanceTablePathReq) {
+
+        // 获取实例的结果
+        WorkInstanceEntity workInstanceEntity =
+            workInstanceRepository.findById(getWorkInstanceTablePathReq.getWorkInstanceId()).get();
+
+        if (!InstanceStatus.SUCCESS.equals(workInstanceEntity.getStatus())) {
+            throw new IsxAppException("只有成功的实例可以查询");
+        }
+
+        // 判断作业类型
+        WorkEntity workEntity = workService.getWorkEntity(workInstanceEntity.getWorkId());
+
+        if (!WorkType.PRQL.equals(workEntity.getWorkType()) && !WorkType.QUERY_JDBC_SQL.equals(workEntity.getWorkType())
+            && !WorkType.QUERY_SPARK_SQL.equals(workEntity.getWorkType())
+            && !WorkType.SPARK_CONTAINER_SQL.equals(workEntity.getWorkType())) {
+            throw new IsxAppException("只支持查询作业");
+        }
+
+        // 返回结果
+        GetWorkInstanceValuePathRes result = new GetWorkInstanceValuePathRes();
+
+        List<List<String>> data;
+        if (WorkType.QUERY_SPARK_SQL.equals(workEntity.getWorkType())) {
+            data = JSON.parseObject(JSON.toJSONString(JSON.parseObject(workInstanceEntity.getResultData()).get("data")),
+                new TypeReference<List<List<String>>>() {});
+        } else {
+            data = JSON.parseObject(workInstanceEntity.getResultData(), new TypeReference<List<List<String>>>() {});
+        }
+
+        try {
+            result.setValue(
+                data.get(getWorkInstanceTablePathReq.getTableRow()).get(getWorkInstanceTablePathReq.getTableCol() - 1));
+        } catch (Exception e) {
+            result.setValue("");
+        }
+
+        result.setCopyValue("#[[get_table_value('${qing." + workEntity.getId() + ".result_data}',"
+            + getWorkInstanceTablePathReq.getTableRow() + "," + getWorkInstanceTablePathReq.getTableCol() + ",'"
+            + Base64.getEncoder().encodeToString(result.getValue().getBytes()) + "')]]");
+
+        return result;
     }
 }

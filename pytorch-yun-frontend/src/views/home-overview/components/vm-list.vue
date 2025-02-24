@@ -3,16 +3,19 @@
     <div class="vm-list__header">
       <span class="vm-list__title">实例列表</span>
       <div class="vm-list__ops">
-        <el-icon class="vm-list__icon"><RefreshRight /></el-icon>
-        <el-input class="vm-list__search" v-model="keyWord" placeholder="名称"  @keydown.enter="queryVmlistData"/>
+        <el-icon class="vm-list__icon" @click="queryVmlistData">
+          <RefreshRight />
+        </el-icon>
+        <el-input class="vm-list__search" v-model="keyWord" placeholder="作业流" @keydown.enter="queryVmlistData" />
       </div>
     </div>
     <div class="vm-list__body">
       <el-table class="vm-list__table" :data="tableData">
-        <el-table-column prop="workflowName" label="名称" width="120" show-overflow-tooltip/>
-        <el-table-column prop="status" label="状态" align="center">
+        <el-table-column prop="workflowName" label="作业流" width="180" show-overflow-tooltip />
+        <el-table-column prop="status" label="状态">
           <template #default="{ row }">
-            <vm-status :status="row.status"></vm-status>
+            <!-- <vm-status :status="row.status"></vm-status> -->
+            <ZStatusTag :status="row.status"></ZStatusTag>
           </template>
         </el-table-column>
         <el-table-column prop="lastModifiedBy" label="发布人">
@@ -20,24 +23,44 @@
             <person-tag :person-name="row.lastModifiedBy"></person-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="startDateTime" label="开始时间" show-overflow-tooltip />
-        <el-table-column prop="endDateTime" label="结束时间" show-overflow-tooltip />
+        <el-table-column prop="startDateTime" label="开始时间" width="170" show-overflow-tooltip />
+        <el-table-column prop="endDateTime" label="结束时间" width="170" show-overflow-tooltip />
         <el-table-column label="操作" align="center">
           <template #default="{ row }">
-            <el-icon class="vm-list__more"><MoreFilled /></el-icon>
+            <el-dropdown trigger="click">
+              <el-icon class="vm-list__more">
+                <MoreFilled />
+              </el-icon>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="showDagDetail(row)">DAG</el-dropdown-item>
+                  <el-dropdown-item @click="reRunWorkFlowDataEvent(row)">重跑</el-dropdown-item>
+                  <el-dropdown-item @click="deleteWorkflowSchedule(row)">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
+        <template #empty>
+          <el-empty class="vm-list__empty" description="暂无数据"></el-empty>
+        </template>
       </el-table>
-      <el-pagination class="vm-list__pagination" small layout="prev, pager, next" :total="total" @current-change="handleCurrentChange"/>
+      <el-pagination class="vm-list__pagination" small layout="prev, pager, next" :total="total"
+        @current-change="handleCurrentChange" />
     </div>
+    <dag-detail ref="dagDetailRef"></dag-detail>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import VmStatus from './vm-status.vue';
 import PersonTag from './person-tag.vue';
 import { ComputeInstance, queryComputeInstances } from '../services/computer-group';
+import DagDetail from '@/views/schedule/dag-detail/index.vue'
+import { ReRunWorkflow } from '@/services/workflow.service';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { DeleteWorkFlowScheduleLog } from '@/services/schedule.service';
 
 const keyWord = ref('')
 
@@ -50,6 +73,8 @@ const paginationInfo = ref<{
   page: 0,
   pageSize: 5
 })
+const dagDetailRef = ref()
+const timer = ref()
 
 function queryVmlistData() {
   queryComputeInstances({
@@ -67,15 +92,57 @@ function handleCurrentChange(page: number) {
   queryVmlistData()
 }
 
+// 展示工作流对应流程图
+function showDagDetail(data: any) {
+  dagDetailRef.value.showModal(data)
+}
+
+// 重跑工作流
+function reRunWorkFlowDataEvent(data: any) {
+  ReRunWorkflow({
+    workflowInstanceId: data.workflowInstanceId
+  }).then((res: any) => {
+    ElMessage.success(res.msg)
+    queryVmlistData()
+  }).catch(() => {
+  })
+}
+
+// 删除作业流调度
+function deleteWorkflowSchedule(data: any) {
+  ElMessageBox.confirm('确定删除该实例吗？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    DeleteWorkFlowScheduleLog({
+      workflowInstanceId: data.workflowInstanceId
+    }).then((res: any) => {
+      ElMessage.success(res.msg)
+      queryVmlistData()
+    }).catch(() => { })
+  })
+}
+
 onMounted(() => {
   queryVmlistData()
+  timer.value = setInterval(() => {
+    queryVmlistData()
+  }, 3000)
 })
 
+onUnmounted(() => {
+  if (timer.value) {
+    clearInterval(timer.value)
+  }
+  timer.value = null
+})
 </script>
 
 <style lang="scss">
 .vm-list {
   margin-bottom: 24px;
+
   .vm-list__header {
     display: flex;
     justify-content: space-between;
@@ -126,7 +193,8 @@ onMounted(() => {
       display: none;
     }
 
-    &.el-table th.el-table__cell.is-leaf, .el-table td.el-table__cell {
+    &.el-table th.el-table__cell.is-leaf,
+    .el-table td.el-table__cell {
       border: 0;
     }
 
@@ -138,9 +206,19 @@ onMounted(() => {
   .vm-list__more {
     transform: rotate(90deg);
     cursor: pointer;
+    margin-top: 4px;
 
     &:hover {
       color: getCssVar('color', 'primary');
+    }
+  }
+
+  .vm-list__empty {
+    padding: 20px 0 0;
+    --el-empty-image-width: 60px;
+
+    .el-empty__description {
+      margin-top: 0;
     }
   }
 

@@ -19,9 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * jwt拦截接口.
- */
+/** jwt拦截接口. */
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -49,15 +47,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             TENANT_ID.set(tenantId);
         }
 
-        // 验证jwt,
-        // 获取用户id
+        // 验证jwt, 获取用户id
         String userUuid;
         try {
             userUuid = JwtUtils.decrypt(isxAppProperties.getJwtKey(), authorization, isxAppProperties.getAesSlat(),
                 String.class);
             USER_ID.set(userUuid);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.debug(e.getMessage(), e);
             request.getRequestDispatcher(SecurityConstants.TOKEN_IS_INVALID_PATH).forward(request, response);
             return;
         }
@@ -66,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             authenticationManager.authenticate(new AuthenticationToken(userUuid, tenantId));
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.debug(e.getMessage(), e);
             request.getRequestDispatcher(SecurityConstants.AUTH_ERROR_PATH).forward(request, response);
             return;
         }

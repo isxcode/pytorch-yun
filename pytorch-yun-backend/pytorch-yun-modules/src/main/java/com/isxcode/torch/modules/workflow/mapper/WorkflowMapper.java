@@ -1,20 +1,19 @@
 package com.isxcode.torch.modules.workflow.mapper;
 
-import com.isxcode.torch.api.monitor.pojos.ao.WorkflowMonitorAo;
-import com.isxcode.torch.api.monitor.pojos.res.PageInstancesRes;
-import com.isxcode.torch.api.workflow.pojos.dto.WorkInstanceInfo;
-import com.isxcode.torch.api.workflow.pojos.req.AddWorkflowReq;
-import com.isxcode.torch.api.workflow.pojos.req.UpdateWorkflowReq;
-import com.isxcode.torch.api.workflow.pojos.res.PageWorkflowRes;
+import com.isxcode.torch.api.instance.ao.WorkflowInstanceAo;
+import com.isxcode.torch.api.instance.res.QueryWorkFlowInstancesRes;
+import com.isxcode.torch.api.monitor.ao.WorkflowMonitorAo;
+import com.isxcode.torch.api.monitor.res.PageInstancesRes;
+import com.isxcode.torch.api.workflow.dto.WorkInstanceInfo;
+import com.isxcode.torch.api.workflow.req.AddWorkflowReq;
+import com.isxcode.torch.api.workflow.req.UpdateWorkflowReq;
+import com.isxcode.torch.api.workflow.res.PageWorkflowRes;
 import com.isxcode.torch.modules.work.entity.WorkInstanceEntity;
 import com.isxcode.torch.modules.workflow.entity.WorkflowEntity;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-/**
- * mapstruct映射.
- */
 @Mapper(componentModel = "spring")
 public interface WorkflowMapper {
 
@@ -35,5 +34,14 @@ public interface WorkflowMapper {
 
     List<WorkInstanceInfo> workInstanceEntityListToWorkInstanceInfoList(List<WorkInstanceEntity> workInstances);
 
+    @Mapping(target = "startDateTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(target = "endDateTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
     PageInstancesRes workflowMonitorAoToPageInstancesRes(WorkflowMonitorAo workflowMonitorAo);
+
+    @Mapping(target = "startDateTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(target = "endDateTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(target = "nextPlanDateTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(target = "planStartDateTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    QueryWorkFlowInstancesRes wfiWorkflowInstanceAo2WfiQueryWorkFlowInstancesRes(
+        WorkflowInstanceAo workflowInstanceAoPage);
 }

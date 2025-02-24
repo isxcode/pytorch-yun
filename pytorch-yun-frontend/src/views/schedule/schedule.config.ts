@@ -20,6 +20,7 @@ export interface colConfig {
   customSlot?: string;
   width?: number;
   minWidth?: number;
+  fixed?: string;
 }
 
 export interface Pagination {
@@ -32,7 +33,7 @@ export interface TableConfig {
   tableData: Array<any>;
   colConfigs: Array<colConfig>;
   seqType: string;
-  pagination?: Pagination; // 分页数据
+  pagination: Pagination; // 分页数据
   loading?: boolean; // 表格loading
 }
 
@@ -47,7 +48,7 @@ export const colConfigs: colConfig[] = [
   {
     prop: 'id',
     title: '实例ID',
-    minWidth: 158,
+    minWidth: 180,
     showOverflowTooltip: true
   },
   {
@@ -88,7 +89,7 @@ export const colConfigs: colConfig[] = [
   {
     prop: 'duration',
     title: '耗时',
-    minWidth: 110,
+    minWidth: 124,
     customSlot: 'duration'
   },
   {
@@ -115,7 +116,8 @@ export const colConfigs: colConfig[] = [
     title: '操作',
     align: 'center',
     customSlot: 'options',
-    width: 80
+    width: 80,
+    fixed: 'right'
   }
 ]
 
@@ -136,12 +138,13 @@ export const colConfigsWorkflow: colConfig[] = [
   {
     prop: 'workflowInstanceId',
     title: '实例ID',
-    minWidth: 158,
+    customSlot: 'nameSlot',
+    minWidth: 180,
     showOverflowTooltip: true
   },
   {
     prop: 'workflowName',
-    title: '作业流名称',
+    title: '作业流',
     minWidth: 120,
     showOverflowTooltip: true
   },
@@ -183,7 +186,7 @@ export const colConfigsWorkflow: colConfig[] = [
   {
     prop: 'duration',
     title: '耗时',
-    minWidth: 110,
+    minWidth: 124,
     customSlot: 'duration'
   },
   {
@@ -205,7 +208,8 @@ export const colConfigsWorkflow: colConfig[] = [
     title: '操作',
     align: 'center',
     customSlot: 'workFlowOptions',
-    width: 80
+    width: 80,
+    fixed: 'right'
   }
 ]
 

@@ -9,20 +9,23 @@ import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.Key;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-/**
- * jwt加密工具类.
- */
+/** jwt加密工具类. */
+@Slf4j
 public class JwtUtils {
 
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    /**
-     * jwt加密.
-     */
+    /** jwt加密. */
     public static String encrypt(String aesKey, Object obj, String jwtKey, Integer minutes) {
 
         Map<String, Object> claims = new HashMap<>(1);
@@ -31,6 +34,7 @@ public class JwtUtils {
         try {
             claimsStr = new ObjectMapper().writeValueAsString(obj);
         } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
             throw new IsxAppException("jwt加密异常");
         }
         if (aesKey != null) {
@@ -57,9 +61,7 @@ public class JwtUtils {
         return jwtBuilder.compact();
     }
 
-    /**
-     * jwt解密.
-     */
+    /** jwt解密. */
     public static <A> A decrypt(String aesKey, String jwtString, String jwtKey, Class<A> targetClass) {
 
         JwtParserBuilder jwtParserBuilder = Jwts.parserBuilder();
@@ -82,6 +84,7 @@ public class JwtUtils {
         try {
             return objectMapper.readValue(targetJsonStr, targetClass);
         } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
             throw new IsxAppException("jwt解密异常");
         }
     }

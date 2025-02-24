@@ -23,9 +23,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SQLDelete(sql = "UPDATE SY_WORKFLOW_CONFIG SET deleted = 1 WHERE id = ? and version_number = ?")
+@SQLDelete(sql = "UPDATE PY_WORKFLOW_CONFIG SET deleted = 1 WHERE id = ? and version_number = ?")
 @Where(clause = "deleted = 0 ${TENANT_FILTER} ")
-@Table(name = "SY_WORKFLOW_CONFIG")
+@Table(name = "PY_WORKFLOW_CONFIG")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @EntityListeners(AuditingEntityListener.class)
 public class WorkflowConfigEntity {
@@ -46,6 +46,12 @@ public class WorkflowConfigEntity {
     private String dagEndList;
 
     private String cronConfig;
+
+    private String alarmList;
+
+    private String invokeStatus;
+
+    private String invokeUrl;
 
     @CreatedDate
     private LocalDateTime createDateTime;

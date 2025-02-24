@@ -27,12 +27,12 @@ fi
 # 获取外部参数
 home_path=""
 agent_port=""
-agent_type=""
+spark_local="false"
 for arg in "$@"; do
   case "$arg" in
   --home-path=*) home_path="${arg#*=}" ;;
   --agent-port=*) agent_port="${arg#*=}" ;;
-  --agent-type=*) agent_type="${arg#*=}" ;;
+  --spark-local=*) spark_local="${arg#*=}" ;;
   *) echo "未知参数: $arg" && exit 1 ;;
   esac
 done
@@ -69,9 +69,23 @@ else
 fi
 echo $! >${agent_path}/zhihuiyun-agent.pid
 
-# 如果用户需要默认spark
-if [ ${agent_type} = "flinkcluster" ]; then
-  nohup bash ${agent_path}/flink-min/bin/start-cluster.sh > /dev/null 2>&1 &
+# 如果用户指定spark安装,默认帮他启动spark
+if [ ${spark_local} = "true" ]; then
+  if [[ "$OSTYPE" == "linux-gnu" ]]; then
+    nohup bash ${agent_path}/spark-min/sbin/start-all.sh > /dev/null 2>&1 &
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    nohup bash ${agent_path}/spark-min/sbin/start-master.sh  > /dev/null 2>&1 &
+    sleep 5
+    nohup bash ${agent_path}/spark-min/sbin/start-worker.sh --webui-port 8081 spark://localhost:7077 > /dev/null 2>&1 &
+  else
+    json_output="{ \
+                      \"status\": \"INSTALL_ERROR\", \
+                      \"log\": \"该系统不支持安装\" \
+                    }"
+    echo $json_output
+    rm ${BASE_PATH}/agent-start.sh
+    exit 0
+  fi
 fi
 
 # 返回结果

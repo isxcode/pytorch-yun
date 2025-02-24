@@ -8,27 +8,27 @@ import com.alibaba.fastjson.JSON;
 import com.isxcode.torch.api.api.constants.ApiStatus;
 import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
 import com.isxcode.torch.api.cluster.constants.ClusterStatus;
-import com.isxcode.torch.api.cluster.pojos.dto.ScpFileEngineNodeDto;
+import com.isxcode.torch.api.cluster.dto.ScpFileEngineNodeDto;
 import com.isxcode.torch.api.datasource.constants.DatasourceStatus;
 import com.isxcode.torch.api.instance.constants.InstanceStatus;
 import com.isxcode.torch.api.main.properties.SparkYunProperties;
 import com.isxcode.torch.api.monitor.constants.MonitorStatus;
-import com.isxcode.torch.api.monitor.pojos.ao.MonitorLineAo;
-import com.isxcode.torch.api.monitor.pojos.ao.WorkflowMonitorAo;
-import com.isxcode.torch.api.monitor.pojos.dto.MonitorLineDto;
-import com.isxcode.torch.api.monitor.pojos.dto.NodeMonitorInfo;
-import com.isxcode.torch.api.monitor.pojos.dto.SystemMonitorDto;
-import com.isxcode.torch.api.monitor.pojos.dto.WorkflowInstanceLineDto;
-import com.isxcode.torch.api.monitor.pojos.req.GetClusterMonitorReq;
-import com.isxcode.torch.api.monitor.pojos.req.GetInstanceMonitorReq;
-import com.isxcode.torch.api.monitor.pojos.req.PageInstancesReq;
-import com.isxcode.torch.api.monitor.pojos.res.GetClusterMonitorRes;
-import com.isxcode.torch.api.monitor.pojos.res.GetInstanceMonitorRes;
-import com.isxcode.torch.api.monitor.pojos.res.GetSystemMonitorRes;
-import com.isxcode.torch.api.monitor.pojos.res.PageInstancesRes;
+import com.isxcode.torch.api.monitor.ao.MonitorLineAo;
+import com.isxcode.torch.api.monitor.ao.WorkflowMonitorAo;
+import com.isxcode.torch.api.monitor.dto.MonitorLineDto;
+import com.isxcode.torch.api.monitor.dto.NodeMonitorInfo;
+import com.isxcode.torch.api.monitor.dto.SystemMonitorDto;
+import com.isxcode.torch.api.monitor.dto.WorkflowInstanceLineDto;
+import com.isxcode.torch.api.monitor.req.GetClusterMonitorReq;
+import com.isxcode.torch.api.monitor.req.GetInstanceMonitorReq;
+import com.isxcode.torch.api.monitor.req.PageInstancesReq;
+import com.isxcode.torch.api.monitor.res.GetClusterMonitorRes;
+import com.isxcode.torch.api.monitor.res.GetInstanceMonitorRes;
+import com.isxcode.torch.api.monitor.res.GetSystemMonitorRes;
+import com.isxcode.torch.api.monitor.res.PageInstancesRes;
 import com.isxcode.torch.api.workflow.constants.WorkflowStatus;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
-import com.isxcode.torch.common.utils.AesUtils;
+import com.isxcode.torch.common.utils.aes.AesUtils;
 import com.isxcode.torch.modules.api.repository.ApiRepository;
 import com.isxcode.torch.modules.cluster.entity.ClusterNodeEntity;
 import com.isxcode.torch.modules.cluster.mapper.ClusterNodeMapper;
@@ -172,17 +172,14 @@ public class MonitorBizService {
                 || TimeType.ONE_HOUR.equals(getClusterMonitorReq.getTimeType())
                 || TimeType.TWO_HOUR.equals(getClusterMonitorReq.getTimeType())
                 || TimeType.SIX_HOUR.equals(getClusterMonitorReq.getTimeType())) {
-                // 30分钟/1小时/2小时/6小时/
-                // 小时:分
+                // 30分钟/1小时/2小时/6小时/ 小时:分
                 nowTime = DateUtil.format(e.getDateTime(), "HH:mm");
             } else if (TimeType.TWELVE_HOUR.equals(getClusterMonitorReq.getTimeType())
                 || TimeType.ONE_DAY.equals(getClusterMonitorReq.getTimeType())) {
-                // 12小时/1天
-                // 小时:00
+                // 12小时/1天 小时:00
                 nowTime = DateUtil.format(e.getDateTime(), "HH:00");
             } else {
-                // 7天/30天
-                // 月-日
+                // 7天/30天 月-日
                 nowTime = DateUtil.format(e.getDateTime(), "MM-dd");
             }
             lineMap.put(nowTime, e);
@@ -196,14 +193,10 @@ public class MonitorBizService {
                 .cpuPercent(v.getCpuPercent() == null ? null : v.getCpuPercent() + "%")
                 .usedStorageSize(v.getUsedStorageSize() == null ? null : DataSizeUtil.format(v.getUsedStorageSize()))
                 .usedMemorySize(v.getUsedMemorySize() == null ? null : DataSizeUtil.format(v.getUsedMemorySize()))
-                .diskIoReadSpeed(
-                    v.getDiskIoReadSpeed() == null ? null : DataSizeUtil.format(v.getDiskIoReadSpeed() * 1024) + "/s")
-                .diskIoWriteSpeed(v.getDiskIoWriteSpeed() == null ? null
-                    : DataSizeUtil.format(v.getDiskIoWriteSpeed() / 1024 / 1024) + "/s")
-                .networkIoReadSpeed(v.getNetworkIoReadSpeed() == null ? null
-                    : DataSizeUtil.format(v.getNetworkIoReadSpeed() * 1024) + "/s")
-                .networkIoWriteSpeed(v.getNetworkIoWriteSpeed() == null ? null
-                    : DataSizeUtil.format(v.getNetworkIoWriteSpeed() / 1024 / 1024) + "/s")
+                .diskIoReadSpeed(v.getDiskIoReadSpeed() == null ? null : v.getDiskIoReadSpeed() + "KB/s")
+                .diskIoWriteSpeed(v.getDiskIoWriteSpeed() == null ? null : v.getDiskIoWriteSpeed() + "KB/s")
+                .networkIoReadSpeed(v.getNetworkIoReadSpeed() == null ? null : v.getNetworkIoReadSpeed() + "KB/s")
+                .networkIoWriteSpeed(v.getNetworkIoWriteSpeed() == null ? null : v.getNetworkIoWriteSpeed() + "KB/s")
                 .build();
             line.add(date);
         });
@@ -220,12 +213,18 @@ public class MonitorBizService {
         // 查询当天的实例
         DateTime startDateTime = DateUtil.beginOfDay(getInstanceMonitorReq.getLocalDate());
         DateTime endDateTime = DateUtil.endOfDay(getInstanceMonitorReq.getLocalDate());
-        List<WorkflowInstanceEntity> workflowInstances = workflowInstanceRepository
-            .findAllByExecStartDateTimeAfterAndExecEndDateTimeBefore(startDateTime, endDateTime);
+        List<WorkflowInstanceEntity> workflowInstances =
+            workflowInstanceRepository.findAllByExecStartDateTimeAfterAndLastModifiedDateTimeBefore(startDateTime,
+                DateUtil.toLocalDateTime(endDateTime));
 
         // 初始化数组
         List<WorkflowInstanceLineDto> lines = new ArrayList<>();
-        long allNum = DateUtil.between(DateUtil.beginOfDay(new Date()), new Date(), DateUnit.HOUR);
+        long allNum;
+        if (DateUtil.isSameDay(new Date(), getInstanceMonitorReq.getLocalDate())) {
+            allNum = DateUtil.between(DateUtil.beginOfDay(new Date()), new Date(), DateUnit.HOUR);
+        } else {
+            allNum = 24;
+        }
         for (int i = 0; i < allNum; i++) {
             lines.add(WorkflowInstanceLineDto.builder().localTime(String.format("%02d", i + 1) + ":00").successNum(0L)
                 .failNum(0L).runningNum(0L).build());
@@ -237,7 +236,7 @@ public class MonitorBizService {
             // 开始小时和结束小时
             int startHour = DateUtil.hour(e.getExecStartDateTime(), true) == 0 ? 0
                 : DateUtil.hour(e.getExecStartDateTime(), true) - 1;
-            int endHour = e.getExecStartDateTime() == null ? Integer.parseInt(String.valueOf(allNum)) - 1
+            int endHour = e.getExecEndDateTime() == null ? Integer.parseInt(String.valueOf(allNum))
                 : DateUtil.hour(e.getExecEndDateTime(), true) - 1;
 
             // 补充运行中的个数
@@ -271,10 +270,7 @@ public class MonitorBizService {
             workflowInstanceRepository.searchWorkflowMonitor(TENANT_ID.get(), pageInstancesReq.getSearchKeyWord(),
                 PageRequest.of(pageInstancesReq.getPage(), pageInstancesReq.getPageSize()));
 
-        Page<PageInstancesRes> map = workflowMonitorAos.map(workflowMapper::workflowMonitorAoToPageInstancesRes);
-        map.getContent().forEach(e -> e
-            .setStatus(InstanceStatus.SUCCESS.equals(e.getStatus()) ? InstanceStatus.SUCCESS : InstanceStatus.FAIL));
-        return map;
+        return workflowMonitorAos.map(workflowMapper::workflowMonitorAoToPageInstancesRes);
     }
 
     @Scheduled(cron = "0 * * * * ?")
@@ -302,6 +298,7 @@ public class MonitorBizService {
                     nodeMonitor.setCreateDateTime(now);
                     return nodeMonitor;
                 } catch (Exception ex) {
+                    log.debug(ex.getMessage(), ex);
                     return NodeMonitorInfo.builder().clusterNodeId(e.getId()).clusterId(e.getClusterId())
                         .status(MonitorStatus.FAIL).log(ex.getMessage()).tenantId(e.getTenantId()).createDateTime(now)
                         .build();
@@ -339,9 +336,21 @@ public class MonitorBizService {
             return nodeMonitorInfo;
         }
 
+        long diskIoReadSpeed = 0L, diskIoWriteSpeed = 0L, networkIoReadSpeed = 0L, networkIoWriteSpeed = 0L;
+        if (!Strings.isEmpty(nodeMonitorInfo.getDiskIoReadSpeedStr())) {
+            for (int i = 0; i < nodeMonitorInfo.getDiskIoReadSpeedStr().split(" ").length; i++) {
+                diskIoReadSpeed += Long.parseLong(nodeMonitorInfo.getDiskIoReadSpeedStr().split(" ")[i]);
+                diskIoWriteSpeed += Long.parseLong(nodeMonitorInfo.getDiskIoWriteSpeedStr().split(" ")[i]);
+                networkIoReadSpeed += Long.parseLong(nodeMonitorInfo.getNetworkIoReadSpeedStr().split(" ")[i]);
+                networkIoWriteSpeed += Long.parseLong(nodeMonitorInfo.getNetworkIoWriteSpeedStr().split(" ")[i]);
+            }
+        }
+
         // 解析一下速度
-        nodeMonitorInfo.setDiskIoReadSpeed(Long.parseLong(nodeMonitorInfo.getDiskIoReadSpeedStr().split(" ")[0]));
-        nodeMonitorInfo.setDiskIoWriteSpeed(Long.parseLong(nodeMonitorInfo.getDiskIoWriteSpeedStr().split(" ")[0]));
+        nodeMonitorInfo.setDiskIoReadSpeed(diskIoReadSpeed);
+        nodeMonitorInfo.setDiskIoWriteSpeed(diskIoWriteSpeed);
+        nodeMonitorInfo.setNetworkIoReadSpeed(networkIoReadSpeed);
+        nodeMonitorInfo.setNetworkIoWriteSpeed(networkIoWriteSpeed);
 
         return nodeMonitorInfo;
     }
