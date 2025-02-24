@@ -1,10 +1,14 @@
 <template>
+  <div ref="headerFilterRef" class="backdrop-blur"></div>
   <header ref="headerRef" class="home-header">
     <div class="content">
       <div class="right">
         <div @click="handleLogoClick" class="home-header-logo">
           <div class="logo">
-            <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/logo.jpg" alt=""/>
+            <img
+              src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/logo.jpg"
+              alt=""
+            />
             <h1>至爻数据</h1>
           </div>
         </div>
@@ -20,6 +24,7 @@
             <SvgIcon v-if="item.icon" :name="item.icon" class="icon-btn">
             </SvgIcon>
           </div>
+          <!-- <LangSwitcher /> -->
         </div>
       </div>
     </div>
@@ -29,64 +34,78 @@
 <script setup lang="ts">
 defineComponent("LayoutHomeHeader");
 
-// 不同的语言对应不同的显示文字
-const langMap = reactive<Record<string, string>>({
-  "zh-CN": "中文",
-  "en-US": "English",
-});
-//  声明当前语言信息
-const currentLang = ref<string>("zh-CN");
-// 计算属性，根据当前语言信息获取对应的显示文字
-const currentLangText = computed(() => {
-  return langMap[currentLang.value];
-});
+const headerRef = ref<HTMLElement | null>(null);
+const headerFilterRef = ref<HTMLElement | null>(null);
+const router = useRouter();
 
-// 语言切换
-function handleLangChange(lang: string) {
-  currentLang.value = lang;
+const whiteList = ["/", "/zh", "/en"];
+
+function setHeaderStyle({
+  height,
+  boxShadow,
+  backgroundColor,
+  backdropFilter,
+  display,
+}: {
+  height: string;
+  boxShadow: string;
+  backgroundColor: string;
+  backdropFilter?: string;
+  display?: string;
+}) {
+  if (headerRef.value) {
+    headerRef.value.style.height = height;
+    headerRef.value.style.boxShadow = boxShadow;
+    headerRef.value.style.backgroundColor = backgroundColor;
+    headerRef.value.style.backdropFilter = backdropFilter || "none";
+  }
+  if (headerFilterRef.value) {
+    headerFilterRef.value.style.display = display || "none";
+  }
 }
 
-const headerRef = ref<HTMLElement | null>(null);
+function handleScroll() {
+  const path = router.currentRoute.value.path.split("/")[1];
+  const flag = whiteList.includes(`/${path}`);
+
+  if (!flag) {
+    setHeaderStyle({
+      height: "60px",
+      boxShadow: "0 2px 4px -1px rgba(0,0,0,0.25)",
+      backgroundColor: "transparent",
+    });
+    return;
+  }
+
+  if (window.scrollY > 0) {
+    setHeaderStyle({
+      height: "60px",
+      boxShadow: "0 2px 4px -1px rgba(0,0,0,0.25)",
+      backgroundColor: "rgba(255,255,255,0.3)",
+      display: "block",
+    });
+  } else {
+    setHeaderStyle({
+      height: "80px",
+      boxShadow: "none",
+      backgroundColor: "transparent",
+    });
+  }
+}
 
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
 });
 
-function handleScroll() {
-  const flag = window.location.pathname === "/";
-  if (!flag) {
-    headerRef.value!.style.height = "60px";
-    headerRef.value!.style.boxShadow = "0 2px 4px -1px rgba(0,0,0,0.25)";
-    headerRef.value!.style.backgroundColor = "transparent";
-    return;
-  }
-  if (window.scrollY > 0) {
-    headerRef.value!.style.backgroundColor = "#fff";
-    headerRef.value!.style.height = "60px";
-    headerRef.value!.style.boxShadow = "0 2px 4px -1px rgba(0,0,0,0.25)";
-    headerRef.value!.style.backgroundColor = "rgba(255,255,255,0.3)";
-    headerRef.value!.style.backdropFilter = "blur(10px)";
-
-  } else {
-    headerRef.value!.style.height = "80px";
-    headerRef.value!.style.boxShadow = "none";
-    headerRef.value!.style.backgroundColor = "transparent";
-    headerRef.value!.style.backdropFilter = "none";
-  }
-}
-
-const router = useRouter();
-
 watch(
   () => router.currentRoute.value.path,
   (path) => {
-    const whiteList = ["/"];
     const flag = whiteList.some((item) => {
-      const path = window.location.pathname.split("/")[1];
+      const path = router.currentRoute.value.path.split("/")[1];
       return item === `/${path}`;
     });
     if (!flag) {
-      headerRef.value!.style.backgroundColor = "var(--sk-color-home-bgc)";
+      headerRef.value!.style.backgroundColor = "transparent";
       headerRef.value!.style.height = "60px";
       headerRef.value!.style.boxShadow = "0 2px 4px -1px rgba(0,0,0,0.25)";
       return;
@@ -98,13 +117,12 @@ watch(
   }
 );
 
-// logo 点击
+const { locale, locales } = useI18n();
 function handleLogoClick() {
   const router = useRouter();
-  router.push("/");
+  const newLocale = locale.value;
+  router.push(`/`);
 }
-
-// 菜单数据接口interface
 
 interface MenuData {
   title: string;
@@ -136,6 +154,19 @@ function handleMenuClick(menuItem: MenuData) {
 </script>
 
 <style lang="scss" scoped>
+.backdrop-blur {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 998;
+  width: 100%;
+  height: 60px;
+  filter: blur(0px);
+  -webkit-filter: blur(0px);
+}
+
 .home-header {
   position: fixed;
   top: 0;
@@ -259,21 +290,11 @@ function handleMenuClick(menuItem: MenuData) {
       }
     }
   }
-
-  @font-face {
-    font-family: "阿里妈妈数黑体 Bold";
-    font-weight: 700;
-    src: url("//at.alicdn.com/wf/webfont/aQ1mhUp3iaYf/5QDL7m0TZ7N4.woff2") format("woff2"),
-    url("//at.alicdn.com/wf/webfont/aQ1mhUp3iaYf/q3FAWdnOd36Q.woff") format("woff");
-    font-display: swap;
-  }
-
 }
 
 // -------------------------------------------------------------------- 移动端 ----------------------------------------------
 
 @media (max-width: 768px) {
-
   .home-header {
     width: 100%;
     position: fixed;
@@ -380,15 +401,6 @@ function handleMenuClick(menuItem: MenuData) {
         }
       }
     }
-
-    @font-face {
-      font-family: "阿里妈妈数黑体 Bold";
-      font-weight: 700;
-      src: url("//at.alicdn.com/wf/webfont/aQ1mhUp3iaYf/5QDL7m0TZ7N4.woff2") format("woff2"),
-      url("//at.alicdn.com/wf/webfont/aQ1mhUp3iaYf/q3FAWdnOd36Q.woff") format("woff");
-      font-display: swap;
-    }
-
   }
 }
 </style>
