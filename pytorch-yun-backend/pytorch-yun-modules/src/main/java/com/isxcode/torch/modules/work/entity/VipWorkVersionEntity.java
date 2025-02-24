@@ -3,6 +3,7 @@ package com.isxcode.torch.modules.work.entity;
 import static com.isxcode.torch.common.config.CommonConfig.TENANT_ID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -12,6 +13,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
@@ -24,9 +26,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Data
 @Entity
-@SQLDelete(sql = "UPDATE SY_WORK_VERSION SET deleted = 1 WHERE id = ? and version_number = ?")
+@SQLDelete(sql = "UPDATE PY_WORK_VERSION SET deleted = 1 WHERE id = ? and version_number = ?")
 @Where(clause = "deleted = 0 ${TENANT_FILTER} ")
-@Table(name = "SY_WORK_VERSION")
+@Table(name = "PY_WORK_VERSION")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @EntityListeners(AuditingEntityListener.class)
 public class VipWorkVersionEntity {
@@ -50,6 +52,8 @@ public class VipWorkVersionEntity {
 
     private String syncWorkConfig;
 
+    private String excelSyncConfig;
+
     private String apiWorkConfig;
 
     private String syncRule;
@@ -61,6 +65,8 @@ public class VipWorkVersionEntity {
     private String libConfig;
 
     private String funcConfig;
+
+    private String alarmList;
 
     @CreatedDate
     private LocalDateTime createDateTime;

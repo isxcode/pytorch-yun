@@ -1,6 +1,7 @@
 package com.isxcode.torch.modules.monitor.repository;
 
-import com.isxcode.torch.api.monitor.pojos.ao.MonitorLineAo;
+import com.isxcode.torch.api.main.constants.ModuleCode;
+import com.isxcode.torch.api.monitor.ao.MonitorLineAo;
 import com.isxcode.torch.modules.file.entity.FileEntity;
 import com.isxcode.torch.modules.monitor.entity.MonitorEntity;
 import org.springframework.cache.annotation.CacheConfig;
@@ -13,14 +14,11 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * 只负责数据库查询逻辑.
- */
 @Repository
-@CacheConfig(cacheNames = {"sy_file"})
+@CacheConfig(cacheNames = {ModuleCode.FILE})
 public interface MonitorRepository extends JpaRepository<MonitorEntity, String>, JpaSpecificationExecutor<FileEntity> {
 
-    @Query("select new com.isxcode.torch.api.monitor.pojos.ao.MonitorLineAo ( count(1),M.clusterId, M.createDateTime,sum(M.cpuPercent) / count(1),sum(M.diskIoReadSpeed) / count(1),sum(M.diskIoWriteSpeed) / count(1),sum(M.networkIoReadSpeed) / count(1),sum(M.networkIoWriteSpeed) / count(1), sum(M.usedMemorySize) / count(1), sum(M.usedStorageSize) / count(1) ) from MonitorEntity M where M.clusterId=:clusterId and M.createDateTime between :startDateTime and :endDateTime group by M.clusterId, M.createDateTime ")
+    @Query("select new com.isxcode.torch.api.monitor.ao.MonitorLineAo ( count(1),M.clusterId, M.createDateTime,sum(M.cpuPercent) / count(1),sum(M.diskIoReadSpeed) / count(1),sum(M.networkIoReadSpeed) / count(1),sum(M.diskIoWriteSpeed) / count(1),sum(M.networkIoWriteSpeed) / count(1), sum(M.usedMemorySize) / count(1), sum(M.usedStorageSize) / count(1) ) from MonitorEntity M where M.clusterId=:clusterId and M.createDateTime between :startDateTime and :endDateTime group by M.clusterId, M.createDateTime ")
     List<MonitorLineAo> queryMonitorLine(@Param("clusterId") String clusterId,
         @Param("startDateTime") LocalDateTime startDateTime, @Param("endDateTime") LocalDateTime endDateTime);
 

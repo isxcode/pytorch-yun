@@ -26,11 +26,9 @@ fi
 
 # 获取外部参数
 home_path=""
-agent_type=""
 for arg in "$@"; do
   case "$arg" in
   --home-path=*) home_path="${arg#*=}" ;;
-  --agent-type=*) agent_type="${arg#*=}" ;;
   *) echo "未知参数: $arg" && exit 1 ;;
   esac
 done
@@ -46,10 +44,8 @@ if [ -e "${agent_path}/zhihuiyun-agent.pid" ]; then
   fi
 fi
 
-# 停止flink
-if [ ${agent_type} = "flinkcluster" ]; then
-  nohup bash ${agent_path}/flink-min/bin/stop-cluster.sh > /dev/null 2>&1 &
-fi
+# 停止spark-local
+nohup bash ${agent_path}/spark-min/sbin/stop-all.sh > /dev/null 2>&1 &
 
 # 返回结果
 json_output="{ \

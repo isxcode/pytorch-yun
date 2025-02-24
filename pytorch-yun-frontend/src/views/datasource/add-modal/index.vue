@@ -35,7 +35,7 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        label="数据源驱动"
+        label="驱动"
         prop="driverId"
       >
         <el-select
@@ -55,13 +55,46 @@
         label="连接信息"
         prop="jdbcUrl"
       >
+        <el-tooltip placement="top">
+            <template #content>
+              <pre>
+mysql: jdbc:mysql://${host}:${ip}/${database}
+oracle: jdbc:oracle:thin:@${host}:${ip}/${database}
+sqlserver: jdbc:sqlserver://${host}:${ip};databaseName=${database}
+postgre: jdbc:postgresql://${host}:${ip}/${database}
+clickhouse: jdbc:clickhouse://${host}:${ip}/${database}
+hive: jdbc:hive2://${host}:${ip}/${database}
+sap: jdbc:sap://${host}:${ip}/${database}
+达梦: jdbc:dm://${host}:${ip}/${database}
+doris: jdbc:mysql://${host}:${ip}/${database}
+oceanbase: jdbc:oceanbase://${host}:${ip}/${database}
+tidb: jdbc:mysql://${host}:${ip}/${database}
+starrocks: jdbc:mysql://${host}:${ip}/${database}
+db2: jdbc:db2://${host}:${ip}/${database}
+              </pre>
+            </template>
+            <el-icon style="left: 50px" class="tooltip-msg"><QuestionFilled /></el-icon>
+        </el-tooltip>
         <el-input
           v-model="formData.jdbcUrl"
-          maxlength="100"
+          placeholder="请输入"
+        />
+      </el-form-item>
+      <el-form-item
+        v-if="formData.dbType === 'KAFKA'"
+        label="topic"
+        prop="kafkaConfig.topic"
+      >
+        <el-input
+          v-model="formData.kafkaConfig.topic"
+          maxlength="200"
           placeholder="请输入"
         />
       </el-form-item>
       <el-form-item v-if="formData.dbType === 'HIVE'" label="hive.metastore.uris">
+        <el-tooltip content="thrift://${host}:${port}，默认端口号9083" placement="top">
+            <el-icon style="left: 104px" class="tooltip-msg"><QuestionFilled /></el-icon>
+        </el-tooltip>
         <el-input
           v-model="formData.metastoreUris"
           maxlength="100"
@@ -110,6 +143,25 @@
         />
       </el-form-item>
     </el-form>
+    <template #customLeft>
+      <div class="test-button">
+        <el-button :loading="testLoading" type="primary" @click="testFun">连接测试</el-button>
+        <el-popover
+          placement="right"
+          title="测试结果"
+          :width="400"
+          trigger="hover"
+          popper-class="message-error-tooltip"
+          :content="testResult?.connectLog"
+          v-if="testResult?.connectLog"
+        >
+          <template #reference>
+            <el-icon class="hover-tooltip" v-if="!testResult?.canConnect"><WarningFilled /></el-icon>
+            <el-icon class="hover-tooltip success" v-else><SuccessFilled /></el-icon>
+          </template>
+        </el-popover>
+      </div>
+    </template>
   </BlockModal>
 </template>
 
@@ -118,14 +170,18 @@ import { reactive, defineExpose, ref, nextTick } from 'vue'
 import BlockModal from '@/components/block-modal/index.vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { GetDefaultDriverData, GetDriverListData } from '@/services/driver-management.service'
+import { TestDatasourceData } from '@/services/datasource.service'
 
 const form = ref<FormInstance>()
 const callback = ref<any>()
 const driverIdList = ref([])
+const testLoading = ref(false)
+const testResult = ref()
 const modelConfig = reactive({
   title: '添加数据源',
   visible: false,
   width: '520px',
+  customClass: 'datasource-add-modal',
   okConfig: {
     title: '确定',
     ok: okEvent,
@@ -147,6 +203,9 @@ const formData = reactive({
   driverId: '',
   metastoreUris: '',
   jdbcUrl: '',
+  kafkaConfig: {
+    topic: '',
+  },
   username: '',
   passwd: '',
   remark: '',
@@ -235,6 +294,13 @@ const rules = reactive<FormRules>({
       trigger: [ 'blur', 'change' ]
     }
   ],
+  'kafkaConfig.topic': [
+    {
+      required: true,
+      message: '请输入topic',
+      trigger: [ 'blur', 'change' ]
+    }
+  ],
   username: [
     {
       required: true,
@@ -254,6 +320,11 @@ const rules = reactive<FormRules>({
 function showModal(cb: () => void, data: any): void {
   callback.value = cb
   modelConfig.visible = true
+
+  testResult.value = {
+    canConnect: null,
+    connectLog: ''
+  }
   if (data) {
     formData.name = data.name
     formData.dbType = data.dbType
@@ -262,6 +333,9 @@ function showModal(cb: () => void, data: any): void {
     formData.passwd = data.passwd
     formData.remark = data.remark
     formData.driverId = data.driverId
+    formData.kafkaConfig = {
+      topic: data?.kafkaConfig?.topic
+    }
     formData.metastoreUris = data.metastoreUris
     formData.id = data.id
     modelConfig.title = '编辑数据源'
@@ -272,6 +346,9 @@ function showModal(cb: () => void, data: any): void {
     formData.username = ''
     formData.passwd = ''
     formData.remark = ''
+    formData.kafkaConfig = {
+      topic: ''
+    }
     formData.driverId = ''
     formData.metastoreUris = ''
     formData.id = ''
@@ -280,6 +357,25 @@ function showModal(cb: () => void, data: any): void {
   getDriverIdList(true)
   nextTick(() => {
     form.value?.resetFields()
+  })
+}
+
+function testFun() {
+  form.value?.validate((valid: boolean) => {
+    if (valid) {
+      testLoading.value = true
+      TestDatasourceData({
+        ...formData
+      }).then((res: any) => {
+        testLoading.value = false
+        testResult.value = res.data
+        ElMessage.success(res.msg)
+      }).catch(() => {
+        testLoading.value = false
+      })
+    } else {
+      ElMessage.warning('请将表单输入完整')
+    }
   })
 }
 
@@ -316,7 +412,7 @@ function getDefaultDriver(e: string) {
 }
 
 function okEvent() {
-  form.value?.validate((valid) => {
+  form.value?.validate((valid: boolean) => {
     if (valid) {
       modelConfig.okConfig.loading = true
       callback
@@ -354,5 +450,29 @@ defineExpose({
 .add-computer-group {
   padding: 12px 20px 0 20px;
   box-sizing: border-box;
+  .tooltip-msg {
+      position: absolute;
+      top: -28px;
+      color: getCssVar('color', 'info');
+      font-size: 16px;
+  }
+}
+.datasource-add-modal {
+  .test-button {
+    position: absolute;
+    left: 20px;
+    bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hover-tooltip {
+    margin-left: 8px;
+    font-size: 16px;
+    color: getCssVar('color', 'danger');
+    &.success {
+      color: getCssVar('color', 'success');
+    }
+  }
 }
 </style>

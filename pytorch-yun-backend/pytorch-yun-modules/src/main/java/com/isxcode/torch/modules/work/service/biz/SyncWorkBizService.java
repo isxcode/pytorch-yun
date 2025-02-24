@@ -1,13 +1,21 @@
 package com.isxcode.torch.modules.work.service.biz;
 
-import com.isxcode.torch.api.datasource.pojos.dto.ColumnMetaDto;
-import com.isxcode.torch.api.work.pojos.req.*;
-import com.isxcode.torch.api.work.pojos.res.*;
-import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
-import com.isxcode.torch.common.utils.AesUtils;
+import com.isxcode.torch.api.datasource.constants.DatasourceType;
+import com.isxcode.torch.api.datasource.dto.ColumnMetaDto;
+import com.isxcode.torch.api.datasource.dto.ConnectInfo;
+import com.isxcode.torch.api.work.req.GetCreateTableSqlReq;
+import com.isxcode.torch.api.work.req.GetDataSourceColumnsReq;
+import com.isxcode.torch.api.work.req.GetDataSourceDataReq;
+import com.isxcode.torch.api.work.req.GetDataSourceTablesReq;
+import com.isxcode.torch.api.work.res.GetCreateTableSqlRes;
+import com.isxcode.torch.api.work.res.GetDataSourceColumnsRes;
+import com.isxcode.torch.api.work.res.GetDataSourceDataRes;
+import com.isxcode.torch.api.work.res.GetDataSourceTablesRes;
 import com.isxcode.torch.modules.datasource.entity.DatasourceEntity;
-import com.isxcode.torch.modules.datasource.repository.DatasourceRepository;
+import com.isxcode.torch.modules.datasource.mapper.DatasourceMapper;
 import com.isxcode.torch.modules.datasource.service.DatasourceService;
+import com.isxcode.torch.modules.datasource.source.DataSourceFactory;
+import com.isxcode.torch.modules.datasource.source.Datasource;
 import com.isxcode.torch.modules.work.service.SyncWorkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,15 +25,9 @@ import javax.transaction.Transactional;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-/**
- * 用户模块接口的业务逻辑.
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -36,14 +38,20 @@ public class SyncWorkBizService {
 
     private final SyncWorkService syncWorkService;
 
-    private final DatasourceRepository datasourceRepository;
+    private final DataSourceFactory dataSourceFactory;
 
-    private final AesUtils aesUtils;
+    private final DatasourceMapper datasourceMapper;
 
     public GetDataSourceTablesRes getDataSourceTables(GetDataSourceTablesReq getDataSourceTablesReq) throws Exception {
 
-        Connection connection = syncWorkService.getConnection(getDataSourceTablesReq.getDataSourceId(), null, null);
+        DatasourceEntity datasourceEntity = datasourceService.getDatasource(getDataSourceTablesReq.getDataSourceId());
+        ConnectInfo connectInfo = datasourceMapper.datasourceEntityToConnectInfo(datasourceEntity);
+        Datasource datasource = dataSourceFactory.getDatasource(connectInfo.getDbType());
+        Connection connection = datasource.getConnection(connectInfo);
         Map<String, String> transform = getTransform(connection, getDataSourceTablesReq.getTablePattern());
+        if (DatasourceType.ORACLE.equals(datasourceEntity.getDbType())) {
+            transform.put("schema", connectInfo.getUsername().toUpperCase());
+        }
         List<String> tables = syncWorkService.tables(connection.getMetaData(), transform.get("catalog"),
             transform.get("schema"), transform.get("tableName"));
         List<String> views = syncWorkService.views(connection.getMetaData(), transform.get("catalog"),
@@ -56,7 +64,10 @@ public class SyncWorkBizService {
     public GetDataSourceColumnsRes getDataSourceColumns(GetDataSourceColumnsReq getDataSourceColumnsReq)
         throws Exception {
 
-        Connection connection = syncWorkService.getConnection(getDataSourceColumnsReq.getDataSourceId(), null, null);
+        DatasourceEntity datasourceEntity = datasourceService.getDatasource(getDataSourceColumnsReq.getDataSourceId());
+        ConnectInfo connectInfo = datasourceMapper.datasourceEntityToConnectInfo(datasourceEntity);
+        Datasource datasource = dataSourceFactory.getDatasource(connectInfo.getDbType());
+        Connection connection = datasource.getConnection(connectInfo);
         Map<String, String> transform = getTransform(connection, getDataSourceColumnsReq.getTableName());
         List<ColumnMetaDto> columns = syncWorkService.columns(connection.getMetaData(), transform.get("catalog"),
             transform.get("schema"), transform.get("tableName"));
@@ -66,42 +77,20 @@ public class SyncWorkBizService {
 
     public GetDataSourceDataRes getDataSourceData(GetDataSourceDataReq getDataSourceDataReq) throws Exception {
 
-        Optional<DatasourceEntity> datasourceEntityOptional =
-            datasourceRepository.findById(getDataSourceDataReq.getDataSourceId());
-        if (!datasourceEntityOptional.isPresent()) {
-            throw new IsxAppException("数据源异常，请联系开发者");
-        }
-
-        Connection connection = datasourceService.getDbConnection(datasourceEntityOptional.get());
-
-        Statement statement = connection.createStatement();
-        String dataPreviewSql = syncWorkService.getDataPreviewSql(datasourceEntityOptional.get().getDbType(),
-            getDataSourceDataReq.getTableName());
-        ResultSet resultSet = statement.executeQuery(dataPreviewSql);
-        List<String> columns = new ArrayList<>();
-        List<List<String>> rows = new ArrayList<>();
-
-        // 封装表头
-        int columnCount = resultSet.getMetaData().getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            columns.add(resultSet.getMetaData().getColumnName(i));
-        }
-
-        // 封装数据
-        while (resultSet.next()) {
-            List<String> row = new ArrayList<>();
-            for (int i = 1; i <= columnCount; i++) {
-                row.add(String.valueOf(resultSet.getObject(i)));
-            }
-            rows.add(row);
-        }
-        statement.close();
-        connection.close();
-        return GetDataSourceDataRes.builder().columns(columns).rows(rows).build();
+        DatasourceEntity datasourceEntity = datasourceService.getDatasource(getDataSourceDataReq.getDataSourceId());
+        ConnectInfo connectInfo = datasourceMapper.datasourceEntityToConnectInfo(datasourceEntity);
+        Datasource datasource = dataSourceFactory.getDatasource(datasourceEntity.getDbType());
+        connectInfo.setTableName(getDataSourceDataReq.getTableName());
+        connectInfo.setRowNumber("200");
+        return datasource.getTableData(connectInfo);
     }
 
     public GetCreateTableSqlRes getCreateTableSql(GetCreateTableSqlReq getCreateTableSqlReq) throws Exception {
-        Connection connection = syncWorkService.getConnection(getCreateTableSqlReq.getDataSourceId(), null, null);
+
+        DatasourceEntity datasourceEntity = datasourceService.getDatasource(getCreateTableSqlReq.getDataSourceId());
+        ConnectInfo connectInfo = datasourceMapper.datasourceEntityToConnectInfo(datasourceEntity);
+        Datasource datasource = dataSourceFactory.getDatasource(connectInfo.getDbType());
+        Connection connection = datasource.getConnection(connectInfo);
         Map<String, String> transform = getTransform(connection, getCreateTableSqlReq.getTableName());
         ResultSet columns = connection.getMetaData().getColumns(transform.get("catalog"), transform.get("schema"),
             transform.get("tableName"), null);
@@ -135,7 +124,8 @@ public class SyncWorkBizService {
             } else {
                 return connection.getSchema();
             }
-        } catch (SQLException e) {
+        } catch (SQLException | AbstractMethodError e) {
+            log.debug(e.getMessage(), e);
             return null;
         }
     }

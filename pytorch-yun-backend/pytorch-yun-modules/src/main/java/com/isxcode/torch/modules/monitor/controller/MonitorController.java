@@ -1,13 +1,13 @@
 package com.isxcode.torch.modules.monitor.controller;
 
 import com.isxcode.torch.api.main.constants.ModuleCode;
-import com.isxcode.torch.api.monitor.pojos.req.GetClusterMonitorReq;
-import com.isxcode.torch.api.monitor.pojos.req.GetInstanceMonitorReq;
-import com.isxcode.torch.api.monitor.pojos.req.PageInstancesReq;
-import com.isxcode.torch.api.monitor.pojos.res.GetClusterMonitorRes;
-import com.isxcode.torch.api.monitor.pojos.res.GetInstanceMonitorRes;
-import com.isxcode.torch.api.monitor.pojos.res.GetSystemMonitorRes;
-import com.isxcode.torch.api.monitor.pojos.res.PageInstancesRes;
+import com.isxcode.torch.api.monitor.req.GetClusterMonitorReq;
+import com.isxcode.torch.api.monitor.req.GetInstanceMonitorReq;
+import com.isxcode.torch.api.monitor.req.PageInstancesReq;
+import com.isxcode.torch.api.monitor.res.GetClusterMonitorRes;
+import com.isxcode.torch.api.monitor.res.GetInstanceMonitorRes;
+import com.isxcode.torch.api.monitor.res.GetSystemMonitorRes;
+import com.isxcode.torch.api.monitor.res.PageInstancesRes;
 import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.monitor.service.MonitorBizService;
@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @Tag(name = "监控模块")
-@RestController
 @RequestMapping(ModuleCode.MONITOR)
+@RestController
 @RequiredArgsConstructor
 public class MonitorController {
 

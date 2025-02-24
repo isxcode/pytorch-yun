@@ -1,7 +1,7 @@
 application:
   title: 至慧云
   website: https://zhihuiyun.isxcode.com
-  describe: 轻量级大模型训练平台
+  describe: 企业级大模型训练平台
 
 server:
   tomcat:
@@ -16,6 +16,17 @@ spring:
     user:
       roles: ADMIN
 
+  main:
+    banner-mode: log
+
+  web:
+    resources:
+      chain:
+        cache: true
+        compressed: true
+      cache:
+        period: 31536000 # 单位秒，默认缓存365天
+
   servlet:
     multipart:
       max-file-size: 100MB
@@ -23,7 +34,7 @@ spring:
       enabled: true
 
   banner:
-    location: classpath:banner/logo.txt
+    location: classpath:logo.txt
 
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -37,6 +48,7 @@ spring:
       validationQuery: select 'x'
       stat-view-servlet:
         enabled: true
+        allow:
 
   jpa:
     show-sql: false
@@ -80,9 +92,15 @@ spring:
     path: /swagger-ui/api-docs
   swagger-ui:
     path: /swagger-ui.html
-  packages-to-scan: com.isxcode.acorn
+  packages-to-scan: com.isxcode.torch
+
+  flyway:
+    enabled: true
 
 logging:
+  level:
+    root: info
+    com.isxcode.torch: info
   exception-conversion-word: '%wEx'
   file:
     name: ./logs/pytorch-yun.log
@@ -96,6 +114,15 @@ logging:
     rollingpolicy:
       clean-history-on-start: false
       file-name-pattern: '${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz'
+      total-size-cap: 100MB
+      max-history: 30
+      max-file-size: 10MB
+
+jasypt:
+  encryptor:
+    property:
+      suffix: )
+      prefix: ENC(
 
 isx-app:
   admin-url:
@@ -105,7 +132,7 @@ isx-app:
     - /druid/** # http://localhost:8080/druid/index.html
     - /tools/setLogLevel # http://localhost:8080/tools/setLogLevel?level=debug
     - /tools/getCacheList # http://localhost:8080/tools/getCacheList
-    - /tools/getCache # http://localhost:8080/tools/getCache?name=SY_USERS
+    - /tools/getCache # http://localhost:8080/tools/getCache?name=PY_USERS
   anonymous-url:
     - / # 让页面可以访问前端
     - /static/** # 放行前端资源文件
@@ -113,6 +140,7 @@ isx-app:
     - /login # 放行登录接口
     - /auth # 放行登录接口
     - /share/** # 分享表单
+    - /dashboard/** # 分享大屏
     - /**/open/** # 放行所有的开放接口
     - /vip/**/open/** # 放行所有的开放接口
     - /**/api/** # 放行所有自定义接口

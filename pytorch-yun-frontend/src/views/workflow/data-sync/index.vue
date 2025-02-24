@@ -65,99 +65,108 @@
                 <span class="btn-text">定位</span>
             </div>
         </div>
-        <div class="data-sync" :class="{ 'data-sync__log': !!instanceId }" id="data-sync">
-            <div class="data-sync-top">
-                <el-card class="box-card">
-                    <template #header>
-                        <div class="card-header">
-                            <span>数据来源</span>
-                        </div>
-                    </template>
-                    <el-form ref="form" label-position="left" label-width="70px" :model="formData" :rules="rules">
-                        <el-form-item prop="sourceDBType" label="类型">
-                            <el-select v-model="formData.sourceDBType" clearable filterable placeholder="请选择"
-                                @change="dbTypeChange('source')">
-                                <el-option v-for="item in typeList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item prop="sourceDBId" label="数据源">
-                            <el-select v-model="formData.sourceDBId" clearable filterable placeholder="请选择"
-                                @visible-change="getDataSource($event, formData.sourceDBType, 'source')"
-                                @change="dbIdChange('source')">
-                                <el-option v-for="item in sourceList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item prop="sourceTable" label="表">
-                            <el-select v-model="formData.sourceTable" clearable filterable placeholder="请选择"
-                                @visible-change="getDataSourceTable($event, formData.sourceDBId, 'source')"
-                                @change="tableChangeEvent($event, formData.sourceDBId, 'source')">
-                                <el-option v-for="item in sourceTablesList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                            <el-button type="primary" link @click="showTableDetail">数据预览</el-button>
-                        </el-form-item>
-                        <el-form-item label="分区键">
-                            <el-select v-model="formData.partitionColumn" clearable filterable placeholder="请选择"
-                                @visible-change="getTableColumnData($event, formData.sourceDBId, formData.sourceTable)"
-                                @change="pageChangeEvent">
-                                <el-option v-for="item in partKeyList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item prop="queryCondition" label="过滤条件">
-                            <code-mirror v-model="formData.queryCondition" basic :lang="lang" @change="pageChangeEvent" />
-                        </el-form-item>
-                    </el-form>
-                </el-card>
-                <el-card class="box-card">
-                    <template #header>
-                        <div class="card-header">
-                            <span>数据去向</span>
-                        </div>
-                    </template>
-                    <el-form ref="form" label-position="left" label-width="70px" :model="formData" :rules="rules">
-                        <el-form-item prop="targetDBType" label="类型">
-                            <el-select v-model="formData.targetDBType" clearable filterable placeholder="请选择"
-                                @change="dbTypeChange('target')">
-                                <el-option v-for="item in typeList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item prop="targetDBId" label="数据源">
-                            <el-select v-model="formData.targetDBId" clearable filterable placeholder="请选择"
-                                @visible-change="getDataSource($event, formData.targetDBType, 'target')"
-                                @change="dbIdChange('target')">
-                                <el-option v-for="item in targetList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item prop="targetTable" label="表">
-                            <el-select v-model="formData.targetTable" clearable filterable placeholder="请选择"
-                                @visible-change="getDataSourceTable($event, formData.targetDBId, 'target')"
-                                @change="tableChangeEvent($event, formData.targetDBId, 'target')">
-                                <el-option v-for="item in targetTablesList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                            <!-- <el-button type="primary" link @click="createTableWork">生成建表作业</el-button> -->
-                        </el-form-item>
-                        <el-form-item prop="overMode" label="写入模式">
-                            <el-select v-model="formData.overMode" clearable filterable placeholder="请选择" @change="pageChangeEvent">
-                                <el-option v-for="item in overModeList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select>
-                        </el-form-item>
-                    </el-form>
-                </el-card>
+        <LoadingPage
+            :visible="loading"
+            :network-error="networkError"
+            @loading-refresh="getDate"
+        >
+            <div class="data-sync" :class="{ 'data-sync__log': !!instanceId }" id="data-sync">
+                <div class="data-sync-top">
+                    <el-card class="box-card">
+                        <template #header>
+                            <div class="card-header">
+                                <span>数据来源</span>
+                            </div>
+                        </template>
+                        <el-form ref="form" label-position="left" label-width="70px" :model="formData" :rules="rules">
+                            <el-form-item prop="sourceDBType" label="类型">
+                                <el-select v-model="formData.sourceDBType" clearable filterable placeholder="请选择"
+                                    @change="dbTypeChange('source')">
+                                    <el-option v-for="item in typeList" :key="item.value" :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item prop="sourceDBId" label="数据源">
+                                <el-tooltip content="数据源网速直接影响同步速度,推荐使用内网ip" placement="top">
+                                    <el-icon style="left: -30px" class="tooltip-msg"><QuestionFilled /></el-icon>
+                                </el-tooltip>
+                                <el-select v-model="formData.sourceDBId" clearable filterable placeholder="请选择"
+                                    @visible-change="getDataSource($event, formData.sourceDBType, 'source')"
+                                    @change="dbIdChange('source')">
+                                    <el-option v-for="item in sourceList" :key="item.value" :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item prop="sourceTable" label="表">
+                                <el-select v-model="formData.sourceTable" clearable filterable placeholder="请选择"
+                                    @visible-change="getDataSourceTable($event, formData.sourceDBId, 'source')"
+                                    @change="tableChangeEvent($event, formData.sourceDBId, 'source')">
+                                    <el-option v-for="item in sourceTablesList" :key="item.value" :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                                <el-button type="primary" link @click="showTableDetail">数据预览</el-button>
+                            </el-form-item>
+                            <el-form-item label="分区键">
+                                <el-select v-model="formData.partitionColumn" clearable filterable placeholder="请选择"
+                                    @visible-change="getTableColumnData($event, formData.sourceDBId, formData.sourceTable)"
+                                    @change="pageChangeEvent">
+                                    <el-option v-for="item in partKeyList" :key="item.value" :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item prop="queryCondition" label="过滤条件">
+                                <code-mirror v-model="formData.queryCondition" basic :lang="lang" @change="pageChangeEvent" />
+                            </el-form-item>
+                        </el-form>
+                    </el-card>
+                    <el-card class="box-card">
+                        <template #header>
+                            <div class="card-header">
+                                <span>数据去向</span>
+                            </div>
+                        </template>
+                        <el-form ref="form" label-position="left" label-width="70px" :model="formData" :rules="rules">
+                            <el-form-item prop="targetDBType" label="类型">
+                                <el-select v-model="formData.targetDBType" clearable filterable placeholder="请选择"
+                                    @change="dbTypeChange('target')">
+                                    <el-option v-for="item in typeList" :key="item.value" :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item prop="targetDBId" label="数据源">
+                                <el-select v-model="formData.targetDBId" clearable filterable placeholder="请选择"
+                                    @visible-change="getDataSource($event, formData.targetDBType, 'target')"
+                                    @change="dbIdChange('target')">
+                                    <el-option v-for="item in targetList" :key="item.value" :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item prop="targetTable" label="表">
+                                <el-select v-model="formData.targetTable" clearable filterable placeholder="请选择"
+                                    @visible-change="getDataSourceTable($event, formData.targetDBId, 'target')"
+                                    @change="tableChangeEvent($event, formData.targetDBId, 'target')">
+                                    <el-option v-for="item in targetTablesList" :key="item.value" :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                                <!-- <el-button type="primary" link @click="createTableWork">生成建表作业</el-button> -->
+                            </el-form-item>
+                            <el-form-item prop="overMode" label="写入模式">
+                                <el-select v-model="formData.overMode" clearable filterable placeholder="请选择" @change="pageChangeEvent">
+                                    <el-option v-for="item in overModeList" :key="item.value" :label="item.label"
+                                        :value="item.value" />
+                                </el-select>
+                            </el-form-item>
+                        </el-form>
+                    </el-card>
+                </div>
+                <data-sync-table ref="dataSyncTableRef" :formData="formData"></data-sync-table>
             </div>
-            <data-sync-table ref="dataSyncTableRef" :formData="formData"></data-sync-table>
-        </div>
+        </LoadingPage>
         <!-- 数据同步日志部分  v-if="instanceId" -->
         <el-collapse v-if="!!instanceId" v-model="collapseActive" class="data-sync-log__collapse" ref="logCollapseRef">
             <el-collapse-item title="查看日志" :disabled="true" name="1">
                 <template #title>
-                    <el-tabs v-model="activeName" @tab-change="tabChangeEvent">
+                    <el-tabs v-model="activeName" @tab-click="changeCollapseUp" @tab-change="tabChangeEvent">
                         <template v-for="tab in tabList" :key="tab.code">
                         <el-tab-pane v-if="!tab.hide" :label="tab.name" :name="tab.code" />
                         </template>
@@ -167,7 +176,7 @@
                         <el-icon v-else @click="changeCollapseUp"><ArrowUp /></el-icon>
                     </span>
                 </template>
-                <div class="log-show">
+                <div class="log-show log-show-datasync">
                     <component :is="currentTab" ref="containerInstanceRef" class="show-container" />
                 </div>
             </el-collapse-item>
@@ -182,7 +191,7 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted, defineProps, nextTick, markRaw } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
-import CodeMirror from 'vue-codemirror6'
+// import CodeMirror from 'vue-codemirror6'
 import { sql } from '@codemirror/lang-sql'
 import { DataSourceType, OverModeList } from './data.config.ts'
 import { GetDatasourceList } from '@/services/datasource.service'
@@ -194,6 +203,7 @@ import { DeleteWorkData, GetWorkItemConfig, PublishWorkData, RunWorkItemConfig, 
 import PublishLog from '../work-item/publish-log.vue'
 import RunningLog from '../work-item/running-log.vue'
 import { Loading } from '@element-plus/icons-vue'
+import LoadingPage from '@/components/loading/index.vue'
 
 interface Option {
     label: string
@@ -219,6 +229,8 @@ const targetTablesList = ref<Option[]>([])
 const overModeList = ref<Option[]>(OverModeList)
 const partKeyList = ref<Option[]>([])       // 分区键
 const typeList = ref(DataSourceType);
+const loading = ref<boolean>(false)
+const networkError = ref<boolean>(false)
 
 // 日志展示相关
 const containerInstanceRef = ref(null)
@@ -294,6 +306,8 @@ function saveData() {
     }).then((res: any) => {
         changeStatus.value = false
         btnLoadingConfig.saveLoading = false
+
+        getDate()
         ElMessage.success('保存成功')
     }).catch(err => {
         btnLoadingConfig.saveLoading = false
@@ -302,9 +316,12 @@ function saveData() {
 }
 
 function getDate() {
+    loading.value = true
+    networkError.value = networkError.value || false
     GetWorkItemConfig({
         workId: props.workItemConfig.id
     }).then((res: any) => {
+        networkError.value = false
         if (res.data.syncWorkConfig) {
             formData.sourceDBType = res.data.syncWorkConfig.sourceDBType
             formData.sourceDBId = res.data.syncWorkConfig.sourceDBId
@@ -315,18 +332,29 @@ function getDate() {
             formData.targetDBId = res.data.syncWorkConfig.targetDBId
             formData.targetTable = res.data.syncWorkConfig.targetTable
             formData.overMode = res.data.syncWorkConfig.overMode
-    
+
             nextTick(() => {
-                getDataSource(true, formData.sourceDBType, 'source')
-                getDataSource(true, formData.targetDBType, 'target')
-                getDataSourceTable(true, formData.sourceDBId, 'source')
-                getDataSourceTable(true, formData.targetDBId, 'target')
-    
+                Promise.all([
+                    getDataSource(true, formData.sourceDBType, 'source'),
+                    getDataSource(true, formData.targetDBType, 'target'),
+                    getDataSourceTable(true, formData.sourceDBId, 'source'),
+                    getDataSourceTable(true, formData.targetDBId, 'target')
+                ]).then(() => {
+                    loading.value = false
+                }).catch((err: any) => {
+                    loading.value = false
+                    console.error('请求失败', err)
+                })
+
                 dataSyncTableRef.value.initPageData(res.data.syncWorkConfig)
                 changeStatus.value = false
             })
+        } else {
+            loading.value = false
         }
     }).catch(err => {
+        loading.value = false
+        networkError.value = false
         console.error(err)
     })
 }
@@ -339,6 +367,9 @@ function runWorkData() {
         type: 'warning'
         }).then(() => {
             btnLoadingConfig.runningLoading = true
+            // 运行自动切换到提交日志
+            tabChangeEvent('PublishLog')
+
             RunWorkItemConfig({
                 workId: props.workItemConfig.id
             }).then((res: any) => {
@@ -348,7 +379,6 @@ function runWorkData() {
                     containerInstanceRef.value.initData(instanceId.value)
                 })
                 btnLoadingConfig.runningLoading = false
-                // initData(res.data.instanceId)
                 nextTick(() => {
                     changeCollapseUp()
                 })
@@ -358,6 +388,9 @@ function runWorkData() {
         })
     } else {
         btnLoadingConfig.runningLoading = true
+        // 运行自动切换到提交日志
+        tabChangeEvent('PublishLog')
+
         RunWorkItemConfig({
             workId: props.workItemConfig.id
         }).then((res: any) => {
@@ -424,51 +457,61 @@ function stopData() {
 
 // 获取数据源
 function getDataSource(e: boolean, sourceType: string, type: string) {
-    if (e && sourceType) {
-        let options = []
-        GetDatasourceList({
-            page: 0,
-            pageSize: 10000,
-            searchKeyWord: sourceType || ''
-        }).then((res: any) => {
-            options = res.data.content.map((item: any) => {
-                return {
-                    label: item.name,
-                    value: item.id
-                }
+    return new Promise((resolve, reject) => {
+        if (e && sourceType) {
+            let options = []
+            GetDatasourceList({
+                page: 0,
+                pageSize: 10000,
+                searchKeyWord: sourceType || ''
+            }).then((res: any) => {
+                options = res.data.content.map((item: any) => {
+                    return {
+                        label: item.name,
+                        value: item.id
+                    }
+                })
+                type === 'source' ? sourceList.value = options : targetList.value = options
+                resolve()
+            }).catch(err => {
+                console.error(err)
+                type === 'source' ? sourceList.value = [] : targetList.value = []
+                reject(err)
             })
-            type === 'source' ? sourceList.value = options : targetList.value = options
-        }).catch(err => {
-            console.error(err)
+        } else {
             type === 'source' ? sourceList.value = [] : targetList.value = []
-        })
-    } else {
-        type === 'source' ? sourceList.value = [] : targetList.value = []
-    }
+            resolve()
+        }
+    })
 }
 
 // 获取数据源表
 function getDataSourceTable(e: boolean, dataSourceId: string, type: string) {
-    if (e && dataSourceId) {
-        let options = []
-        GetDataSourceTables({
-            dataSourceId: dataSourceId,
-            tablePattern: ""
-        }).then((res: any) => {
-            options = res.data.tables.map((item: any) => {
-                return {
-                    label: item,
-                    value: item
-                }
+    return new Promise((resolve, reject) => {
+        if (e && dataSourceId) {
+            let options = []
+            GetDataSourceTables({
+                dataSourceId: dataSourceId,
+                tablePattern: ""
+            }).then((res: any) => {
+                options = res.data.tables.map((item: any) => {
+                    return {
+                        label: item,
+                        value: item
+                    }
+                })
+                type === 'source' ? sourceTablesList.value = options : targetTablesList.value = options
+                resolve()
+            }).catch(err => {
+                console.error(err)
+                type === 'source' ? sourceTablesList.value = [] : targetTablesList.value = []
+                reject(err)
             })
-            type === 'source' ? sourceTablesList.value = options : targetTablesList.value = options
-        }).catch(err => {
-            console.error(err)
+        } else {
             type === 'source' ? sourceTablesList.value = [] : targetTablesList.value = []
-        })
-    } else {
-        type === 'source' ? sourceTablesList.value = [] : targetTablesList.value = []
-    }
+            resolve()
+        }
+    })
 }
 
 // 数据预览
@@ -583,9 +626,13 @@ function changeCollapseDown() {
     logCollapseRef.value.setActiveNames('0')
     isCollapse.value = false
 }
-function changeCollapseUp() {
-    logCollapseRef.value.setActiveNames('1')
-    isCollapse.value = true
+function changeCollapseUp(e: any) {
+    if (e && e.paneName === activeName.value && isCollapse.value) {
+        changeCollapseDown()
+    } else {
+        logCollapseRef.value.setActiveNames('1')
+        isCollapse.value = true
+    }
 }
 function pageChangeEvent() {
     changeStatus.value = true
@@ -605,6 +652,7 @@ onMounted(() => {
     padding-top: 50px;
     background-color: #ffffff;
     width: 100%;
+    // border-left: 1px solid var(--el-border-color);
 
     .data-sync__option-container {
         height: 50px;
@@ -724,6 +772,13 @@ onMounted(() => {
                 .el-card__body {
                     .el-form {
                         .el-form-item {
+                            position: relative;
+                            .tooltip-msg {
+                                position: absolute;
+                                top: 7px;
+                                color: getCssVar('color', 'info');
+                                font-size: 16px;
+                            }
                             .el-form-item__label {
                                 position: relative;
 
@@ -805,6 +860,12 @@ onMounted(() => {
         .log-show {
             padding: 0 20px;
             box-sizing: border-box;
+            &.log-show-datasync {
+                .zqy-download-log {
+                    right: 40px;
+                    top: 12px;
+                }
+            }
 
             pre {
                 width: 100px;

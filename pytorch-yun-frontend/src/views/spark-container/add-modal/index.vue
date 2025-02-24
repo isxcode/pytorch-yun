@@ -29,7 +29,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="资源类型" prop="resourceLevel">
-        <el-select v-model="formData.resourceLevel" placeholder="请选择" @change="resourceLevelChange">
+        <el-select v-model="formData.resourceLevel" placeholder="请选择">
           <el-option v-for="item in typeList" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </el-form-item>
@@ -55,7 +55,7 @@ import BlockModal from '@/components/block-modal/index.vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { GetComputerGroupList } from '@/services/computer-group.service';
 import { GetDatasourceList } from '@/services/datasource.service'
-import CodeMirror from 'vue-codemirror6'
+// import CodeMirror from 'vue-codemirror6'
 import {json} from '@codemirror/lang-json'
 import { jsonFormatter } from '@/utils/formatter'
 
@@ -183,10 +183,6 @@ function getDataSourceList(e: boolean, searchType?: string) {
       dataSourceList.value = []
     })
   }
-}
-
-function resourceLevelChange(e: string) {
-  formData.sparkConfig = ''
 }
 
 function okEvent() {

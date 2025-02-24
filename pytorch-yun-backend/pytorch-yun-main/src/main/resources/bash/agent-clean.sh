@@ -21,7 +21,7 @@ rm -rf /tmp/hadoop-*/nm-local-dir/usercache/${user}/filecache
 
 # 删除hdfs中失败的spark作业缓存
 if command -v hadoop &>/dev/null; then
-  hadoop fs -rm -r /user/${user}/.flinkStaging
+  hadoop fs -rm -r /user/${user}/.sparkStaging
 fi
 
 # 清理k8s中容器

@@ -8,59 +8,13 @@
       <div class="zqy-seach">
         <el-input v-model="keyword" placeholder="请输入节点名称/地址/备注 回车进行搜索" :maxlength="200" clearable @input="inputEvent"
           @keyup.enter="initData(false)" />
-        <el-button type="primary" @click="initData(false)">
-          刷新
-        </el-button>
       </div>
     </div>
     <LoadingPage :visible="loading" :network-error="networkError" @loading-refresh="initData(false)">
       <div class="zqy-table">
         <BlockTable :table-config="tableConfig" @size-change="handleSizeChange" @current-change="handleCurrentChange">
           <template #statusTag="scopeSlot">
-            <div class="btn-group">
-              <el-tag v-if="scopeSlot.row.status === 'RUNNING'" class="ml-2" type="success">
-                启动
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'NO_ACTIVE'" class="ml-2" type="danger">
-                不可用
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'STOP'" class="ml-2" type="danger">
-                待激活
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'UN_INSTALL'">
-                未安装
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'CHECKING'">
-                检测中
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'STARTING'">
-                启动中
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'STOPPING'">
-                停止中
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'INSTALLING'">
-                安装中
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'REMOVING'">
-                卸载中
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'UN_CHECK'">
-                待检测
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'CHECK_ERROR'" class="ml-2" type="danger">
-                检测失败
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'CAN_NOT_INSTALL'" class="ml-2" type="danger">
-                不可安装
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'CAN_INSTALL'" class="ml-2" type="success">
-                可安装
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'INSTALL_ERROR'" class="ml-2" type="danger">
-                安装失败
-              </el-tag>
-            </div>
+            <ZStatusTag :status="scopeSlot.row.status"></ZStatusTag>
           </template>
           <template #defaultNodeTag="scopeSlot">
             <div class="btn-group">
@@ -74,7 +28,7 @@
           </template>
           <template #options="scopeSlot">
             <div class="btn-group">
-              <span @click="showLog(scopeSlot.row)">日志</span>
+              <span @click="checkData(scopeSlot.row)">检测</span>
               <el-dropdown trigger="click">
                 <span class="click-show-more">更多</span>
                 <template #dropdown>
@@ -82,19 +36,16 @@
                     <el-dropdown-item @click="editNodeData(scopeSlot.row)">
                       编辑
                     </el-dropdown-item>
+                    <el-dropdown-item @click="showLog(scopeSlot.row)">
+                      日志
+                    </el-dropdown-item>
                     <el-dropdown-item v-if="scopeSlot.row.status === 'RUNNING'" @click="stopAgent(scopeSlot.row)">
                       停止
                     </el-dropdown-item>
                     <el-dropdown-item v-if="scopeSlot.row.status === 'STOP'" @click="startAgent(scopeSlot.row)">
                       激活
                     </el-dropdown-item>
-                    <el-dropdown-item @click="checkData(scopeSlot.row)">
-                      检测
-                    </el-dropdown-item>
-                    <!-- <el-dropdown-item @click="setDefaultNode(scopeSlot.row)">
-                      设置默认节点
-                    </el-dropdown-item> -->
-                    <el-dropdown-item @click="installData(scopeSlot.row)">
+                    <el-dropdown-item v-if="scopeSlot.row.status === 'UN_INSTALL'|| scopeSlot.row.status === 'INSTALL_ERROR'" @click="installData(scopeSlot.row)">
                       安装
                     </el-dropdown-item>
                     <el-dropdown-item @click="uninstallData(scopeSlot.row)">
@@ -178,6 +129,9 @@ function initData(tableLoading?: boolean, type?: string) {
           tableConfig.tableData.forEach((col: any) => {
             if (item.id === col.id) {
               col.status = item.status
+              col.cpu=item.cpu
+              col.memory=item.memory
+              col.storage=item.storage
             }
           })
         })
@@ -384,6 +338,8 @@ function handleCurrentChange(e: number) {
 }
 
 onMounted(() => {
+  tableConfig.pagination.currentPage = 1
+  tableConfig.pagination.pageSize = 10
   initData()
   timer.value = setInterval(() => {
     initData(true, 'interval')

@@ -25,8 +25,8 @@
           </template>
           <template #options="scopeSlot">
             <div class="btn-group">
-              <span v-if="!scopeSlot.row.isDefaultDriver" @click="setDefaultDriver(scopeSlot.row)">设为默认</span>
-              <span v-else @click="setDefaultDriver(scopeSlot.row)">取消默认</span>
+              <span v-if="!scopeSlot.row.isDefaultDriver" @click="setDefaultDriver(scopeSlot.row)">默认</span>
+              <span v-else @click="setDefaultDriver(scopeSlot.row)">取消</span>
               <span @click="deleteData(scopeSlot.row)">删除</span>
               <!-- <el-icon v-else class="is-loading"><Loading /></el-icon> -->
             </div>
@@ -166,10 +166,12 @@ function handleCurrentChange(e: number) {
 }
 
 onMounted(() => {
+  tableConfig.pagination.currentPage = 1
+  tableConfig.pagination.pageSize = 10
   initData()
 })
 </script>
-  
+
 <style lang="scss">
 .zqy-seach-table {
   .name-click {

@@ -22,14 +22,11 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-/**
- * 只负责数据库对象映射.
- */
 @Data
 @Entity
-@SQLDelete(sql = "UPDATE SY_WORK SET deleted = 1 WHERE id = ? and version_number = ?")
+@SQLDelete(sql = "UPDATE PY_WORK SET deleted = 1 WHERE id = ? and version_number = ?")
 @Where(clause = "deleted = 0 ${TENANT_FILTER} ")
-@Table(name = "SY_WORK")
+@Table(name = "PY_WORK")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @EntityListeners(AuditingEntityListener.class)
 public class WorkEntity {

@@ -6,9 +6,6 @@ import com.isxcode.torch.modules.file.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/**
- * 资源文件接口的业务逻辑.
- */
 @Service
 @RequiredArgsConstructor
 public class FileService {
@@ -18,5 +15,11 @@ public class FileService {
     public FileEntity getFile(String fileId) {
 
         return fileRepository.findById(fileId).orElseThrow(() -> new IsxAppException("资源不存在"));
+    }
+
+    public String getFileName(String fileId) {
+
+        FileEntity fileEntity = fileRepository.findById(fileId).orElse(null);
+        return fileEntity == null ? fileId : fileEntity.getFileName();
     }
 }

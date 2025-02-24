@@ -1,10 +1,11 @@
 package com.isxcode.torch.modules.file.controller;
 
-import com.isxcode.torch.api.file.pojos.req.DeleteFileReq;
-import com.isxcode.torch.api.file.pojos.req.DownloadFileReq;
-import com.isxcode.torch.api.file.pojos.req.PageFileReq;
-import com.isxcode.torch.api.file.pojos.res.PageFileRes;
+import com.isxcode.torch.api.file.req.DeleteFileReq;
+import com.isxcode.torch.api.file.req.DownloadFileReq;
+import com.isxcode.torch.api.file.req.PageFileReq;
+import com.isxcode.torch.api.file.res.PageFileRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
+import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.file.service.FileBizService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,8 +23,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 
 @Tag(name = "资源文件中心模块")
-@RestController
 @RequestMapping(ModuleCode.FILE)
+@RestController
 @RequiredArgsConstructor
 public class FileController {
 
@@ -33,7 +35,7 @@ public class FileController {
     @SuccessResponse("上传成功")
     public void uploadFile(@RequestParam("file") @Schema(title = "文件") MultipartFile file,
         @RequestParam("type") @Schema(title = "文件类型")
-        @Pattern(regexp = "^(JOB|FUNC|LIB)$", message = "只能是JOB/FUNC/LIB其中一个") String type,
+        @Pattern(regexp = "^(JOB|FUNC|LIB|EXCEL)$", message = "只能是JOB/FUNC/LIB/EXCEL其中一个") String type,
         @RequestParam(value = "remark", required = false) @Schema(title = "备注") String remark) {
 
         fileBizService.uploadFile(file, type, remark);
@@ -49,14 +51,15 @@ public class FileController {
         fileBizService.updateFile(fileId, file, remark);
     }
 
-    @Operation(summary = "资源文件下载")
+    @Operation(summary = "资源文件下载接口")
     @PostMapping("/downloadFile")
     public ResponseEntity<Resource> downloadFile(@Valid @RequestBody DownloadFileReq downloadFileReq) {
 
         return fileBizService.downloadFile(downloadFileReq);
     }
 
-    @Operation(summary = "资源文件删除")
+    @Secured({RoleType.TENANT_ADMIN})
+    @Operation(summary = "资源文件删除接口")
     @PostMapping("/deleteFile")
     @SuccessResponse("删除成功")
     public void deleteFile(@Valid @RequestBody DeleteFileReq deleteFileReq) {
@@ -64,7 +67,7 @@ public class FileController {
         fileBizService.deleteFile(deleteFileReq);
     }
 
-    @Operation(summary = "资源文件查询")
+    @Operation(summary = "资源文件查询接口")
     @PostMapping("/pageFile")
     @SuccessResponse("查询成功")
     public Page<PageFileRes> pageFile(@Valid @RequestBody PageFileReq pageFileReq) {

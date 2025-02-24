@@ -12,6 +12,7 @@ export interface colConfig {
   customSlot?: string;
   width?: number;
   minWidth?: number;
+  fixed?: string;
 }
 
 export interface Pagination {
@@ -63,6 +64,11 @@ export const colConfigs: colConfig[] = [
     minWidth: 80
   },
   {
+    prop: 'maxWorkflowNum',
+    title: '作业流',
+    minWidth: 80
+  },
+  {
     prop: 'status',
     title: '状态',
     minWidth: 100,
@@ -78,7 +84,8 @@ export const colConfigs: colConfig[] = [
     title: '操作',
     align: 'center',
     customSlot: 'options',
-    width: 80
+    width: 80,
+    fixed: 'right'
   }
 ]
 

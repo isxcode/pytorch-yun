@@ -1,63 +1,41 @@
-<!--
- * @Author: fanciNate
- * @Date: 2023-05-26 16:35:28
- * @LastEditTime: 2023-06-22 21:29:48
- * @LastEditors: fanciNate
- * @Description: In User Settings Edit
- * @FilePath: /pytorch-yun/pytorch-yun-website/src/views/workflow/work-item/publish-log.vue
--->
 <template>
-  <div
-    id="content"
-    class="publish-log"
-  >
-    <pre
-      v-if="logMsg"
-      ref="preContentRef"
-      @mousewheel="mousewheelEvent"
-    >{{ logMsg + loadingMsg }}</pre>
-    <EmptyPage v-else />
+  <div id="content" class="publish-log">
+    <LoadingPage :visible="loading">
+      <LogContainer v-if="logMsg" :logMsg="logMsg" :status="status" :showResult="false"></LogContainer>
+      <EmptyPage v-else />
+    </LoadingPage>
+    <span v-if="runId" class="zqy-log-refrash" @click="refrashEvent">刷新</span>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onUnmounted, ref, defineExpose, computed } from 'vue'
+import { nextTick, onUnmounted, ref, defineExpose } from 'vue'
 import { GetSubmitLogData } from '@/services/workflow.service'
 import EmptyPage from '@/components/empty-page/index.vue'
+import LoadingPage from '@/components/loading/index.vue'
 
 const logMsg = ref('')
-const position = ref(true)
 const timer = ref(null)
-const preContentRef = ref(null)
 const runId = ref('')
 const status = ref(false)
 const callback = ref()
-const loadingPoint = ref('.')
-const loadingTimer = ref()
-
-const loadingMsg = computed(() => {
-  const str = !status.value ? `加载中${loadingPoint.value}` : ''
-  return str
-})
+const loading = ref<boolean>(false)
 
 function initData(id: string, cb: any): void {
-
-  loadingTimer.value = setInterval(() => {
-    if (loadingPoint.value.length < 5) {
-      loadingPoint.value = loadingPoint.value + '.'
-    } else {
-      loadingPoint.value = '.'
-    }
-  }, 1000)
-
   runId.value = id
   callback.value = cb
+  loading.value = true
   getLogData(runId.value)
   if (!timer.value) {
     timer.value = setInterval(() => {
       getLogData(runId.value)
     }, 3000)
   }
+}
+
+function refrashEvent() {
+  loading.value = true
+  getLogData(runId.value)
 }
 
 // 获取日志
@@ -70,12 +48,7 @@ function getLogData(id: string) {
   })
     .then((res: any) => {
       logMsg.value = res.data.log
-      status.value = ['FAIL', 'SUCCESS'].includes(res.data.status) ? true : false
-      if (position.value) {
-        nextTick(() => {
-          scrollToButtom()
-        })
-      }
+      status.value = ['FAIL', 'SUCCESS','ABORT'].includes(res.data.status) ? true : false
       if (status.value && callback.value) {
         callback.value(res.data.status)
         if (timer.value) {
@@ -89,23 +62,17 @@ function getLogData(id: string) {
           }
           timer.value = null
       }
+      setTimeout(() => {
+        loading.value = false
+      }, 300)
     })
     .catch((err: any) => {
       console.log('err', err)
       logMsg.value = ''
+      setTimeout(() => {
+        loading.value = false
+      }, 300)
     })
-}
-
-function scrollToButtom() {
-  if (preContentRef.value) {
-    document.getElementById('content').scrollTop = preContentRef.value?.scrollHeight // 滚动高度
-  }
-}
-
-function mousewheelEvent(e: any) {
-  if (!(e.deltaY > 0)) {
-    position.value = false
-  }
 }
 
 onUnmounted(() => {
@@ -113,11 +80,6 @@ onUnmounted(() => {
     clearInterval(timer.value)
   }
   timer.value = null
-
-  if (loadingTimer.value) {
-    clearInterval(loadingTimer.value)
-  }
-  loadingTimer.value = null
 })
 
 defineExpose({
@@ -127,14 +89,25 @@ defineExpose({
 
 <style lang="scss">
 .publish-log {
-  pre {
-    color: getCssVar('text-color', 'primary');
-    font-size: getCssVar('font-size', 'extra-small');
-    line-height: 21px;
-    margin: 0;
+  height: 100%;
+  position: static;
+  .zqy-loading {
+    position: static;
+    height: 100% !important;
+    padding: 0 !important;
+    margin-top: 0 !important;
+    overflow: auto;
   }
   .empty-page {
-    height: 50%;
+    height: 100%;
+  }
+  .zqy-log-refrash {
+    font-size: 12px;
+    color: getCssVar('color', 'primary');
+    cursor: pointer;
+    position: absolute;
+    right: 100px;
+    top: 12px;
   }
 }
 </style>

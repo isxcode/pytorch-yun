@@ -30,27 +30,34 @@
       <div class="zqy-table">
         <BlockTable :table-config="tableConfig" @size-change="handleSizeChange" @current-change="handleCurrentChange">
           <template #statusTag="scopeSlot">
-            <div class="btn-group">
-              <el-tag v-if="scopeSlot.row.status === 'ACTIVE'" class="ml-2" type="success">
-                可用
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'FAIL'" class="ml-2" type="danger">
-                不可用
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'UN_CHECK'">
-                待检测
-              </el-tag>
-            </div>
+            <ZStatusTag :status="scopeSlot.row.status"></ZStatusTag>
           </template>
           <template #options="scopeSlot">
             <div class="btn-group">
-              <span @click="showLog(scopeSlot.row)">日志</span>
-              <span @click="editData(scopeSlot.row)">编辑</span>
+
               <span v-if="!scopeSlot.row.checkLoading" @click="checkData(scopeSlot.row)">检测</span>
-              <el-icon v-else class="is-loading">
+              <el-icon
+                  v-else
+                  class="is-loading"
+              >
                 <Loading />
               </el-icon>
-              <span @click="deleteData(scopeSlot.row)">删除</span>
+              <el-dropdown trigger="click">
+                <span class="click-show-more">更多</span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item @click="showLog(scopeSlot.row)">
+                      日志
+                    </el-dropdown-item>
+                    <el-dropdown-item @click="editData(scopeSlot.row)">
+                      编辑
+                    </el-dropdown-item>
+                    <el-dropdown-item @click="deleteData(scopeSlot.row)">
+                      删除
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </template>
         </BlockTable>
@@ -202,6 +209,8 @@ function handleChnage() {
 }
 
 onMounted(() => {
+  tableConfig.pagination.currentPage = 1
+  tableConfig.pagination.pageSize = 10
   initData()
 })
 </script>

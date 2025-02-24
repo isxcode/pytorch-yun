@@ -20,12 +20,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Data
 @Entity
-@SQLDelete(sql = "UPDATE SY_WORKFLOW_FAVOUR SET deleted = 1 WHERE id = ? and version_number = ?")
+@SQLDelete(sql = "UPDATE PY_WORKFLOW_FAVOUR SET deleted = 1 WHERE id = ? and version_number = ?")
 @Where(clause = "deleted = 0 ${TENANT_FILTER} ")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "SY_WORKFLOW_FAVOUR")
+@Table(name = "PY_WORKFLOW_FAVOUR")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @EntityListeners(AuditingEntityListener.class)
 public class WorkflowFavourEntity {

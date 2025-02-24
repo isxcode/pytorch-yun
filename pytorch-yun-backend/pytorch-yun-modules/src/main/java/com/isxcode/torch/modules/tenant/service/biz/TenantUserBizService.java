@@ -3,11 +3,12 @@ package com.isxcode.torch.modules.tenant.service.biz;
 import static com.isxcode.torch.common.config.CommonConfig.TENANT_ID;
 import static com.isxcode.torch.common.config.CommonConfig.USER_ID;
 
-import com.isxcode.torch.api.tenant.pojos.req.*;
-import com.isxcode.torch.api.tenant.pojos.res.PageTenantUserRes;
+import com.isxcode.torch.api.tenant.req.*;
+import com.isxcode.torch.api.tenant.res.PageTenantUserRes;
 import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.api.user.constants.UserStatus;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.modules.license.repository.LicenseStore;
 import com.isxcode.torch.modules.tenant.entity.TenantEntity;
 import com.isxcode.torch.modules.tenant.service.TenantService;
 import com.isxcode.torch.security.user.TenantUserEntity;
@@ -25,9 +26,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-/**
- * 数据源模块service.
- */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -40,6 +38,8 @@ public class TenantUserBizService {
 
     private final TenantService tenantService;
 
+    private final LicenseStore licenseStore;
+
     public void addTenantUser(AddTenantUserReq turAddTenantUserReq) {
 
         // 已req中的tenantId为主
@@ -51,6 +51,12 @@ public class TenantUserBizService {
         long memberCount = tenantUserRepository.countByTenantId(tenantId);
         if (memberCount + 1 > tenant.getMaxMemberNum()) {
             throw new IsxAppException("超出租户的最大成员限制");
+        }
+        // 判断是否超过许可证成员最大值
+        if (licenseStore.getLicense() != null) {
+            if (memberCount + 1 > licenseStore.getLicense().getMaxMemberNum()) {
+                throw new IsxAppException("超出许可证租户的最大成员限制");
+            }
         }
 
         // 判断对象用户是否合法

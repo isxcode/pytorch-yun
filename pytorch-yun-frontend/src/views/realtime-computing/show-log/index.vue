@@ -1,8 +1,10 @@
 <template>
     <BlockModal :model-config="modelConfig" @close="closeEvent">
-        <div id="content" class="content-box">
-            <pre v-if="logMsg" @mousewheel="mousewheelEvent" ref="preContentRef">{{ logMsg + loadingMsg  }}</pre>
-        </div>
+        <LoadingPage class="log-loading" :visible="loading">
+            <div id="content" class="content-box">
+                <LogContainer v-if="logMsg" :logMsg="logMsg" :status="status"></LogContainer>
+            </div>
+        </LoadingPage>
     </BlockModal>
 </template>
 
@@ -10,12 +12,12 @@
 import { reactive, defineExpose, ref, onUnmounted, nextTick, computed } from 'vue'
 import BlockModal from '@/components/block-modal/index.vue'
 import { GetRealSubLog, GetRealSubRunningLog } from '@/services/realtime-computing.service';
+import LoadingPage from '@/components/loading/index.vue'
 
 const logMsg = ref('')
-const timer = ref(null)
-const preContentRef = ref(null)
-const position = ref(true)
+const timer = ref<any>(null)
 const isRequest = ref(false)
+const loading = ref<boolean>(false)
 
 const modelConfig = reactive({
     title: '日志',
@@ -33,23 +35,11 @@ const modelConfig = reactive({
 })
 
 const status = ref(false)
-const loadingPoint = ref('.')
-const loadingTimer = ref()
-const loadingMsg = computed(() => {
-  const str = !status.value ? `加载中${loadingPoint.value}` : ''
-  return str
-})
 
 function showModal(clusterNodeId: string, type?: string): void {
-    position.value = true
-    // 日志添加loading
-    loadingTimer.value = setInterval(() => {
-        if (loadingPoint.value.length < 5) {
-            loadingPoint.value = loadingPoint.value + '.'
-        } else {
-            loadingPoint.value = '.'
-        }
-    }, 1000)
+    logMsg.value = ''
+    loading.value = true
+    timer.value = null
 
     getLogData(clusterNodeId, type)
     if (!timer.value) {
@@ -70,15 +60,12 @@ function getLogData(id: string, type?: string) {
         GetRealSubRunningLog({
             id: id
         }).then((res: any) => {
+            loading.value = false
             status.value = ['FAIL', 'STOP'].includes(res.data.status) ? true : false
             logMsg.value = res.data.runningLog
-            if (position.value) {
-                nextTick(() => {
-                    scrollToButtom()
-                })
-            }
             isRequest.value = false
         }).catch((err: any) => {
+            loading.value = false
             console.log('err', err)
             logMsg.value = ''
             isRequest.value = false
@@ -87,15 +74,12 @@ function getLogData(id: string, type?: string) {
         GetRealSubLog({
             id: id
         }).then((res: any) => {
+            loading.value = false
             status.value = ['FAIL', 'STOP'].includes(res.data.status) ? true : false
             logMsg.value = res.data.submitLog
-            if (position.value) {
-                nextTick(() => {
-                    scrollToButtom()
-                })
-            }
             isRequest.value = false
         }).catch((err: any) => {
+            loading.value = false
             console.log('err', err)
             logMsg.value = ''
             isRequest.value = false
@@ -103,22 +87,7 @@ function getLogData(id: string, type?: string) {
     }
 }
 
-function scrollToButtom() {
-  if (preContentRef.value) {
-    document.getElementById('content').scrollTop = preContentRef.value?.scrollHeight // 滚动高度
-  }
-}
-function mousewheelEvent(e: any) {
-  if (!(e.deltaY > 0)) {
-    position.value = false
-  }
-}
-
 function closeEvent() {
-    if (loadingTimer.value) {
-        clearInterval(loadingTimer.value)
-    }
-    loadingTimer.value = null
     if (timer.value) {
         clearInterval(timer.value)
     }
@@ -131,10 +100,6 @@ onUnmounted(() => {
         clearInterval(timer.value)
     }
     timer.value = null
-    if (loadingTimer.value) {
-        clearInterval(loadingTimer.value)
-    }
-    loadingTimer.value = null
 })
 
 
@@ -142,25 +107,3 @@ defineExpose({
     showModal
 })
 </script>
-
-<style lang="scss">
-.zqy-log-modal {
-    .modal-content {
-        .content-box {
-            min-height: 60vh;
-            max-height: 60vh;
-            padding: 12px 20px;
-            box-sizing: border-box;
-            overflow: auto;
-
-            pre {
-                color: getCssVar('text-color', 'primary');
-                font-size: 12px;
-                line-height: 21px;
-                margin: 0;
-            }
-        }
-    }
-}
-</style>
-  

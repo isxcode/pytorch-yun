@@ -1,8 +1,8 @@
 package com.isxcode.torch.modules.tenant.controller;
 
 import com.isxcode.torch.api.main.constants.ModuleCode;
-import com.isxcode.torch.api.tenant.pojos.req.*;
-import com.isxcode.torch.api.tenant.pojos.res.PageTenantUserRes;
+import com.isxcode.torch.api.tenant.req.*;
+import com.isxcode.torch.api.tenant.res.PageTenantUserRes;
 import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.tenant.service.biz.TenantUserBizService;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "租户用户模块")
-@RestController
 @RequestMapping(ModuleCode.TENANT_USER)
+@RestController
 @RequiredArgsConstructor
 public class TenantUserController {
 
@@ -34,7 +34,7 @@ public class TenantUserController {
         tenantUserBizService.addTenantUser(addTenantUserReq);
     }
 
-    @Secured({RoleType.SYS_ADMIN, RoleType.TENANT_ADMIN})
+    @Secured({RoleType.SYS_ADMIN, RoleType.TENANT_ADMIN, RoleType.NORMAL_MEMBER})
     @Operation(summary = "查询租户用户列表接口")
     @PostMapping("/pageTenantUser")
     @SuccessResponse("查询成功")

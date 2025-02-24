@@ -3,12 +3,13 @@ package com.isxcode.torch.modules.datasource.service.biz;
 import com.alibaba.fastjson2.JSON;
 import com.isxcode.torch.api.datasource.constants.DatasourceStatus;
 import com.isxcode.torch.api.datasource.constants.DatasourceType;
-import com.isxcode.torch.api.datasource.pojos.dto.KafkaConfig;
-import com.isxcode.torch.api.datasource.pojos.req.*;
-import com.isxcode.torch.api.datasource.pojos.res.*;
+import com.isxcode.torch.api.datasource.dto.ConnectInfo;
+import com.isxcode.torch.api.datasource.dto.KafkaConfig;
+import com.isxcode.torch.api.datasource.req.*;
+import com.isxcode.torch.api.datasource.res.*;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.backend.api.base.properties.IsxAppProperties;
-import com.isxcode.torch.common.utils.AesUtils;
+import com.isxcode.torch.common.utils.aes.AesUtils;
 import com.isxcode.torch.common.utils.path.PathUtils;
 import com.isxcode.torch.modules.datasource.entity.DatabaseDriverEntity;
 import com.isxcode.torch.modules.datasource.entity.DatasourceEntity;
@@ -30,6 +31,9 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 
+import com.isxcode.torch.modules.datasource.source.DataSourceFactory;
+import com.isxcode.torch.modules.datasource.source.Datasource;
+import com.isxcode.torch.modules.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -62,6 +66,9 @@ public class DatasourceBizService {
 
     private final DatabaseDriverService databaseDriverService;
 
+    private final DataSourceFactory dataSourceFactory;
+    private final UserService userService;
+
     public void addDatasource(AddDatasourceReq addDatasourceReq) {
 
         // 检测数据源名称重复
@@ -83,8 +90,8 @@ public class DatasourceBizService {
 
         // 如果是kafka数据源，添加kafka配置
         if (DatasourceType.KAFKA.equals(addDatasourceReq.getDbType())) {
-            datasource.setKafkaConfig(
-                JSON.toJSONString(KafkaConfig.builder().bootstrapServers(addDatasourceReq.getJdbcUrl()).build()));
+            addDatasourceReq.getKafkaConfig().setBootstrapServers(addDatasourceReq.getJdbcUrl());
+            datasource.setKafkaConfig(JSON.toJSONString(addDatasourceReq.getKafkaConfig()));
         }
 
         datasource.setCheckDateTime(LocalDateTime.now());
@@ -106,6 +113,12 @@ public class DatasourceBizService {
 
         // 密码对成加密
         datasource.setPasswd(aesUtils.encrypt(datasource.getPasswd()));
+
+        // 如果是kafka数据源，赋予kafka配置
+        if (DatasourceType.KAFKA.equals(datasource.getDbType())) {
+            updateDatasourceReq.getKafkaConfig().setBootstrapServers(updateDatasourceReq.getJdbcUrl());
+            datasource.setKafkaConfig(JSON.toJSONString(updateDatasourceReq.getKafkaConfig()));
+        }
 
         // 判断如果是hive数据源，metastore_uris没有填写，附加默认值，thrift://localhost:9083
         if (DatasourceType.HIVE.equals(updateDatasourceReq.getDbType())
@@ -132,10 +145,12 @@ public class DatasourceBizService {
             datasourceEntityPage.map(datasourceMapper::datasourceEntityToQueryDatasourceRes);
         pageDatasourceRes.getContent().forEach(e -> {
             if (!Strings.isEmpty(e.getDriverId())) {
-                Optional<DatabaseDriverEntity> databaseDriver = databaseDriverRepository.findById(e.getDriverId());
-                if (databaseDriver.isPresent()) {
-                    e.setDriverName(databaseDriver.get().getName());
+                if (!Strings.isEmpty(e.getDriverId())) {
+                    e.setDriverName(databaseDriverService.getDriverName(e.getDriverId()));
                 }
+            }
+            if (DatasourceType.KAFKA.equals(e.getDbType())) {
+                e.setKafkaConfig(JSON.parseObject(e.getKafkaConfigStr(), KafkaConfig.class));
             }
         });
 
@@ -149,42 +164,91 @@ public class DatasourceBizService {
 
     public TestConnectRes testConnect(GetConnectLogReq testConnectReq) {
 
-        DatasourceEntity datasource = datasourceService.getDatasource(testConnectReq.getDatasourceId());
+        DatasourceEntity datasourceEntity = datasourceService.getDatasource(testConnectReq.getDatasourceId());
 
         // 测试连接
-        datasource.setCheckDateTime(LocalDateTime.now());
+        datasourceEntity.setCheckDateTime(LocalDateTime.now());
 
-        if (DatasourceType.KAFKA.equals(datasource.getDbType())) {
+        if (DatasourceType.KAFKA.equals(datasourceEntity.getDbType())) {
             try {
-                datasourceService.checkKafka(JSON.parseObject(datasource.getKafkaConfig(), KafkaConfig.class));
-                datasource.setStatus(DatasourceStatus.ACTIVE);
-                datasource.setConnectLog("测试连接成功！");
-                datasourceRepository.save(datasource);
+                datasourceService.checkKafka(JSON.parseObject(datasourceEntity.getKafkaConfig(), KafkaConfig.class));
+                datasourceEntity.setStatus(DatasourceStatus.ACTIVE);
+                datasourceEntity.setConnectLog("测试连接成功！");
+                datasourceRepository.save(datasourceEntity);
                 return new TestConnectRes(true, "连接成功");
             } catch (Exception e) {
-                log.error(e.getMessage());
-                datasource.setStatus(DatasourceStatus.FAIL);
-                datasource.setConnectLog("测试连接失败：" + e.getMessage());
-                datasourceRepository.save(datasource);
+                log.debug(e.getMessage(), e);
+                datasourceEntity.setStatus(DatasourceStatus.FAIL);
+                datasourceEntity.setConnectLog("测试连接失败：" + e.getMessage());
+                datasourceRepository.save(datasourceEntity);
                 return new TestConnectRes(false, e.getMessage());
             }
         } else {
-            try (Connection connection = datasourceService.getDbConnection(datasource)) {
+            ConnectInfo connectInfo = datasourceMapper.datasourceEntityToConnectInfo(datasourceEntity);
+            Datasource datasource = dataSourceFactory.getDatasource(connectInfo.getDbType());
+            connectInfo.setLoginTimeout(5);
+            try (Connection connection = datasource.getConnection(connectInfo)) {
                 if (connection != null) {
-                    datasource.setStatus(DatasourceStatus.ACTIVE);
-                    datasource.setConnectLog("测试连接成功！");
-                    datasourceRepository.save(datasource);
+                    datasourceEntity.setStatus(DatasourceStatus.ACTIVE);
+                    datasourceEntity.setConnectLog("测试连接成功！");
+                    datasourceRepository.save(datasourceEntity);
                     return new TestConnectRes(true, "连接成功");
+                } else {
+                    datasourceEntity.setStatus(DatasourceStatus.FAIL);
+                    datasourceEntity.setConnectLog("测试连接失败: 请检查连接协议");
+                    datasourceRepository.save(datasourceEntity);
+                    return new TestConnectRes(false, "请检查连接协议");
                 }
+            } catch (IsxAppException exception) {
+                log.debug(exception.getMessage(), exception);
+
+                datasourceEntity.setStatus(DatasourceStatus.FAIL);
+                datasourceEntity.setConnectLog("测试连接失败：" + exception.getMsg());
+                datasourceRepository.save(datasourceEntity);
+                return new TestConnectRes(false, exception.getMessage());
             } catch (Exception e) {
-                log.error(e.getMessage());
-                datasource.setStatus(DatasourceStatus.FAIL);
-                datasource.setConnectLog("测试连接失败：" + e.getMessage());
-                datasourceRepository.save(datasource);
+                log.debug(e.getMessage(), e);
+
+                datasourceEntity.setStatus(DatasourceStatus.FAIL);
+                datasourceEntity.setConnectLog("测试连接失败：" + e.getMessage());
+                datasourceRepository.save(datasourceEntity);
                 return new TestConnectRes(false, e.getMessage());
             }
         }
-        return new TestConnectRes(false, "连接失败");
+    }
+
+    public CheckConnectRes checkConnect(CheckConnectReq checkConnectReq) {
+
+        DatasourceEntity datasourceEntity = datasourceMapper.checkConnectReqToDatasourceEntity(checkConnectReq);
+        if (Strings.isNotEmpty(checkConnectReq.getPasswd())) {
+            datasourceEntity.setPasswd(aesUtils.encrypt(checkConnectReq.getPasswd()));
+        }
+
+        if (DatasourceType.KAFKA.equals(datasourceEntity.getDbType())) {
+            try {
+                datasourceService.checkKafka(checkConnectReq.getKafkaConfig());
+                return new CheckConnectRes(true, "连接成功");
+            } catch (Exception e) {
+                log.debug(e.getMessage(), e);
+                return new CheckConnectRes(false, e.getMessage());
+            }
+        } else {
+            ConnectInfo connectInfo = datasourceMapper.datasourceEntityToConnectInfo(datasourceEntity);
+            Datasource datasource = dataSourceFactory.getDatasource(connectInfo.getDbType());
+            try (Connection connection = datasource.getConnection(connectInfo)) {
+                if (connection != null) {
+                    return new CheckConnectRes(true, "连接成功");
+                } else {
+                    return new CheckConnectRes(false, "请检查连接协议");
+                }
+            } catch (IsxAppException exception) {
+                log.debug(exception.getMessage(), exception);
+                return new CheckConnectRes(false, exception.getMsg());
+            } catch (Exception e) {
+                log.debug(e.getMessage(), e);
+                return new CheckConnectRes(false, e.getMessage());
+            }
+        }
     }
 
     public GetConnectLogRes getConnectLog(GetConnectLogReq getConnectLogReq) {
@@ -203,6 +267,7 @@ public class DatasourceBizService {
             try {
                 Files.createDirectories(Paths.get(driverDirPath));
             } catch (IOException e) {
+                log.debug(e.getMessage(), e);
                 throw new IsxAppException("上传驱动，目录创建失败");
             }
         }
@@ -212,6 +277,7 @@ public class DatasourceBizService {
             Files.copy(inputStream, Paths.get(driverDirPath).resolve(driverFile.getOriginalFilename()),
                 StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
+            log.debug(e.getMessage(), e);
             throw new IsxAppException("上传许可证失败");
         }
 
@@ -231,7 +297,12 @@ public class DatasourceBizService {
             databaseDriverRepository.searchAll(pageDatabaseDriverReq.getSearchKeyWord(), TENANT_ID.get(),
                 PageRequest.of(pageDatabaseDriverReq.getPage(), pageDatabaseDriverReq.getPageSize()));
 
-        return pageDatabaseDriver.map(datasourceMapper::dataDriverEntityToPageDatabaseDriverRes);
+        Page<PageDatabaseDriverRes> map =
+            pageDatabaseDriver.map(datasourceMapper::dataDriverEntityToPageDatabaseDriverRes);
+
+        map.getContent().forEach(e -> e.setCreateUsername(userService.getUserName(e.getCreateBy())));
+
+        return map;
     }
 
     public void deleteDatabaseDriver(DeleteDatabaseDriverReq deleteDatabaseDriverReq) {
@@ -255,9 +326,7 @@ public class DatasourceBizService {
         // 卸载Map中的驱动
         ALL_EXIST_DRIVER.remove(driver.getId());
 
-        // 将文件名改名字
-        // xxx.jar
-        // ${driverId}_xxx.jar_bak
+        // 将文件名改名字 xxx.jar ${driverId}_xxx.jar_bak
         try {
             String jdbcDirPath = PathUtils.parseProjectPath(isxAppProperties.getResourcesPath()) + File.separator
                 + "jdbc" + File.separator + TENANT_ID.get();
@@ -266,6 +335,7 @@ public class DatasourceBizService {
                 StandardCopyOption.REPLACE_EXISTING);
             Files.delete(Paths.get(jdbcDirPath).resolve(driver.getFileName()));
         } catch (IOException e) {
+            log.debug(e.getMessage(), e);
             throw new IsxAppException("删除驱动文件异常");
         }
 
@@ -287,7 +357,7 @@ public class DatasourceBizService {
         DatabaseDriverEntity databaseDriver = databaseDriverEntityOptional.get();
 
         if ("SYSTEM_DRIVER".equals(databaseDriver.getDriverType())) {
-            throw new IsxAppException("系统默认数据源驱动无法配置默认");
+            throw new IsxAppException("系统驱动无法默认");
         }
 
         if (settingDefaultDatabaseDriverReq.getIsDefaultDriver()) {

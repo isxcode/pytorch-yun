@@ -14,27 +14,20 @@
       <div class="zqy-table">
         <BlockTable :table-config="tableConfig" @size-change="handleSizeChange" @current-change="handleCurrentChange">
           <template #statusTag="scopeSlot">
-            <div class="btn-group">
-              <el-tag v-if="scopeSlot.row.status === 'RUNNING'" class="ml-2" type="success">
-                运行中
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'FAIL'" class="ml-2" type="danger">
-                失败
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'STOP'" class="ml-2" type="warning">
-                停止
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'NEW'" type="info">
-                新建
-              </el-tag>
-              <el-tag v-if="scopeSlot.row.status === 'DEPLOYING'" type="primary">
-                启动中
-              </el-tag>
-            </div>
+            <ZStatusTag :status="
+              scopeSlot.row.status === 'STOP' ?
+               'STOP_S' : scopeSlot.row.status === 'RUNNING' ?
+                'RUNNING_S' : scopeSlot.row.status === 'DEPLOYING' ? 'STARTING' : scopeSlot.row.status"></ZStatusTag>
           </template>
           <template #options="scopeSlot">
             <div class="btn-group">
-              <span @click="editData(scopeSlot.row)">编辑</span>
+              <span v-if="!scopeSlot.row.checkLoading" @click="checkData(scopeSlot.row)">检测</span>
+              <el-icon
+                  v-else
+                  class="is-loading"
+              >
+                <Loading />
+              </el-icon>
               <el-dropdown trigger="click">
                 <span class="click-show-more">更多</span>
                 <template #dropdown>
@@ -42,14 +35,14 @@
                     <el-dropdown-item @click="showLog(scopeSlot.row)">
                       日志
                     </el-dropdown-item>
-                    <el-dropdown-item @click="stopContainer(scopeSlot.row)">
-                      停止
+                    <el-dropdown-item @click="editData(scopeSlot.row)">
+                      编辑
                     </el-dropdown-item>
                     <el-dropdown-item @click="startContainer(scopeSlot.row)">
                       启动
                     </el-dropdown-item>
-                    <el-dropdown-item @click="checkData(scopeSlot.row)">
-                      检测
+                    <el-dropdown-item @click="stopContainer(scopeSlot.row)">
+                      停止
                     </el-dropdown-item>
                     <el-dropdown-item @click="deleteData(scopeSlot.row)">
                       删除
@@ -240,6 +233,8 @@ function handleCurrentChange(e: number) {
 }
 
 onMounted(() => {
+  tableConfig.pagination.currentPage = 1
+  tableConfig.pagination.pageSize = 10
   initData()
   timer.value = setInterval(() => {
     initData(true, 'interval')

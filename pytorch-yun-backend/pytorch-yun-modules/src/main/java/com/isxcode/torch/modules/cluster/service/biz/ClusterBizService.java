@@ -1,12 +1,11 @@
 package com.isxcode.torch.modules.cluster.service.biz;
 
 import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
-import com.isxcode.torch.api.cluster.constants.ClusterStatus;
-import com.isxcode.torch.api.cluster.pojos.dto.ScpFileEngineNodeDto;
-import com.isxcode.torch.api.cluster.pojos.req.*;
-import com.isxcode.torch.api.cluster.pojos.res.PageClusterRes;
-import com.isxcode.torch.api.cluster.pojos.res.QueryAllClusterRes;
-import com.isxcode.torch.common.utils.AesUtils;
+import com.isxcode.torch.api.cluster.req.*;
+import com.isxcode.torch.api.cluster.res.PageClusterRes;
+import com.isxcode.torch.api.cluster.res.QueryAllClusterRes;
+import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.common.utils.aes.AesUtils;
 import com.isxcode.torch.modules.cluster.entity.ClusterEntity;
 import com.isxcode.torch.modules.cluster.entity.ClusterNodeEntity;
 import com.isxcode.torch.modules.cluster.mapper.ClusterMapper;
@@ -15,13 +14,9 @@ import com.isxcode.torch.modules.cluster.repository.ClusterNodeRepository;
 import com.isxcode.torch.modules.cluster.repository.ClusterRepository;
 import com.isxcode.torch.modules.cluster.run.RunAgentCheckService;
 import com.isxcode.torch.modules.cluster.service.ClusterService;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import javax.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -30,9 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-/**
- * 计算引擎模块.
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -55,9 +47,16 @@ public class ClusterBizService {
 
     public void addCluster(AddClusterReq addClusterReq) {
 
+        // 集群名字不能重复
+        Optional<ClusterEntity> clusterByName = clusterRepository.findByName(addClusterReq.getName());
+        if (clusterByName.isPresent()) {
+            throw new IsxAppException("集群名称重复");
+        }
+
+        // 转换对象
         ClusterEntity cluster = clusterMapper.addEngineReqToClusterEntity(addClusterReq);
 
-        // 判断租户中的集群数是否为0
+        // 第一个集群设置为默认集群
         long count = clusterRepository.count();
         cluster.setDefaultCluster(count == 0);
 
@@ -81,57 +80,19 @@ public class ClusterBizService {
 
     public void deleteCluster(DeleteClusterReq deleteClusterReq) {
 
+        // 所有的节点都卸载了，才能删除集群
+        List<ClusterNodeEntity> allNode = clusterNodeRepository.findAllByClusterId(deleteClusterReq.getEngineId());
+        boolean canNoteDelete = allNode.stream().anyMatch(e -> ClusterNodeStatus.RUNNING.equals(e.getStatus()));
+        if (canNoteDelete) {
+            throw new IsxAppException("存在节点未卸载");
+        }
+
         clusterRepository.deleteById(deleteClusterReq.getEngineId());
     }
 
     public void checkCluster(CheckClusterReq checkClusterReq) {
 
-        ClusterEntity cluster = clusterService.getCluster(checkClusterReq.getEngineId());
-
-        List<ClusterNodeEntity> engineNodes = clusterNodeRepository.findAllByClusterId(checkClusterReq.getEngineId());
-
-        // 同步检测按钮
-        engineNodes.forEach(e -> {
-            ScpFileEngineNodeDto scpFileEngineNodeDto = clusterNodeMapper.engineNodeEntityToScpFileEngineNodeDto(e);
-            scpFileEngineNodeDto.setPasswd(aesUtils.decrypt(scpFileEngineNodeDto.getPasswd()));
-
-            try {
-                runAgentCheckService.checkAgent(scpFileEngineNodeDto, e);
-            } catch (JSchException | IOException | InterruptedException | SftpException ex) {
-                log.error(ex.getMessage());
-                e.setCheckDateTime(LocalDateTime.now());
-                e.setAgentLog(ex.getMessage());
-                e.setStatus(ClusterNodeStatus.CHECK_ERROR);
-                clusterNodeRepository.saveAndFlush(e);
-            }
-        });
-
-        // 激活节点
-        List<ClusterNodeEntity> activeNodes = engineNodes.stream()
-            .filter(e -> ClusterNodeStatus.RUNNING.equals(e.getStatus())).collect(Collectors.toList());
-        cluster.setActiveNodeNum(activeNodes.size());
-        cluster.setAllNodeNum(engineNodes.size());
-
-        // 内存
-        double allMemory = activeNodes.stream().mapToDouble(ClusterNodeEntity::getAllMemory).sum();
-        cluster.setAllMemoryNum(allMemory);
-        double usedMemory = activeNodes.stream().mapToDouble(ClusterNodeEntity::getUsedMemory).sum();
-        cluster.setUsedMemoryNum(usedMemory);
-
-        // 存储
-        double allStorage = activeNodes.stream().mapToDouble(ClusterNodeEntity::getAllStorage).sum();
-        cluster.setAllStorageNum(allStorage);
-        double usedStorage = activeNodes.stream().mapToDouble(ClusterNodeEntity::getUsedStorage).sum();
-        cluster.setUsedStorageNum(usedStorage);
-
-        if (!activeNodes.isEmpty()) {
-            cluster.setStatus(ClusterStatus.ACTIVE);
-        } else {
-            cluster.setStatus(ClusterStatus.NO_ACTIVE);
-        }
-
-        cluster.setCheckDateTime(LocalDateTime.now());
-        clusterRepository.saveAndFlush(cluster);
+        clusterService.checkCluster(checkClusterReq.getEngineId());
     }
 
     public void setDefaultCluster(SetDefaultClusterReq setDefaultClusterReq) {

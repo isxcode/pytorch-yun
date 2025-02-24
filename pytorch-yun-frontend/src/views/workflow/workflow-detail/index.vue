@@ -280,8 +280,8 @@ function getTypeData(e: string) {
       value: 'QUERY_JDBC'
     },
     {
-      label: 'FlinkSql执行作业',
-      value: 'FLINK_SQL'
+      label: 'SparkSql查询作业',
+      value: 'SPARK_SQL'
     }
   ]
   return typeList.find(itme => itme.value === e)?.label

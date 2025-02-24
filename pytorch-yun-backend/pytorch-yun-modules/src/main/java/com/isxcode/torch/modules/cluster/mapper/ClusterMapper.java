@@ -1,19 +1,16 @@
 package com.isxcode.torch.modules.cluster.mapper;
 
 import com.isxcode.torch.api.cluster.constants.ClusterStatus;
-import com.isxcode.torch.api.cluster.pojos.req.AddClusterReq;
-import com.isxcode.torch.api.cluster.pojos.req.UpdateClusterReq;
-import com.isxcode.torch.api.cluster.pojos.res.PageClusterRes;
-import com.isxcode.torch.api.cluster.pojos.res.QueryAllClusterRes;
+import com.isxcode.torch.api.cluster.req.AddClusterReq;
+import com.isxcode.torch.api.cluster.req.UpdateClusterReq;
+import com.isxcode.torch.api.cluster.res.PageClusterRes;
+import com.isxcode.torch.api.cluster.res.QueryAllClusterRes;
 import com.isxcode.torch.modules.cluster.entity.ClusterEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
 
-/**
- * mapstruct映射.
- */
 @Mapper(componentModel = "spring")
 public interface ClusterMapper {
 

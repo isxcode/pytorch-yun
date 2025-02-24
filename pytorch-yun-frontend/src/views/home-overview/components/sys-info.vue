@@ -4,7 +4,7 @@
       <span class="sys-info__title">系统信息</span>
       <div class="sys-info__ops">
         <el-icon class="sys-info__icon" @click="querySysInfoData"><RefreshRight /></el-icon>
-        <el-icon class="sys-info__icon"><Setting /></el-icon>
+        <!-- <el-icon class="sys-info__icon"><Setting /></el-icon> -->
       </div>
     </div>
     <div class="sys-info__body">
@@ -24,29 +24,29 @@ import { querySystemBaseInfo } from '../services/computer-group';
 const sysInfoData = ref<Array<ChartInfo>>([
   {
     type: 'clusterMonitor',
-    title: '计算机群',
-    mix: 75,
+    title: '计算集群',
+    mix: undefined,
     total: 100,
     color: '#ED7B09'
   },
   {
     type: 'datasourceMonitor',
     title: '数据源',
-    mix: 35,
+    mix: undefined,
     total: 100,
     color: '#1967BF'
   },
   {
     type: 'workflowMonitor',
     title: '发布作业',
-    mix: 65,
+    mix: undefined,
     total: 100,
     color: '#03A89D'
   },
   {
     type: 'apiMonitor',
     title: '发布接口',
-    mix: 99,
+    mix: undefined,
     total: 100,
     color: '#4B19BF'
   }

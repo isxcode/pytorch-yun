@@ -42,7 +42,7 @@
                     value-format="YYYY-MM-DD"
                   />
                 </el-form-item>
-  
+
                 <el-form-item label="cron表达式" prop="cron" v-if="cronConfig.setMode === 'ADVANCE'">
                   <el-input
                     v-model="cronConfig.cron"
@@ -178,6 +178,43 @@
               </template>
             </el-form>
           </div>
+          <!-- 基线告警 -->
+          <div class="config-item">
+            <div class="item-title">基线告警</div>
+            <el-form
+              label-position="left"
+              label-width="120px"
+              :model="messageConfig"
+            >
+              <el-form-item label="告警">
+                <el-select v-model="messageConfig.alarmList" clearable multiple collapse-tags collapse-tags-tooltip
+                    filterable placeholder="请选择">
+                    <el-option v-for="item in alarmConfigList" :key="item.id" :label="item.name"
+                        :value="item.id" />
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </div>
+          <!-- 外部调用 -->
+          <div class="config-item">
+            <div class="item-title">外部调用</div>
+            <el-form
+              label-position="left"
+              label-width="120px"
+              :model="otherConfig"
+            >
+              <el-form-item label="启用">
+                <el-switch v-model="otherConfig.invokeStatus" @change="getInvokeUrl" />
+              </el-form-item>
+              <el-form-item v-if="otherConfig.invokeUrl" label="调用链接" class="invoke-url-copy">
+                <el-input v-model="otherConfig.invokeUrl" :disabled="true" />
+                <span
+                  class="invoke-url-copy__text"
+                  @click="copyUrlEvent(otherConfig.invokeUrl)"
+                >复制</span>
+              </el-form-item>
+            </el-form>
+          </div>
         </div>
       </el-scrollbar>
   </BlockDrawer>
@@ -188,6 +225,8 @@ import { computed, nextTick, reactive, ref } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import BlockDrawer from '@/components/block-drawer/index.vue'
 import {ScheduleRange, WeekDateList, CronConfigRules} from './config-detail'
+import { GetAlarmPagesList } from '@/services/message-center.service';
+import { GetInvokeUrl } from '@/services/workflow.service';
 
 const scheduleRange = ref(ScheduleRange);
 const weekDateList = ref(WeekDateList)
@@ -204,6 +243,8 @@ const callback = ref<any>()
     value: 'SINGLE'
   }
 ])
+const alarmConfigList = ref([])
+const workflowId = ref('')
 const cronConfigRules = reactive<FormRules>(CronConfigRules)
 const drawerConfig = reactive({
   title: '配置',
@@ -241,6 +282,10 @@ let cronConfig = reactive({
   weekDate: '',      // 指定时间 - 星期
   monthDay: '',      // 指定时间 - 月
 })
+// 基线告警
+let messageConfig = reactive({
+  alarmList: []
+})
 
 const state = reactive({
   secondsText: '',
@@ -250,6 +295,11 @@ const state = reactive({
   weeksText: '',
   monthsText: '',
   yearsText: ''
+})
+// 外部调用
+let otherConfig = reactive({
+  invokeStatus: false,
+  invokeUrl: ''
 })
 
 const cron = computed(() => {
@@ -271,13 +321,31 @@ function showModal(cb: () => void, data: any) {
   if (!data) {
     cronConfig.setMode = 'SIMPLE'
   } else {
+    workflowId.value = data.workflowId
     Object.keys(cronConfig).forEach((key: string) => {
-      cronConfig[key] = data[key]
+      cronConfig[key] = data.cronConfig[key]
     })
+    messageConfig.alarmList = data.alarmList
+    otherConfig.invokeStatus = data.invokeStatus === 'OFF' || !data.invokeStatus ? false : true
+    otherConfig.invokeUrl = data.invokeUrl
   }
+  getAlarmConfigList()
 
   drawerConfig.visible = true;
 }
+
+function getAlarmConfigList() {
+    GetAlarmPagesList({
+        page: 0,
+        pageSize: 10000,
+        searchKeyWord: ''
+    }).then((res: any) => {
+      alarmConfigList.value = res.data.content.filter((item: any) => item.alarmType === 'WORKFLOW')
+    }).catch(() => {
+      alarmConfigList.value = []
+    })
+}
+
 
 function okEvent() {
   // 获取cron表达式
@@ -288,8 +356,12 @@ function okEvent() {
         state.daysText || '*'
       } ${state.monthsText || '*'} ${state.weeksText || '?'} ${state.yearsText || '*'}`
       callback.value({
-        ...cronConfig,
-        cron: cronConfig.setMode === 'SIMPLE' ? cron : cronConfig.cron
+        cronConfig: {
+          ...cronConfig,
+          cron: cronConfig.setMode === 'SIMPLE' ? cron : cronConfig.cron,
+        },
+        ...messageConfig,
+        ...otherConfig
       }).then((res: any) => {
         drawerConfig.okConfig.loading = false
         if (res === undefined) {
@@ -357,6 +429,33 @@ function cronTypeChange(e: string) {
   cronConfig.cron = ''
 }
 
+function getInvokeUrl(e: boolean) {
+  if (e) {
+    GetInvokeUrl({
+      workflowId: workflowId.value,
+      outerAddress: location.host
+    }).then((res: any) => {
+      otherConfig.invokeUrl = res.data.url
+    }).catch((error: any) => {
+      otherConfig.invokeUrl = ''
+      console.error(error)
+    })
+  }
+}
+
+async function copyUrlEvent(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    ElMessage({
+      duration: 800,
+      message: '复制成功',
+      type: 'success',
+    });
+  } catch (err) {
+    console.error("Failed to copy: ", err);
+  }
+}
+
 defineExpose({
   showModal,
 })
@@ -376,9 +475,28 @@ defineExpose({
       padding: 12px 0 0;
       box-sizing: border-box;
       .el-form-item {
+        .el-form-item__label {
+          pointer-events: none;
+        }
         .el-form-item__content {
           .el-radio-group {
             justify-content: flex-end;
+          }
+        }
+        &.invoke-url-copy {
+          .el-input {
+            width: calc(100% - 36px);
+          }
+          .invoke-url-copy__text {
+            position: absolute;
+            right: 0;
+            font-size: 12px;
+            color: getCssVar('color', 'primary');
+            cursor: pointer;
+            user-select: none;
+            &:hover {
+              text-decoration: underline;
+            }
           }
         }
       }
