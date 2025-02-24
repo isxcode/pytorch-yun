@@ -39,15 +39,20 @@ export const httpOption = {
     showErrorMessage: (msg: string): void => {
       message.error(msg)
     },
-    checkStatus: (status: number, msg: string, showMsg: any): void => {
+    checkStatus: (status: number, msg: string, showMsg: any, response: any): void => {
       try {
         if (status == 401) {
-          showMsg('用户登录过期')
           router.push({
             name: 'login'
           })
         } else if (status == 403) {
           message.error('许可证无效，请联系管理员')
+        } else if (status == 404) {
+          if (response.config.url.match('/vip/')) {
+            message.error('请升级到企业版')
+          } else {
+            showMsg(msg)
+          }
         } else {
           showMsg(msg)
         }

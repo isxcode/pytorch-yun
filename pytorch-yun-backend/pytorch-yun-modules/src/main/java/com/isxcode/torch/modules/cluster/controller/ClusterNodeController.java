@@ -1,9 +1,11 @@
 package com.isxcode.torch.modules.cluster.controller;
 
-import com.isxcode.torch.api.cluster.pojos.req.*;
-import com.isxcode.torch.api.cluster.pojos.res.EnoQueryNodeRes;
-import com.isxcode.torch.api.cluster.pojos.res.GetClusterNodeRes;
+import com.isxcode.torch.api.cluster.req.*;
+import com.isxcode.torch.api.cluster.res.QueryNodeRes;
+import com.isxcode.torch.api.cluster.res.GetClusterNodeRes;
+import com.isxcode.torch.api.cluster.res.TestAgentRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
+import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.cluster.service.biz.ClusterNodeBizService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,14 +15,15 @@ import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "引擎节点模块")
-@RestController
+@Tag(name = "集群节点模块")
 @RequestMapping(ModuleCode.CLUSTER_NODE)
+@RestController
 @RequiredArgsConstructor
 public class ClusterNodeController {
 
@@ -45,11 +48,12 @@ public class ClusterNodeController {
     @Operation(summary = "查询节点列表接口")
     @PostMapping("/pageClusterNode")
     @SuccessResponse("查询节点列表成功")
-    public Page<EnoQueryNodeRes> pageClusterNode(@Valid @RequestBody PageClusterNodeReq pageClusterNodeReq) {
+    public Page<QueryNodeRes> pageClusterNode(@Valid @RequestBody PageClusterNodeReq pageClusterNodeReq) {
 
         return clusterNodeBizService.pageClusterNode(pageClusterNodeReq);
     }
 
+    @Secured({RoleType.TENANT_ADMIN})
     @Operation(summary = "删除节点接口")
     @PostMapping("/deleteClusterNode")
     @SuccessResponse("删除成功")
@@ -106,12 +110,20 @@ public class ClusterNodeController {
         clusterNodeBizService.cleanAgent(cleanAgentReq);
     }
 
-    @Operation(summary = "获取当前集群节点信息")
+    @Operation(summary = "获取当前集群节点信息接口")
     @PostMapping("/getClusterNode")
     @SuccessResponse("获取成功")
     public GetClusterNodeRes getClusterNode(@Valid @RequestBody GetClusterNodeReq getClusterNodeReq) {
 
         return clusterNodeBizService.getClusterNode(getClusterNodeReq);
+    }
+
+    @Operation(summary = "节点链接测试接口")
+    @PostMapping("/testAgent")
+    @SuccessResponse("测试完成")
+    public TestAgentRes testAgent(@Valid @RequestBody TestAgentReq testAgentReq) {
+
+        return clusterNodeBizService.testAgent(testAgentReq);
     }
 
 }

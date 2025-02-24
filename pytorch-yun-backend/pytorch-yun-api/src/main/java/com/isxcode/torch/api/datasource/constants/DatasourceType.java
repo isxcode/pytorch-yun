@@ -1,8 +1,6 @@
 package com.isxcode.torch.api.datasource.constants;
 
-/**
- * 数据源类型.
- */
+/** 数据源类型. */
 public interface DatasourceType {
 
     String MYSQL = "MYSQL";

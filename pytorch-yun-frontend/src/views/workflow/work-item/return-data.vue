@@ -1,21 +1,30 @@
-<!--
- * @Author: fanciNate
- * @Date: 2023-05-23 07:25:46
- * @LastEditTime: 2023-06-18 16:13:37
- * @LastEditors: fanciNate
- * @Description: In User Settings Edit
- * @FilePath: /pytorch-yun/pytorch-yun-website/src/views/workflow/work-item/return-data.vue
--->
+
 <template>
-  <BlockTable
-    :table-config="tableConfig"
-  />
+  <LoadingPage class="log-loading" :visible="loading">
+    <LogContainer
+      v-if="strData || jsonData"
+      :logMsg="strData || jsonData"
+      :showResult="true"
+      :status="true"
+    ></LogContainer>
+    <template v-else>
+      <BlockTable class="result-table-log" :table-config="tableConfig"/>
+    </template>
+  </LoadingPage>
+  <span v-if="showParse" class="zqy-json-parse" @click="getJsonParseResult">结果解析</span>
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
+import { reactive, ref, defineEmits, defineProps } from 'vue'
 import BlockTable from '@/components/block-table/index.vue'
 import { GetResultData } from '@/services/schedule.service'
+import LoadingPage from '@/components/loading/index.vue'
+
+const emit = defineEmits(['getJsonParseResult'])
+
+const props = defineProps<{
+  showParse: boolean
+}>()
 
 const tableConfig = reactive({
   tableData: [],
@@ -23,9 +32,16 @@ const tableConfig = reactive({
   seqType: 'seq',
   loading: false
 })
+const jsonData = ref()
+const strData = ref()
+const loading = ref<boolean>(false)
 
 function initData(id: string): void {
   getResultDatalist(id)
+}
+
+function getJsonParseResult() {
+    emit('getJsonParseResult')
 }
 
 // 获取结果
@@ -37,10 +53,16 @@ function getResultDatalist(id: string) {
     return
   }
   tableConfig.loading = true
+  loading.value = true
   GetResultData({
     instanceId: id
   })
     .then((res: any) => {
+      jsonData.value = res.data.jsonData
+      strData.value = res.data.strData
+
+      loading.value = false
+
       const col = res.data.data.slice(0, 1)[0]
       const tableData = res.data.data.slice(1, res.data.data.length)
       tableConfig.colConfigs = col.map((colunm: any) => {
@@ -75,8 +97,28 @@ defineExpose({
 </script>
 
 <style lang="scss">
+.log-loading {
+  &.zqy-loading {
+    position: static;
+    height: 100% !important;
+    padding: 0 !important;
+    margin-top: 0 !important;
+    overflow: auto;
+  }
+}
 .vxe-table--body-wrapper {
-  max-height: calc(100vh - 466px);
+  max-height: calc(100vh - 428px);
   overflow: auto;
+}
+.zqy-json-parse {
+    font-size: 12px;
+    color: getCssVar('color', 'primary');
+    cursor: pointer;
+    position: absolute;
+    right: 40px;
+    top: 12px;
+    &:hover {
+        text-decoration: underline;
+    }
 }
 </style>

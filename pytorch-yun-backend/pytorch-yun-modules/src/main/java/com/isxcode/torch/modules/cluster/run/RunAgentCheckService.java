@@ -7,18 +7,22 @@ import static com.isxcode.torch.common.utils.ssh.SshUtils.scpFile;
 
 import com.alibaba.fastjson.JSON;
 import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
-import com.isxcode.torch.api.cluster.pojos.dto.AgentInfo;
-import com.isxcode.torch.api.cluster.pojos.dto.ScpFileEngineNodeDto;
+import com.isxcode.torch.api.cluster.constants.ClusterStatus;
+import com.isxcode.torch.api.cluster.dto.AgentInfo;
+import com.isxcode.torch.api.cluster.dto.ScpFileEngineNodeDto;
 import com.isxcode.torch.api.main.properties.SparkYunProperties;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.common.utils.os.OsUtils;
 import com.isxcode.torch.modules.cluster.entity.ClusterNodeEntity;
 import com.isxcode.torch.modules.cluster.repository.ClusterNodeRepository;
+import com.isxcode.torch.modules.cluster.repository.ClusterRepository;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
-import java.io.File;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -36,6 +40,8 @@ public class RunAgentCheckService {
 
     private final ClusterNodeRepository clusterNodeRepository;
 
+    private final ClusterRepository clusterRepository;
+
     @Async("sparkYunWorkThreadPool")
     public void run(String clusterNodeId, ScpFileEngineNodeDto scpFileEngineNodeDto, String tenantId, String userId) {
 
@@ -52,7 +58,7 @@ public class RunAgentCheckService {
         try {
             checkAgent(scpFileEngineNodeDto, clusterNodeEntity);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             clusterNodeEntity.setCheckDateTime(LocalDateTime.now());
             clusterNodeEntity.setAgentLog(e.getMessage());
             clusterNodeEntity.setStatus(ClusterNodeStatus.CHECK_ERROR);
@@ -63,21 +69,26 @@ public class RunAgentCheckService {
     public void checkAgent(ScpFileEngineNodeDto scpFileEngineNodeDto, ClusterNodeEntity engineNode)
         throws JSchException, IOException, InterruptedException, SftpException {
 
+        String bashFilePath = sparkYunProperties.getTmpDir() + "/agent-check.sh";
+
         // 拷贝检测脚本
-        scpFile(scpFileEngineNodeDto, "classpath:bash/agent-check.sh",
-            sparkYunProperties.getTmpDir() + File.separator + "agent-check.sh");
+        scpFile(scpFileEngineNodeDto, "classpath:bash/agent-check.sh", bashFilePath);
 
         // 运行安装脚本
-        String checkCommand = "bash " + sparkYunProperties.getTmpDir() + File.separator + "agent-check.sh"
-            + " --home-path=" + engineNode.getAgentHomePath();
+        String checkCommand = "bash " + bashFilePath + " --home-path=" + engineNode.getAgentHomePath();
 
         log.debug("执行远程命令:{}", checkCommand);
 
         // 获取返回结果
-        String executeLog = executeCommand(scpFileEngineNodeDto, checkCommand, false);
+        String executeLog =
+            executeCommand(scpFileEngineNodeDto, OsUtils.fixWindowsChar(bashFilePath, checkCommand), false);
 
         log.debug("远程返回值:{}", executeLog);
         AgentInfo agentCheckInfo = JSON.parseObject(executeLog, AgentInfo.class);
+
+        if (agentCheckInfo == null) {
+            return;
+        }
 
         // 保存服务器信息
         engineNode.setAllMemory(
@@ -96,5 +107,13 @@ public class RunAgentCheckService {
         engineNode.setAgentLog(agentCheckInfo.getLog());
         engineNode.setCheckDateTime(LocalDateTime.now());
         clusterNodeRepository.saveAndFlush(engineNode);
+
+        // 如果状态是成功的话,将集群改为启用
+        if (ClusterNodeStatus.RUNNING.equals(agentCheckInfo.getStatus())) {
+            clusterRepository.findById(engineNode.getClusterId()).ifPresent(clusterEntity -> {
+                clusterEntity.setStatus(ClusterStatus.ACTIVE);
+                clusterRepository.saveAndFlush(clusterEntity);
+            });
+        }
     }
 }

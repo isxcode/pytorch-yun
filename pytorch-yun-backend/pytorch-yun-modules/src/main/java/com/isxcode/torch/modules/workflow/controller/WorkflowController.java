@@ -1,13 +1,16 @@
 package com.isxcode.torch.modules.workflow.controller;
 
+import com.isxcode.torch.api.instance.req.QueryWorkFlowInstancesReq;
+import com.isxcode.torch.api.instance.res.QueryWorkFlowInstancesRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
-import com.isxcode.torch.api.work.pojos.req.GetWorkflowDefaultClusterReq;
-import com.isxcode.torch.api.work.pojos.res.GetWorkflowDefaultClusterRes;
-import com.isxcode.torch.api.workflow.pojos.req.*;
-import com.isxcode.torch.api.workflow.pojos.res.GetRunWorkInstancesRes;
-import com.isxcode.torch.api.workflow.pojos.res.GetWorkflowRes;
-import com.isxcode.torch.api.workflow.pojos.res.OnExternalCallRes;
-import com.isxcode.torch.api.workflow.pojos.res.PageWorkflowRes;
+import com.isxcode.torch.api.user.constants.RoleType;
+import com.isxcode.torch.api.work.req.GetWorkflowDefaultClusterReq;
+import com.isxcode.torch.api.work.res.GetWorkflowDefaultClusterRes;
+import com.isxcode.torch.api.workflow.req.*;
+import com.isxcode.torch.api.workflow.res.GetRunWorkInstancesRes;
+import com.isxcode.torch.api.workflow.res.GetWorkflowRes;
+import com.isxcode.torch.api.workflow.res.GetInvokeUrlRes;
+import com.isxcode.torch.api.workflow.res.PageWorkflowRes;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.workflow.service.WorkflowBizService;
 import com.isxcode.torch.modules.workflow.service.WorkflowConfigBizService;
@@ -15,12 +18,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "作业流模块")
-@RestController
 @RequestMapping(ModuleCode.WORKFLOW)
+@RestController
 @RequiredArgsConstructor
 public class WorkflowController {
 
@@ -62,6 +65,7 @@ public class WorkflowController {
         return workflowBizService.pageWorkflow(pageWorkflowReq);
     }
 
+    @Secured({RoleType.TENANT_ADMIN})
     @Operation(summary = "删除作业流接口")
     @PostMapping("/deleteWorkflow")
     @SuccessResponse("删除成功")
@@ -97,7 +101,7 @@ public class WorkflowController {
     @PostMapping("/importWorkflow")
     @SuccessResponse("导入成功")
     public void importWorkflow(@RequestParam("workflowConfigFile") MultipartFile workflowConfigFile,
-        @Schema(description = "作业流唯一id", example = "sy_ba1f12b5c8154f999a02a5be2373a438")
+        @Schema(description = "作业流唯一id", example = "py_ba1f12b5c8154f999a02a5be2373a438")
         @RequestParam(required = false) String workflowId) {
 
         workflowBizService.importWorkflow(workflowConfigFile, workflowId);
@@ -167,7 +171,7 @@ public class WorkflowController {
         workflowConfigBizService.configWorkflowSetting(configWorkflowSettingReq);
     }
 
-    @Operation(summary = "获取作业流默认计算引擎")
+    @Operation(summary = "获取作业流默认计算引擎接口")
     @PostMapping("/getWorkflowDefaultCluster")
     @SuccessResponse("查询成功")
     public GetWorkflowDefaultClusterRes getWorkflowDefaultCluster(
@@ -176,51 +180,29 @@ public class WorkflowController {
         return workflowBizService.getWorkflowDefaultCluster(getWorkflowDefaultClusterReq);
     }
 
-    // @Operation(summary
-    // =
-    // "收藏工作流接口")
-    // @GetMapping("/favourWorkflow")
-    // @SuccessResponse("收藏成功")
-    // public
-    // void
-    // favourWorkflow(
-    // @Schema(description
-    // =
-    // "作业流唯一id",
-    // example
-    // =
-    // "sy_ba1f12b5c8154f999a02a5be2373a438")
-    // @RequestParam
-    // String
-    // workflowId)
-    // {
-    //
-    // workflowFavourBizService.favourWorkflow(workflowId);
-    // }
+    @Operation(summary = "获取作业流外部调用url接口")
+    @PostMapping("/getInvokeUrl")
+    @SuccessResponse("获取成功")
+    public GetInvokeUrlRes getInvokeUrl(@Valid @RequestBody GetInvokeUrlReq getInvokeUrlReq) {
 
-    @Operation(summary = "启用外部调用作业流功能")
-    @PostMapping("/onExternalCall")
-    @SuccessResponse("保存成功")
-    public OnExternalCallRes onExternalCall(@Valid @RequestBody OnExternalCallReq onExternalCallReq,
-        HttpServletRequest request) {
-
-        return workflowConfigBizService.onExternalCall(onExternalCallReq, request);
+        return workflowBizService.getInvokeUrl(getInvokeUrlReq);
     }
 
-    @Operation(summary = "关闭外部调用作业流功能")
-    @PostMapping("/offExternalCall")
-    @SuccessResponse("保存成功")
-    public void offExternalCall(@Valid @RequestBody OffExternalCallReq offExternalCallReq) {
-
-        workflowConfigBizService.offExternalCall(offExternalCallReq);
-    }
-
-    @Operation(summary = "外部调用作业流")
-    @PostMapping("/invoke")
+    @Operation(summary = "外部调用作业流接口")
+    @PostMapping("/open/invokeWorkflow")
     @SuccessResponse("调用成功")
-    public String invoke(@Valid @RequestBody InvokeReq invokeReq, HttpServletRequest request) {
+    public void invokeWorkflow(@Valid @RequestBody InvokeWorkflowReq invokeWorkflowReq) {
 
-        return workflowBizService.invoke(invokeReq, request);
+        workflowBizService.invokeWorkflow(invokeWorkflowReq);
+    }
+
+    @Operation(summary = "查询作业流实例列表接口")
+    @PostMapping("/queryWorkFlowInstances")
+    @SuccessResponse("查询成功")
+    public Page<QueryWorkFlowInstancesRes> queryWorkFlowInstances(
+        @Valid @RequestBody QueryWorkFlowInstancesReq queryWorkFlowInstancesReq) {
+
+        return workflowBizService.queryWorkFlowInstances(queryWorkFlowInstancesReq);
     }
 
 }

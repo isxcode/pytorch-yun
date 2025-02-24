@@ -47,6 +47,9 @@
           placeholder="请输入"
         />
       </el-form-item>
+      <el-form-item v-if="clusterType === 'standalone'" label="默认安装Spark">
+        <el-switch v-model="formData.installSparkLocal" />
+      </el-form-item>
       <el-form-item label="备注">
         <el-input
           v-model="formData.remark"
@@ -57,6 +60,25 @@
         />
       </el-form-item>
     </el-form>
+    <template #customLeft>
+      <div class="test-button">
+        <el-button :loading="testLoading" type="primary" @click="testFun">链接测试</el-button>
+        <el-popover
+          placement="right"
+          title="测试结果"
+          :width="400"
+          trigger="hover"
+          popper-class="message-error-tooltip"
+          :content="testResult?.log"
+          :disabled="testResult?.status === 'SUCCESS'"
+        >
+          <template #reference>
+            <el-icon class="hover-tooltip" v-if="testResult?.status === 'FAIL'"><WarningFilled /></el-icon>
+            <el-icon class="hover-tooltip success" v-else-if="testResult?.status === 'SUCCESS'"><SuccessFilled /></el-icon>
+          </template>
+        </el-popover>
+      </div>
+    </template>
   </BlockModal>
 </template>
 
@@ -65,14 +87,22 @@ import { reactive, defineExpose, ref, nextTick } from 'vue'
 import BlockModal from '@/components/block-modal/index.vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { Validator } from '@/validator/index'
+import { useRoute } from 'vue-router'
+import { TestComputerPointHostData } from '@/services/computer-group.service'
+
+const route = useRoute()
 
 const form = ref<FormInstance>()
 const callback = ref<any>()
 const pwdType = ref('pwd')
+const clusterType = ref('')
+const testLoading = ref(false)
+const testResult = ref()
 const modelConfig = reactive({
   title: '添加节点',
   visible: false,
   width: '520px',
+  customClass: 'compute-add-modal',
   okConfig: {
     title: '确定',
     ok: okEvent,
@@ -97,6 +127,7 @@ const formData = reactive({
   agentHomePath: '',
   agentPort: '',
   hadoopHomePath: '',
+  installSparkLocal: false,
   remark: '',
   id: ''
 })
@@ -135,6 +166,12 @@ const rules = reactive<FormRules>({
 function showModal(cb: () => void, data: any): void {
   callback.value = cb
   pwdType.value = 'pwd'
+  clusterType.value = route.query.type
+
+  testResult.value = {
+    log: '',
+    status: ''
+  }
   if (data) {
     formData.name = data.name
     formData.host = data.host
@@ -144,18 +181,20 @@ function showModal(cb: () => void, data: any): void {
     formData.agentHomePath = data.agentHomePath
     formData.agentPort = data.agentPort
     formData.hadoopHomePath = data.hadoopHomePath
+    formData.installSparkLocal = data.installSparkLocal
     formData.remark = data.remark
     formData.id = data.id
     modelConfig.title = '编辑节点'
   } else {
     formData.name = ''
     formData.host = ''
-    formData.port = ''
+    formData.port = '22'
     formData.username = ''
     formData.passwd = ''
     formData.agentHomePath = ''
     formData.agentPort = ''
     formData.hadoopHomePath = ''
+    formData.installSparkLocal = false
     formData.remark = ''
     formData.id = ''
     modelConfig.title = '添加节点'
@@ -165,6 +204,26 @@ function showModal(cb: () => void, data: any): void {
     form.value?.resetFields()
   })
   modelConfig.visible = true
+}
+
+function testFun() {
+  if (formData.host && formData.port && formData.username && formData.passwd) {
+    testLoading.value = true
+    TestComputerPointHostData({
+      host: formData.host,
+      port: formData.port || '22',
+      username: formData.username,
+      passwd: formData.passwd
+    }).then((res: any) => {
+      testLoading.value = false
+      testResult.value = res.data
+      ElMessage.success(res.msg)
+    }).catch(() => {
+      testLoading.value = false
+    })
+  } else {
+    ElMessage.warning('请将参数填写完整')
+  }
 }
 
 function pwdTypeChangeEvent() {
@@ -211,5 +270,29 @@ defineExpose({
 .add-computer-group {
   padding: 12px 20px 0 20px;
   box-sizing: border-box;
+}
+.compute-add-modal {
+  .test-button {
+    position: absolute;
+    left: 20px;
+    bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hover-tooltip {
+    margin-left: 8px;
+    font-size: 16px;
+    color: getCssVar('color', 'danger');
+    &.success {
+      color: getCssVar('color', 'success');
+    }
+  }
+}
+.message-error-tooltip {
+    .el-popover__title {
+        font-size: 14px;
+    }
+    font-size: 12px;
 }
 </style>

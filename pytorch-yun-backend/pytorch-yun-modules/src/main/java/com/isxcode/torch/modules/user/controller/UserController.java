@@ -2,8 +2,8 @@ package com.isxcode.torch.modules.user.controller;
 
 import com.isxcode.torch.api.main.constants.ModuleCode;
 import com.isxcode.torch.api.user.constants.RoleType;
-import com.isxcode.torch.api.user.pojos.req.*;
-import com.isxcode.torch.api.user.pojos.res.*;
+import com.isxcode.torch.api.user.req.*;
+import com.isxcode.torch.api.user.res.*;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.user.service.UserBizService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "用户模块")
-@RestController
 @RequestMapping(ModuleCode.USER)
+@RestController
 @RequiredArgsConstructor
 public class UserController {
 
@@ -71,7 +71,7 @@ public class UserController {
     }
 
     @Secured({RoleType.SYS_ADMIN})
-    @Operation(summary = "更新用户信息")
+    @Operation(summary = "更新用户信息接口")
     @PostMapping("/updateUserInfo")
     @SuccessResponse("信息更新成功")
     public void updateUserInfo(@Valid @RequestBody UpdateUserInfoReq updateUserInfoReq) {

@@ -1,18 +1,11 @@
 package com.isxcode.torch.modules.work.run;
 
-import com.isxcode.torch.api.work.pojos.dto.ApiWorkConfig;
-import com.isxcode.torch.api.work.pojos.dto.ClusterConfig;
-import com.isxcode.torch.api.work.pojos.dto.JarJobConfig;
-import com.isxcode.torch.api.work.pojos.dto.SyncRule;
-import com.isxcode.torch.api.work.pojos.dto.SyncWorkConfig;
+import com.isxcode.torch.api.work.dto.*;
 import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
-/**
- * 作业运行上下文.
- */
 @Data
 @Builder
 public class WorkRunContext {
@@ -36,6 +29,11 @@ public class WorkRunContext {
      * 同步作业信息.
      */
     private SyncWorkConfig syncWorkConfig;
+
+    /**
+     * Excel同步作业信息.
+     */
+    private ExcelSyncConfig excelSyncConfig;
 
     /**
      * 接口调用作业信息.

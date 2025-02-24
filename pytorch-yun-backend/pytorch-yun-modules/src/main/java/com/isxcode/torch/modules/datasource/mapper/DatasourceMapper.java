@@ -1,26 +1,25 @@
 package com.isxcode.torch.modules.datasource.mapper;
 
-import com.isxcode.torch.api.datasource.pojos.req.AddDatasourceReq;
-import com.isxcode.torch.api.datasource.pojos.req.UpdateDatasourceReq;
-import com.isxcode.torch.api.datasource.pojos.res.GetDefaultDatabaseDriverRes;
-import com.isxcode.torch.api.datasource.pojos.res.PageDatabaseDriverRes;
-import com.isxcode.torch.api.datasource.pojos.res.PageDatasourceRes;
+import com.isxcode.torch.api.datasource.dto.ConnectInfo;
+import com.isxcode.torch.api.datasource.req.AddDatasourceReq;
+import com.isxcode.torch.api.datasource.req.CheckConnectReq;
+import com.isxcode.torch.api.datasource.req.UpdateDatasourceReq;
+import com.isxcode.torch.api.datasource.res.GetDefaultDatabaseDriverRes;
+import com.isxcode.torch.api.datasource.res.PageDatabaseDriverRes;
+import com.isxcode.torch.api.datasource.res.PageDatasourceRes;
 import com.isxcode.torch.modules.datasource.entity.DatabaseDriverEntity;
 import com.isxcode.torch.modules.datasource.entity.DatasourceEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-/**
- * mapstruct映射.
- */
 @Mapper(componentModel = "spring")
 public interface DatasourceMapper {
 
-    /**
-     * dasAddDatasourceReq转DatasourceEntity.
-     */
     @Mapping(target = "kafkaConfig", ignore = true)
     DatasourceEntity dasAddDatasourceReqToDatasourceEntity(AddDatasourceReq dasAddDatasourceReq);
+
+    @Mapping(target = "kafkaConfig", ignore = true)
+    DatasourceEntity checkConnectReqToDatasourceEntity(CheckConnectReq checkConnectReq);
 
     @Mapping(source = "dasUpdateDatasourceReq.passwd", target = "passwd")
     @Mapping(source = "dasUpdateDatasourceReq.remark", target = "remark")
@@ -36,6 +35,8 @@ public interface DatasourceMapper {
         DatasourceEntity datasourceEntity);
 
     @Mapping(target = "checkDateTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(target = "kafkaConfigStr", source = "kafkaConfig")
+    @Mapping(target = "kafkaConfig", ignore = true)
     PageDatasourceRes datasourceEntityToQueryDatasourceRes(DatasourceEntity datasourceEntity);
 
     @Mapping(target = "createDateTime", dateFormat = "yyyy-MM-dd HH:mm:ss")
@@ -43,4 +44,6 @@ public interface DatasourceMapper {
 
     GetDefaultDatabaseDriverRes databaseDriverEntityToGetDefaultDatabaseDriverRes(
         DatabaseDriverEntity databaseDriverEntity);
+
+    ConnectInfo datasourceEntityToConnectInfo(DatasourceEntity datasourceEntity);
 }

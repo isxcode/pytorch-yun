@@ -3,14 +3,18 @@ package com.isxcode.torch.modules.cluster.service.biz;
 import static com.isxcode.torch.common.config.CommonConfig.TENANT_ID;
 import static com.isxcode.torch.common.config.CommonConfig.USER_ID;
 
+import com.isxcode.torch.api.agent.constants.AgentType;
+import com.isxcode.torch.api.api.constants.PathConstants;
 import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
 import com.isxcode.torch.api.cluster.constants.ClusterStatus;
-import com.isxcode.torch.api.cluster.pojos.dto.ScpFileEngineNodeDto;
-import com.isxcode.torch.api.cluster.pojos.req.*;
-import com.isxcode.torch.api.cluster.pojos.res.EnoQueryNodeRes;
-import com.isxcode.torch.api.cluster.pojos.res.GetClusterNodeRes;
+import com.isxcode.torch.api.cluster.dto.ScpFileEngineNodeDto;
+import com.isxcode.torch.api.cluster.req.*;
+import com.isxcode.torch.api.cluster.res.QueryNodeRes;
+import com.isxcode.torch.api.cluster.res.GetClusterNodeRes;
+import com.isxcode.torch.api.cluster.res.TestAgentRes;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
-import com.isxcode.torch.common.utils.AesUtils;
+import com.isxcode.torch.common.utils.aes.AesUtils;
+import com.isxcode.torch.common.utils.ssh.SshUtils;
 import com.isxcode.torch.modules.cluster.entity.ClusterEntity;
 import com.isxcode.torch.modules.cluster.entity.ClusterNodeEntity;
 import com.isxcode.torch.modules.cluster.mapper.ClusterNodeMapper;
@@ -20,9 +24,9 @@ import com.isxcode.torch.modules.cluster.run.*;
 import com.isxcode.torch.modules.cluster.service.ClusterNodeService;
 import com.isxcode.torch.modules.cluster.service.ClusterService;
 
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.IOException;
+
+import com.jcraft.jsch.JSchException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -31,9 +35,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 用户模块接口的业务逻辑.
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(noRollbackFor = {IsxAppException.class})
@@ -66,9 +67,12 @@ public class ClusterNodeBizService {
 
     public void addClusterNode(AddClusterNodeReq addClusterNodeReq) {
 
-        clusterService.checkCluster(addClusterNodeReq.getClusterId());
+        ClusterEntity cluster = clusterService.getCluster(addClusterNodeReq.getClusterId());
 
         ClusterNodeEntity clusterNode = engineNodeMapper.addClusterNodeReqToClusterNodeEntity(addClusterNodeReq);
+
+        // 是否安装spark-local组件
+        clusterNode.setInstallSparkLocal(addClusterNodeReq.getInstallSparkLocal());
 
         // 密码对成加密
         clusterNode.setPasswd(aesUtils.encrypt(addClusterNodeReq.getPasswd().trim()));
@@ -76,27 +80,23 @@ public class ClusterNodeBizService {
         // 设置服务器默认端口号
         clusterNode.setPort(Strings.isEmpty(addClusterNodeReq.getPort()) ? "22" : addClusterNodeReq.getPort().trim());
 
-        // 设置默认代理安装地址
-        clusterNode
-            .setAgentHomePath(clusterNodeService.getDefaultAgentHomePath(addClusterNodeReq.getUsername().trim()));
-
-        // 添加特殊逻辑，从备注中获取安装路径
-        // 正则获取路径
-        // $path{/root}
-        if (!Strings.isEmpty(addClusterNodeReq.getRemark())) {
-
-            Pattern regex = Pattern.compile("\\$path\\{(.*?)\\}");
-            Matcher matcher = regex.matcher(addClusterNodeReq.getRemark());
-            if (matcher.find()) {
-                clusterNode.setAgentHomePath(matcher.group(1));
-            }
-        }
-
         // 设置默认代理端口号
         clusterNode.setAgentPort(clusterNodeService.getDefaultAgentPort(addClusterNodeReq.getAgentPort().trim()));
 
         // 初始化节点状态，未检测
         clusterNode.setStatus(ClusterNodeStatus.UN_INSTALL);
+
+        // 设置默认代理安装地址
+        clusterNode.setAgentHomePath(
+            clusterNodeService.getDefaultAgentHomePath(addClusterNodeReq.getUsername().trim(), clusterNode));
+
+        // 如果是默认安装spark,设置默认路径
+        if (addClusterNodeReq.getInstallSparkLocal() || !AgentType.StandAlone.equals(cluster.getClusterType())) {
+            clusterNode.setSparkHomePath(clusterNode.getAgentHomePath() + "/" + PathConstants.AGENT_PATH_NAME + "/"
+                + PathConstants.SPARK_MIN_HOME);
+        } else {
+            clusterNode.setSparkHomePath(addClusterNodeReq.getSparkHomePath());
+        }
 
         // 持久化数据
         clusterNodeRepository.save(clusterNode);
@@ -108,40 +108,49 @@ public class ClusterNodeBizService {
 
         ClusterNodeEntity clusterNode = clusterNodeService.getClusterNode(updateClusterNodeReq.getId());
 
-        // 转换对象
-        ClusterNodeEntity node = engineNodeMapper.updateNodeReqToNodeEntity(updateClusterNodeReq, clusterNode);
-
-        // 设置安装地址
-        node.setAgentHomePath(clusterNodeService.getDefaultAgentHomePath(updateClusterNodeReq.getUsername()));
-
-        // 添加特殊逻辑，从备注中获取安装路径
-        // 正则获取路径
-        // $path{/root}
-        if (!Strings.isEmpty(updateClusterNodeReq.getRemark())) {
-
-            Pattern regex = Pattern.compile("\\$path\\{(.*?)\\}");
-            Matcher matcher = regex.matcher(updateClusterNodeReq.getRemark());
-            if (matcher.find()) {
-                node.setAgentHomePath(matcher.group(1));
-            }
+        // 如果是安装中等状态，需要等待运行结束
+        if (ClusterNodeStatus.CHECKING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.INSTALLING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.REMOVING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.STARTING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.STOPPING.equals(clusterNode.getStatus())) {
+            throw new IsxAppException("当前状态无法操作，请稍后再试");
         }
 
+        // 转换对象
+        clusterNode = engineNodeMapper.updateNodeReqToNodeEntity(updateClusterNodeReq, clusterNode);
+
+        // 是否安装spark-local组件
+        clusterNode.setInstallSparkLocal(updateClusterNodeReq.getInstallSparkLocal());
+
         // 密码对成加密
-        node.setPasswd(aesUtils.encrypt(updateClusterNodeReq.getPasswd()));
+        clusterNode.setPasswd(aesUtils.encrypt(updateClusterNodeReq.getPasswd().trim()));
+
+        // 设置安装地址
+        clusterNode.setAgentHomePath(
+            clusterNodeService.getDefaultAgentHomePath(updateClusterNodeReq.getUsername(), clusterNode));
+
+        // 如果是默认安装spark,设置默认路径
+        if (updateClusterNodeReq.getInstallSparkLocal() || !AgentType.StandAlone.equals(cluster.getClusterType())) {
+            clusterNode.setSparkHomePath(clusterNode.getAgentHomePath() + "/" + PathConstants.AGENT_PATH_NAME + "/"
+                + PathConstants.SPARK_MIN_HOME);
+        } else {
+            clusterNode.setSparkHomePath(updateClusterNodeReq.getSparkHomePath());
+        }
 
         // 设置代理端口号
-        node.setAgentPort(clusterNodeService.getDefaultAgentPort(updateClusterNodeReq.getAgentPort()));
+        clusterNode.setAgentPort(clusterNodeService.getDefaultAgentPort(updateClusterNodeReq.getAgentPort()));
 
         // 初始化节点状态，未检测
-        node.setStatus(ClusterNodeStatus.UN_CHECK);
-        clusterNodeRepository.save(node);
+        clusterNode.setStatus(ClusterNodeStatus.UN_CHECK);
+        clusterNodeRepository.save(clusterNode);
 
         // 集群状态修改
         cluster.setStatus(ClusterStatus.UN_CHECK);
         clusterRepository.save(cluster);
     }
 
-    public Page<EnoQueryNodeRes> pageClusterNode(PageClusterNodeReq enoQueryNodeReq) {
+    public Page<QueryNodeRes> pageClusterNode(PageClusterNodeReq enoQueryNodeReq) {
 
         Page<ClusterNodeEntity> engineNodeEntities = clusterNodeRepository.searchAll(enoQueryNodeReq.getSearchKeyWord(),
             enoQueryNodeReq.getClusterId(), PageRequest.of(enoQueryNodeReq.getPage(), enoQueryNodeReq.getPageSize()));
@@ -151,14 +160,16 @@ public class ClusterNodeBizService {
 
     public void deleteClusterNode(DeleteClusterNodeReq deleteClusterNodeReq) {
 
-        Optional<ClusterNodeEntity> engineNodeEntityOptional =
-            clusterNodeRepository.findById(deleteClusterNodeReq.getEngineNodeId());
-        if (!engineNodeEntityOptional.isPresent()) {
-            throw new IsxAppException("节点已删除");
-        }
+        ClusterNodeEntity clusterNode = clusterNodeRepository.findById(deleteClusterNodeReq.getEngineNodeId())
+            .orElseThrow(() -> new IsxAppException("节点已删除"));
 
-        // 判断节点状态是否为已安装
-        if (ClusterNodeStatus.RUNNING.equals(engineNodeEntityOptional.get().getStatus())) {
+        // 如果是安装中等状态，需要等待运行结束
+        if (ClusterNodeStatus.CHECKING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.INSTALLING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.REMOVING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.STARTING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.STOPPING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.RUNNING.equals(clusterNode.getStatus())) {
             throw new IsxAppException("请卸载节点后删除");
         }
 
@@ -173,8 +184,10 @@ public class ClusterNodeBizService {
         // 如果是安装中等状态，需要等待运行结束
         if (ClusterNodeStatus.CHECKING.equals(engineNode.getStatus())
             || ClusterNodeStatus.INSTALLING.equals(engineNode.getStatus())
-            || ClusterNodeStatus.REMOVING.equals(engineNode.getStatus())) {
-            throw new IsxAppException("进行中，稍后再试");
+            || ClusterNodeStatus.REMOVING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.STARTING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.STOPPING.equals(engineNode.getStatus())) {
+            throw new IsxAppException("当前状态无法操作，请稍后再试");
         }
 
         // 转换请求节点检测对象
@@ -192,6 +205,23 @@ public class ClusterNodeBizService {
         runAgentCheckService.run(checkAgentReq.getEngineNodeId(), scpFileEngineNodeDto, TENANT_ID.get(), USER_ID.get());
     }
 
+    public TestAgentRes testAgent(TestAgentReq testAgentReq) {
+
+        ScpFileEngineNodeDto scpFileEngineNodeDto = ScpFileEngineNodeDto.builder().host(testAgentReq.getHost())
+            .port(testAgentReq.getPort()).passwd(testAgentReq.getPasswd()).username(testAgentReq.getUsername()).build();
+        String testAgent = "echo 'hello'";
+        try {
+            String testBack = SshUtils.executeCommand(scpFileEngineNodeDto, testAgent, false);
+            if ("hello\n".equals(testBack)) {
+                return TestAgentRes.builder().status("SUCCESS").log("链接成功").build();
+            } else {
+                return TestAgentRes.builder().status("FAIL").log(testBack).build();
+            }
+        } catch (JSchException | InterruptedException | IOException e) {
+            return TestAgentRes.builder().status("FAIL").log(e.getMessage()).build();
+        }
+    }
+
     /**
      * 安装节点.
      */
@@ -204,8 +234,11 @@ public class ClusterNodeBizService {
         // 如果是安装中等状态，需要等待运行结束
         if (ClusterNodeStatus.CHECKING.equals(clusterNode.getStatus())
             || ClusterNodeStatus.INSTALLING.equals(clusterNode.getStatus())
-            || ClusterNodeStatus.REMOVING.equals(clusterNode.getStatus())) {
-            throw new IsxAppException("进行中，稍后再试");
+            || ClusterNodeStatus.REMOVING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.STARTING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.STOPPING.equals(clusterNode.getStatus())
+            || ClusterNodeStatus.RUNNING.equals(clusterNode.getStatus())) {
+            throw new IsxAppException("当前状态无法操作，请稍后再试");
         }
 
         // 将节点信息转成工具类识别对象
@@ -234,7 +267,7 @@ public class ClusterNodeBizService {
         if (ClusterNodeStatus.CHECKING.equals(engineNode.getStatus())
             || ClusterNodeStatus.INSTALLING.equals(engineNode.getStatus())
             || ClusterNodeStatus.REMOVING.equals(engineNode.getStatus())) {
-            throw new IsxAppException("进行中，稍后再试");
+            throw new IsxAppException("当前状态无法操作，请稍后再试");
         }
 
         // 将节点信息转成工具类识别对象
@@ -258,6 +291,15 @@ public class ClusterNodeBizService {
         // 获取节点信息
         ClusterNodeEntity engineNode = clusterNodeService.getClusterNode(cleanAgentReq.getEngineNodeId());
 
+        // 如果是安装中等状态，需要等待运行结束
+        if (ClusterNodeStatus.CHECKING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.INSTALLING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.REMOVING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.STARTING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.STOPPING.equals(engineNode.getStatus())) {
+            throw new IsxAppException("当前状态无法操作，请稍后再试");
+        }
+
         // 将节点信息转成工具类识别对象
         ScpFileEngineNodeDto scpFileEngineNodeDto = engineNodeMapper.engineNodeEntityToScpFileEngineNodeDto(engineNode);
         scpFileEngineNodeDto.setPasswd(aesUtils.decrypt(scpFileEngineNodeDto.getPasswd()));
@@ -277,8 +319,10 @@ public class ClusterNodeBizService {
         // 如果是安装中等状态，需要等待运行结束
         if (ClusterNodeStatus.CHECKING.equals(engineNode.getStatus())
             || ClusterNodeStatus.INSTALLING.equals(engineNode.getStatus())
-            || ClusterNodeStatus.REMOVING.equals(engineNode.getStatus())) {
-            throw new IsxAppException("进行中，稍后再试");
+            || ClusterNodeStatus.REMOVING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.STARTING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.STOPPING.equals(engineNode.getStatus())) {
+            throw new IsxAppException("当前状态无法操作，请稍后再试");
         }
 
         // 将节点信息转成工具类识别对象
@@ -307,8 +351,10 @@ public class ClusterNodeBizService {
         // 如果是安装中等状态，需要等待运行结束
         if (ClusterNodeStatus.CHECKING.equals(engineNode.getStatus())
             || ClusterNodeStatus.INSTALLING.equals(engineNode.getStatus())
-            || ClusterNodeStatus.REMOVING.equals(engineNode.getStatus())) {
-            throw new IsxAppException("进行中，稍后再试");
+            || ClusterNodeStatus.REMOVING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.STARTING.equals(engineNode.getStatus())
+            || ClusterNodeStatus.STOPPING.equals(engineNode.getStatus())) {
+            throw new IsxAppException("当前状态无法操作，请稍后再试");
         }
 
         // 将节点信息转成工具类识别对象

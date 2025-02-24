@@ -84,6 +84,15 @@ export function UpdateWorkflowDetailList(params: any): Promise<any> {
   })
 }
 
+// 作业-复制
+export function CopyWorkflowDetailList(params: any): Promise<any> {
+  return http.request({
+    method: 'post',
+    url: '/work/copyWork',
+    params: params
+  })
+}
+
 // 作业-删除
 export function DeleteWorkflowDetailList(params: any): Promise<any> {
   return http.request({
@@ -283,6 +292,42 @@ export function ReRunWorkflow(params: any): Promise<any> {
   return http.request({
     method: 'post',
     url: '/workflow/reRunFlow',
+    params: params
+  })
+}
+
+// 外部调用获取链接
+export function GetInvokeUrl(params: any): Promise<any> {
+  return http.request({
+    method: 'post',
+    url: '/workflow/getInvokeUrl',
+    params: params
+  })
+}
+
+// 获取作业返回的jsonPath接口
+export function GetWorkInstanceJsonPath(params: any): Promise<any> {
+  return http.request({
+    method: 'post',
+    url: '/work/getWorkInstanceJsonPath',
+    params: params
+  })
+}
+
+// 获取作业返回的几行几列结果接口
+export function GetWorkInstanceTablePath(params: any): Promise<any> {
+  return http.request({
+    method: 'post',
+    url: '/work/getWorkInstanceTablePath',
+    params: params
+  })
+}
+
+// 获取作业返回的正则解析结果接口
+export function GetWorkInstanceRegexPath(params: any): Promise<any> {
+  return http.request({
+    method: 'post',
+    url: '/work/getWorkInstanceRegexPath',
     params: params
   })
 }

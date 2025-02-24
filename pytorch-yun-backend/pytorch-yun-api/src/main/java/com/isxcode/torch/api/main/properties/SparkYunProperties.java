@@ -11,18 +11,9 @@ import org.springframework.stereotype.Component;
 @EnableConfigurationProperties(SparkYunProperties.class)
 public class SparkYunProperties {
 
-    /**
-     * 可以让脚本临时复制的目录.
-     */
+    /** 可以让脚本临时复制的目录. */
     private String tmpDir = "/tmp";
 
-    /**
-     * 代理默认端口号.
-     */
-    private String defaultAgentPort = "30178";
-
-    /**
-     * 资源文件默认目录.
-     */
-    private String resourceDir = "/var/lib/zhihuiyun";
+    /** 代理默认端口号. */
+    private String defaultAgentPort = "30177";
 }

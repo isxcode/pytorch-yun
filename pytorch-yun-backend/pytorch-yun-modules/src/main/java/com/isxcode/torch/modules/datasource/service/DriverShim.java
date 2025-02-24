@@ -1,10 +1,10 @@
 /*
- * This file is part of dependency -check- core.
+ * This file is part of dependency-check-core.
  *
- * Licensed under the Apache License, Version 2.0 (the "License" ); you may not use this file except
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
  *
- * http:// www. apache. org/ licenses / LICENSE -2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
@@ -18,6 +18,7 @@
  */
 package com.isxcode.torch.modules.datasource.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -39,7 +40,8 @@ import java.util.Properties;
  * @author Jeremy Long
  * @see Driver
  */
-class DriverShim implements Driver {
+@Slf4j
+public class DriverShim implements Driver {
 
     /**
      * The logger.
@@ -55,7 +57,7 @@ class DriverShim implements Driver {
      *
      * @param driver the database driver to wrap
      */
-    DriverShim(Driver driver) {
+    public DriverShim(Driver driver) {
         this.driver = driver;
     }
 
@@ -118,18 +120,19 @@ class DriverShim implements Driver {
      */
     @Override
     public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        // return
-        // driver.getParentLogger();
+        // return driver.getParentLogger();
         final Method m;
         try {
             m = driver.getClass().getMethod("getParentLogger");
         } catch (Throwable e) {
+            log.error(e.getMessage(), e);
             throw new SQLFeatureNotSupportedException();
         }
         if (m != null) {
             try {
                 return (java.util.logging.Logger) m.invoke(m);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                log.error(ex.getMessage(), ex);
                 LOGGER.trace("", ex);
             }
         }

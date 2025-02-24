@@ -3,9 +3,12 @@ package com.isxcode.torch.modules.workflow.run;
 import static com.isxcode.torch.common.config.CommonConfig.TENANT_ID;
 import static com.isxcode.torch.common.config.CommonConfig.USER_ID;
 
+import com.isxcode.torch.api.alarm.constants.AlarmEventType;
 import com.isxcode.torch.api.instance.constants.InstanceStatus;
+import com.isxcode.torch.api.instance.constants.InstanceType;
 import com.isxcode.torch.api.work.constants.WorkLog;
 import com.isxcode.torch.common.locker.Locker;
+import com.isxcode.torch.modules.alarm.service.AlarmService;
 import com.isxcode.torch.modules.work.entity.VipWorkVersionEntity;
 import com.isxcode.torch.modules.work.entity.WorkConfigEntity;
 import com.isxcode.torch.modules.work.entity.WorkEntity;
@@ -19,9 +22,11 @@ import com.isxcode.torch.modules.work.run.WorkExecutorFactory;
 import com.isxcode.torch.modules.work.run.WorkRunContext;
 import com.isxcode.torch.modules.workflow.entity.WorkflowInstanceEntity;
 import com.isxcode.torch.modules.workflow.repository.WorkflowInstanceRepository;
+
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -30,9 +35,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- * 工作流执行器.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -53,6 +55,8 @@ public class WorkflowRunEventListener {
     private final WorkConfigRepository workConfigRepository;
 
     private final VipWorkVersionRepository vipWorkVersionRepository;
+
+    private final AlarmService alarmService;
 
     @EventListener
     @Async("springEventThreadPool")
@@ -193,6 +197,24 @@ public class WorkflowRunEventListener {
                 workflowInstance.setDuration(
                     (System.currentTimeMillis() - workflowInstance.getExecStartDateTime().getTime()) / 1000);
                 workflowInstance.setExecEndDateTime(new Date());
+
+                // 基线告警
+                if (flowIsError) {
+                    // 执行失败，基线告警
+                    if (InstanceType.AUTO.equals(workflowInstance.getInstanceType())) {
+                        alarmService.sendWorkflowMessage(workflowInstance, AlarmEventType.RUN_FAIL);
+                    }
+                } else {
+                    // 执行成功，基线告警
+                    if (InstanceType.AUTO.equals(workInstance.getInstanceType())) {
+                        alarmService.sendWorkflowMessage(workflowInstance, AlarmEventType.RUN_SUCCESS);
+                    }
+                }
+                // 执行结束，基线告警
+                if (InstanceType.AUTO.equals(workInstance.getInstanceType())) {
+                    alarmService.sendWorkflowMessage(workflowInstance, AlarmEventType.RUN_END);
+                }
+
                 workflowInstanceRepository.saveAndFlush(workflowInstance);
 
                 // 清除缓存中的作业流日志

@@ -8,7 +8,7 @@ public interface WorkType {
     /**
      * sparkSql执行作业.
      */
-    String EXECUTE_FLINK_SQL = "FLINK_SQL";
+    String QUERY_SPARK_SQL = "SPARK_SQL";
 
     /**
      * jdbcSql执行作业
@@ -36,9 +36,9 @@ public interface WorkType {
     String PYTHON = "PYTHON";
 
     /**
-     * 用户自定义flink作业.
+     * 用户自定义spark作业.
      */
-    String FLINK_JAR = "FLINK_JAR";
+    String SPARK_JAR = "SPARK_JAR";
 
     /**
      * spark容器sql.
@@ -48,4 +48,16 @@ public interface WorkType {
     String API = "API";
 
     String PRQL = "PRQL";
+
+    String CURL = "CURL";
+
+    /**
+     * Excel导入作业.
+     */
+    String EXCEL_SYNC_JDBC = "EXCEL_SYNC_JDBC";
+
+    /**
+     * 实时计算.
+     */
+    String REAL_WORK = "REAL_WORK";
 }

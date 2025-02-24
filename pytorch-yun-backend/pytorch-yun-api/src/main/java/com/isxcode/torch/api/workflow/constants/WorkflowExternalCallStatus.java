@@ -6,12 +6,12 @@ package com.isxcode.torch.api.workflow.constants;
 public interface WorkflowExternalCallStatus {
 
     /**
-     * 外部调用已打开.
+     * 打开.
      */
-    char ON = '1';
+    String ON = "ON";
 
     /**
-     * 外部调用已关闭.
+     * 关闭.
      */
-    char OFF = '0';
+    String OFF = "OFF";
 }

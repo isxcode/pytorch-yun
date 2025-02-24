@@ -15,9 +15,9 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@SQLDelete(sql = "UPDATE SY_MONITOR SET deleted = 1 WHERE id = ?")
+@SQLDelete(sql = "UPDATE PY_MONITOR SET deleted = 1 WHERE id = ?")
 @Where(clause = "deleted = 0 ${TENANT_FILTER} ")
-@Table(name = "SY_MONITOR")
+@Table(name = "PY_MONITOR")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @EntityListeners(AuditingEntityListener.class)
 @Builder(toBuilder = true)

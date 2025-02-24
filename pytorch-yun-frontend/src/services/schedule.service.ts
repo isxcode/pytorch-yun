@@ -11,6 +11,8 @@ interface SerchParams {
   page: number;
   pageSize: number;
   searchKeyWord: string;
+  executeStatus: string
+  workflowId?: string
 }
 
 interface LogParam {
@@ -25,7 +27,7 @@ interface workflowInstanceId {
 export function GetScheduleList(params: SerchParams): Promise<any> {
   return http.request({
     method: 'post',
-    url: '/vip/woi/queryInstance',
+    url: '/work/queryInstance',
     params: params
   })
 }
@@ -34,7 +36,7 @@ export function GetScheduleList(params: SerchParams): Promise<any> {
 export function GetScheduleWorkFlowList(params: SerchParams): Promise<any> {
   return http.request({
     method: 'post',
-    url: '/vip/wfi/queryWorkFlowInstances',
+    url: '/workflow/queryWorkFlowInstances',
     params: params
   })
 }
@@ -43,7 +45,7 @@ export function GetScheduleWorkFlowList(params: SerchParams): Promise<any> {
 export function GetScheduleDetail(params: workflowInstanceId): Promise<any> {
   return http.request({
     method: 'post',
-    url: '/vip/wfi/getWorkflowInstance',
+    url: '/work/getWorkflowInstance',
     params: params
   })
 }
@@ -70,7 +72,7 @@ export function GetYarnLogData(params: LogParam): Promise<any> {
 export function ReStartRunning(params: LogParam): Promise<any> {
   return http.request({
     method: 'get',
-    url: '/vip/woi/restartInstance',
+    url: '/vip/work-instance/restartInstance',
     params: params
   })
 }
@@ -84,11 +86,21 @@ export function GetResultData(params: LogParam): Promise<any> {
   })
 }
 
-// 删除调度历史
+// 删除调度历史-作业
 export function DeleteScheduleLog(params: LogParam): Promise<any> {
   return http.request({
     method: 'get',
-    url: '/vip/woi/deleteInstance',
+    url: '/vip/work-instance/deleteInstance',
     params: params
   })
 }
+
+// 删除调度历史-作业流
+export function DeleteWorkFlowScheduleLog(params: workflowInstanceId): Promise<any> {
+  return http.request({
+    method: 'post',
+    url: '/vip/workflow-instance/deleteWorkflowInstance',
+    params: params
+  })
+}
+

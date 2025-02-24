@@ -3,26 +3,23 @@
   width: 100vw;
   height: 100vh;
 
-  
+
   &.is-collapse {
-    
+
     .zqy-home__sidebar {
       width: 80px;
+      z-index: 999;
       .zqy-home__nav {
         display: flex;
         justify-content: center;
         align-items: center;
       }
     }
-    
+
     .zqy-home__main {
       padding-left: 80px;
-      // 适配输入框穿透问题
-      .flow-container {
-        max-width: calc(100vw - 282px);
-      }
     }
-    
+
     .zqy-home__menu-footer {
       // width: 80px;
       padding-left: 24px;
@@ -30,13 +27,13 @@
       // flex-direction: column;
       // justify-content: space-evenly;
     }
-    
-    
+
+
     .zqy-home__title {
       display: none;
     }
   }
-  
+
   .zqy-home__sidebar {
     --el-transition-duration: 0.3s;
 
@@ -51,17 +48,15 @@
     background-color: getCssVar('color', 'white');
     transition: width getCssVar('transition-duration') ease-in-out;
     border-right: 1px solid var(--el-border-color);
+    z-index: 2000;
   }
-  
+
   .zqy-home__main {
     width: 100vw;
-    padding-left: 220px;
+    background-color: getCssVar('color', 'white');
+    padding-left: 80px;
     box-sizing: border-box;
     transition: all getCssVar('transition-duration') ease-in-out;
-    // padding-bottom: 24px;
-    .flow-container {
-      max-width: calc(100vw - 422px);
-    }
   }
 
   .zqy-home__nav {
@@ -114,6 +109,13 @@
     width: 100%;
     .zqy-home__menu.el-menu {
       border-right: 0;
+      .el-sub-menu {
+        .el-menu {
+          .el-menu-item {
+            padding-left: 44px;
+          }
+        }
+      }
       .el-menu-item {
         border-radius: getCssVar('border-radius', 'base');
 
@@ -153,7 +155,7 @@
 
   .zyq-home__menu-title {
     max-width: 72px;
-  }  
+  }
 }
 
 .zyq-home__menu-icon {

@@ -1,44 +1,34 @@
-<!--
- * @Author: fanciNate
- * @Date: 2023-05-26 16:35:28
- * @LastEditTime: 2023-06-18 15:48:24
- * @LastEditors: fanciNate
- * @Description: In User Settings Edit
- * @FilePath: /pytorch-yun/pytorch-yun-website/src/views/workflow/work-item/running-log.vue
--->
 <template>
-  <div
-    id="content"
-    class="running-log"
-  >
-    <pre
-      v-if="logMsg"
-      ref="preContentRef"
-      @mousewheel="mousewheelEvent"
-    >{{ logMsg }}</pre>
-    <EmptyPage v-else />
+  <div id="content" class="running-log">
+    <LoadingPage :visible="loading">
+      <LogContainer
+        v-if="logMsg"
+        :logMsg="logMsg"
+        :status="true"
+        :showResult="false"
+      ></LogContainer>
+      <EmptyPage v-else />
+    </LoadingPage>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onUnmounted, ref, defineExpose } from 'vue'
+import { ref, defineExpose } from 'vue'
 import EmptyPage from '@/components/empty-page/index.vue'
 import { GetYarnLogData } from '@/services/schedule.service'
+import LoadingPage from '@/components/loading/index.vue'
 
 const logMsg = ref('')
-const position = ref(true)
-const timer = ref(null)
-const preContentRef = ref(null)
 const pubId = ref('')
+const loading = ref<boolean>(false)
+
+const props = defineProps<{
+  showParse: boolean
+}>()
 
 function initData(id: string): void {
   pubId.value = id
   getLogData(pubId.value)
-  if (!timer.value) {
-    timer.value = setInterval(() => {
-      getLogData(pubId.value)
-    }, 3000)
-  }
 }
 
 // 获取日志
@@ -47,44 +37,15 @@ function getLogData(id: string) {
     logMsg.value = ''
     return
   }
-  GetYarnLogData({
-    instanceId: id
+  loading.value = true
+  GetYarnLogData({ instanceId: id}).then((res: any) => {
+    logMsg.value = res.data.yarnLog
+    loading.value = false
+  }).catch(() => {
+    logMsg.value = ''
+    loading.value = false
   })
-    .then((res: any) => {
-      logMsg.value = res.data.yarnLog
-      if (position.value) {
-        nextTick(() => {
-          scrollToButtom()
-        })
-      }
-    })
-    .catch(() => {
-      logMsg.value = ''
-      if (timer.value) {
-          clearInterval(timer.value)
-      }
-      timer.value = null
-    })
 }
-
-function scrollToButtom() {
-  if (preContentRef.value) {
-    document.getElementById('content').scrollTop = preContentRef.value?.scrollHeight // 滚动高度
-  }
-}
-
-function mousewheelEvent(e: any) {
-  if (!(e.deltaY > 0)) {
-    position.value = false
-  }
-}
-
-onUnmounted(() => {
-  if (timer.value) {
-    clearInterval(timer.value)
-  }
-  timer.value = null
-})
 
 defineExpose({
   initData
@@ -93,14 +54,30 @@ defineExpose({
 
 <style lang="scss">
 .running-log {
-  pre {
-    color: getCssVar('text-color', 'primary');
-    font-size: 12px;
-    line-height: 21px;
-    margin: 0;
-  }
+  height: 100%;
   .empty-page {
-    height: 50%;
+    height: 100%;
+  }
+  .zqy-loading {
+    position: static;
+    height: 100% !important;
+    padding: 0 !important;
+    margin-top: 0 !important;
+    overflow: auto;
+  }
+}
+.zqy-json-parse {
+  font-size: 12px;
+  color: getCssVar('color', 'primary');
+  cursor: pointer;
+  position: absolute;
+  right: 40px;
+  top: 12px;
+  &.zqy-json-parse__log {
+    right: 98px;
+  }
+  &:hover {
+      text-decoration: underline;
   }
 }
 </style>

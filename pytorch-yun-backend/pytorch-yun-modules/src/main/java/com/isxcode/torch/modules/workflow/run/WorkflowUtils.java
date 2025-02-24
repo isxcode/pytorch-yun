@@ -6,12 +6,8 @@ import static com.isxcode.torch.common.config.CommonConfig.USER_ID;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.TypeReference;
-import com.isxcode.torch.api.work.pojos.dto.ApiWorkConfig;
-import com.isxcode.torch.api.work.pojos.dto.ClusterConfig;
-import com.isxcode.torch.api.work.pojos.dto.JarJobConfig;
-import com.isxcode.torch.api.work.pojos.dto.SyncRule;
-import com.isxcode.torch.api.work.pojos.dto.SyncWorkConfig;
-import com.isxcode.torch.api.workflow.pojos.dto.NodeInfo;
+import com.isxcode.torch.api.work.dto.*;
+import com.isxcode.torch.api.workflow.dto.NodeInfo;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.common.utils.jgrapht.JgraphtUtils;
 import com.isxcode.torch.modules.work.entity.VipWorkVersionEntity;
@@ -24,9 +20,6 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.util.Strings;
 
-/**
- * 工作流工具类.
- */
 public class WorkflowUtils {
 
     /**
@@ -143,6 +136,7 @@ public class WorkflowUtils {
             .instanceId(instanceId).tenantId(TENANT_ID.get())
             .clusterConfig(JSON.parseObject(workConfig.getClusterConfig(), ClusterConfig.class))
             .syncWorkConfig(JSON.parseObject(workConfig.getSyncWorkConfig(), SyncWorkConfig.class))
+            .excelSyncConfig(JSON.parseObject(workConfig.getExcelSyncConfig(), ExcelSyncConfig.class))
             .syncRule(JSON.parseObject(workConfig.getSyncRule(), SyncRule.class)).workType(work.getWorkType())
             .jarJobConfig(JSON.parseObject(workConfig.getJarJobConfig(), JarJobConfig.class))
             .funcConfig(JSON.parseArray(workConfig.getFuncConfig(), String.class))
@@ -153,12 +147,10 @@ public class WorkflowUtils {
 
     public static WorkRunContext genWorkRunContext(String instanceId, VipWorkVersionEntity workVersion,
         WorkflowRunEvent event) {
-        // todo
-        // 维护udf配置信息
-        // 维护自定义作业配置信息
         return WorkRunContext.builder().datasourceId(workVersion.getDatasourceId()).script(workVersion.getScript())
             .instanceId(instanceId).tenantId(TENANT_ID.get()).userId(USER_ID.get())
             .syncWorkConfig(JSON.parseObject(workVersion.getSyncWorkConfig(), SyncWorkConfig.class))
+            .excelSyncConfig(JSON.parseObject(workVersion.getExcelSyncConfig(), ExcelSyncConfig.class))
             .syncRule(JSON.parseObject(workVersion.getSyncRule(), SyncRule.class))
             .clusterConfig(JSON.parseObject(workVersion.getClusterConfig(), ClusterConfig.class))
             .jarJobConfig(JSON.parseObject(workVersion.getJarJobConfig(), JarJobConfig.class))
@@ -167,6 +159,16 @@ public class WorkflowUtils {
             .containerId(workVersion.getContainerId()).workType(workVersion.getWorkType())
             .apiWorkConfig(JSON.parseObject(workVersion.getApiWorkConfig(), ApiWorkConfig.class))
             .workName(event.getWorkName()).workId(workVersion.getId()).build();
+    }
+
+    public static WorkRunContext genWorkRunContext(VipWorkVersionEntity workVersion) {
+
+        return WorkRunContext.builder().workId(workVersion.getWorkId())
+            .clusterConfig(JSON.parseObject(workVersion.getClusterConfig(), ClusterConfig.class))
+            .datasourceId(workVersion.getDatasourceId()).userId(USER_ID.get()).tenantId(TENANT_ID.get())
+            .script(workVersion.getScript()).workType(workVersion.getWorkType())
+            .syncRule(JSON.parseObject(workVersion.getSyncRule(), SyncRule.class)).versionId(workVersion.getId())
+            .build();
     }
 
     /**

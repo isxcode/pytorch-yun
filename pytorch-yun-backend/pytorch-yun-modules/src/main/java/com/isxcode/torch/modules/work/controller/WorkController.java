@@ -1,9 +1,15 @@
 package com.isxcode.torch.modules.work.controller;
 
+import com.isxcode.torch.api.instance.req.*;
+import com.isxcode.torch.api.instance.res.GetWorkInstanceValuePathRes;
+import com.isxcode.torch.api.instance.res.GetWorkflowInstanceRes;
+import com.isxcode.torch.api.instance.res.QueryInstanceRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
-import com.isxcode.torch.api.work.pojos.req.*;
-import com.isxcode.torch.api.work.pojos.res.*;
+import com.isxcode.torch.api.user.constants.RoleType;
+import com.isxcode.torch.api.work.req.*;
+import com.isxcode.torch.api.work.res.*;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
+import com.isxcode.torch.modules.work.service.ExcelSyncService;
 import com.isxcode.torch.modules.work.service.biz.SyncWorkBizService;
 import com.isxcode.torch.modules.work.service.biz.WorkBizService;
 import com.isxcode.torch.modules.work.service.biz.WorkConfigBizService;
@@ -11,16 +17,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Tag(name = "作业模块")
-@RestController
 @RequestMapping(ModuleCode.WORK)
+@RestController
 @RequiredArgsConstructor
 public class WorkController {
 
@@ -29,6 +34,8 @@ public class WorkController {
     private final WorkConfigBizService workConfigBizService;
 
     private final SyncWorkBizService syncWorkBizService;
+
+    private final ExcelSyncService excelSyncService;
 
     @Operation(summary = "添加作业接口")
     @PostMapping("/addWork")
@@ -86,6 +93,7 @@ public class WorkController {
         return workBizService.getStatus(getStatusReq);
     }
 
+    @Secured({RoleType.TENANT_ADMIN})
     @Operation(summary = "删除作业接口")
     @PostMapping("/deleteWork")
     @SuccessResponse("删除成功")
@@ -150,7 +158,7 @@ public class WorkController {
         workBizService.topWork(topWorkReq);
     }
 
-    @Operation(summary = "获取数据源表信息")
+    @Operation(summary = "获取数据源表信息接口")
     @PostMapping("/getDataSourceTables")
     @SuccessResponse("查询成功")
     public GetDataSourceTablesRes getDataSourceTables(@Valid @RequestBody GetDataSourceTablesReq getDataSourceTablesReq)
@@ -159,7 +167,7 @@ public class WorkController {
         return syncWorkBizService.getDataSourceTables(getDataSourceTablesReq);
     }
 
-    @Operation(summary = "获取数据表字段信息")
+    @Operation(summary = "获取数据表字段信息接口")
     @PostMapping("/getDataSourceColumns")
     @SuccessResponse("查询成功")
     public GetDataSourceColumnsRes getDataSourceColumns(
@@ -168,7 +176,7 @@ public class WorkController {
         return syncWorkBizService.getDataSourceColumns(getDataSourceColumnsReq);
     }
 
-    @Operation(summary = "数据预览")
+    @Operation(summary = "数据预览接口")
     @PostMapping("/getDataSourceData")
     @SuccessResponse("查询成功")
     public GetDataSourceDataRes getDataSourceData(@Valid @RequestBody GetDataSourceDataReq getDataSourceDataReq)
@@ -177,13 +185,81 @@ public class WorkController {
         return syncWorkBizService.getDataSourceData(getDataSourceDataReq);
     }
 
-    @Operation(summary = "DDL预生成")
+    @Operation(summary = "DDL预生成接口")
     @PostMapping("/getCreateTableSql")
     @SuccessResponse("查询成功")
     public GetCreateTableSqlRes getCreateTableSql(@Valid @RequestBody GetCreateTableSqlReq getCreateTableSqlReq)
         throws Exception {
 
         return syncWorkBizService.getCreateTableSql(getCreateTableSqlReq);
+    }
+
+    @Operation(summary = "获取Excel文件的字段信息接口")
+    @PostMapping("/getExcelColumns")
+    @SuccessResponse("查询成功")
+    public GetExcelColumnsRes getExcelColumns(@Valid @RequestBody GetExcelColumnsReq getExcelColumnsReq) {
+
+        return excelSyncService.getExcelColumns(getExcelColumnsReq);
+    }
+
+    @Operation(summary = "excel数据预览接口")
+    @PostMapping("/getExcelData")
+    @SuccessResponse("查询成功")
+    public GetExcelDataRes getExcelData(@Valid @RequestBody GetExcelDataReq getExcelDataReq) {
+
+        return excelSyncService.getExcelData(getExcelDataReq);
+    }
+
+    @Operation(summary = "预览excel文件名接口")
+    @PostMapping("/parseExcelName")
+    @SuccessResponse("查询成功")
+    public ParseExcelNameRes parseExcelName(@Valid @RequestBody ParseExcelNameReq parseExcelNameReq) {
+
+        return excelSyncService.parseExcelName(parseExcelNameReq);
+    }
+
+    @Operation(summary = "查看作业实例接口")
+    @PostMapping("/queryInstance")
+    @SuccessResponse("查询成功")
+    public Page<QueryInstanceRes> queryInstance(@Valid @RequestBody QueryInstanceReq woiQueryInstanceReq) {
+
+        return workBizService.queryInstance(woiQueryInstanceReq);
+    }
+
+    @Operation(summary = "查询单个作业流实例信息接口")
+    @PostMapping("/getWorkflowInstance")
+    @SuccessResponse("查询成功")
+    public GetWorkflowInstanceRes getWorkflowInstance(
+        @Valid @RequestBody GetWorkflowInstanceReq wfiGetWorkflowInstanceReq) {
+
+        return workBizService.getWorkflowInstance(wfiGetWorkflowInstanceReq);
+    }
+
+    @Operation(summary = "获取作业返回的jsonPath接口")
+    @PostMapping("/getWorkInstanceJsonPath")
+    @SuccessResponse("查询成功")
+    public List<GetWorkInstanceValuePathRes> getWorkInstanceJsonPath(
+        @Valid @RequestBody GetWorkInstanceJsonPathReq getWorkInstanceJsonPathReq) {
+
+        return workBizService.getWorkInstanceJsonPath(getWorkInstanceJsonPathReq);
+    }
+
+    @Operation(summary = "获取作业返回的正则解析结果接口")
+    @PostMapping("/getWorkInstanceRegexPath")
+    @SuccessResponse("查询成功")
+    public GetWorkInstanceValuePathRes getWorkInstanceRegexPath(
+        @Valid @RequestBody GetWorkInstanceRegexPathReq getWorkInstanceJsonPathReq) {
+
+        return workBizService.getWorkInstanceRegexPath(getWorkInstanceJsonPathReq);
+    }
+
+    @Operation(summary = "获取作业返回的几行几列结果接口")
+    @PostMapping("/getWorkInstanceTablePath")
+    @SuccessResponse("查询成功")
+    public GetWorkInstanceValuePathRes getWorkInstanceTablePath(
+        @Valid @RequestBody GetWorkInstanceTablePathReq getWorkInstanceTablePathReq) {
+
+        return workBizService.getWorkInstanceTablePath(getWorkInstanceTablePathReq);
     }
 
 }

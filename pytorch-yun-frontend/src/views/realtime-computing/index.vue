@@ -6,7 +6,7 @@
         type="primary"
         @click="addData"
       >
-        添加实时计算
+        添加实时
       </el-button>
       <div class="zqy-seach">
         <el-input
@@ -37,45 +37,11 @@
             >{{ scopeSlot.row.name }}</span>
           </template>
           <template #statusTag="scopeSlot">
-            <div class="btn-group">
-              <el-tag
-                v-if="scopeSlot.row.status === 'DEPLOYING'"
-                class="ml-2"
-              >
-                部署中
-              </el-tag>
-              <el-tag
-                v-if="scopeSlot.row.status === 'FAIL'"
-                class="ml-2"
-                type="danger"
-              >
-                失败
-              </el-tag>
-              <el-tag
-                v-if="scopeSlot.row.status === 'STOP'"
-                class="ml-2"
-              >
-                停止
-              </el-tag>
-              <el-tag
-                v-if="scopeSlot.row.status === 'RUNNING'"
-                class="ml-2"
-                type="success"
-              >
-                运行中
-              </el-tag>
-              <el-tag
-                v-if="scopeSlot.row.status === 'NEW'"
-                class="ml-2"
-                type="info"
-              >
-                新建
-              </el-tag>
-            </div>
+            <ZStatusTag :status="scopeSlot.row.status === 'STOP' ? 'STOP_S' : scopeSlot.row.status"></ZStatusTag>
           </template>
           <template #options="scopeSlot">
             <div class="btn-group">
-              <span @click="editData(scopeSlot.row)">编辑</span>
+              <span @click="checkData(scopeSlot.row)">检测</span>
               <el-dropdown trigger="click">
                 <span class="click-show-more">更多</span>
                 <template #dropdown>
@@ -86,14 +52,14 @@
                     <el-dropdown-item v-if="scopeSlot.row.status === 'RUNNING'" @click="showRunningLog(scopeSlot.row)">
                       运行日志
                     </el-dropdown-item>
-                    <el-dropdown-item @click="stopComputing(scopeSlot.row)">
-                      停止
+                    <el-dropdown-item @click="editData(scopeSlot.row)">
+                      编辑
                     </el-dropdown-item>
                     <el-dropdown-item @click="startComputing(scopeSlot.row)">
                       运行
                     </el-dropdown-item>
-                    <el-dropdown-item @click="checkData(scopeSlot.row)">
-                      检测
+                    <el-dropdown-item @click="stopComputing(scopeSlot.row)">
+                      停止
                     </el-dropdown-item>
                     <el-dropdown-item @click="deleteData(scopeSlot.row)">
                       删除
@@ -122,6 +88,7 @@ import { SaveTimeComputingData, GetTimeComputingList, UpdateTimeComputingData, D
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import ShowLog from './show-log/index.vue'
+import {Loading} from "@element-plus/icons-vue";
 
 const router = useRouter()
 
@@ -169,6 +136,10 @@ function initData(tableLoading?: boolean, type?: string) {
       loading.value = false
       tableConfig.loading = false
       networkError.value = true
+      if (timer.value) {
+        clearInterval(timer.value)
+      }
+      timer.value = null
     })
 }
 
@@ -291,6 +262,8 @@ function handleCurrentChange(e: number) {
 }
 
 onMounted(() => {
+  tableConfig.pagination.currentPage = 1
+  tableConfig.pagination.pageSize = 10
   initData()
   timer.value = setInterval(() => {
     !isRequest.value && initData(true, 'interval')

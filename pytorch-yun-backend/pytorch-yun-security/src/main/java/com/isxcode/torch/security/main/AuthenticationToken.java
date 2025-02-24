@@ -23,8 +23,7 @@ public class AuthenticationToken extends AbstractAuthenticationToken {
 
         super(null);
         this.principal = principal;
-        // this.credentials
-        // = "";
+        // this.credentials = "";
         setAuthenticated(false);
     }
 

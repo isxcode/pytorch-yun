@@ -30,9 +30,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@SQLDelete(sql = "UPDATE SY_WORKFLOW_INSTANCE SET deleted = 1 WHERE id = ?")
+@SQLDelete(sql = "UPDATE PY_WORKFLOW_INSTANCE SET deleted = 1 WHERE id = ?")
 @Where(clause = "deleted = 0 ${TENANT_FILTER} ")
-@Table(name = "SY_WORKFLOW_INSTANCE")
+@Table(name = "PY_WORKFLOW_INSTANCE")
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @EntityListeners(AuditingEntityListener.class)
 public class WorkflowInstanceEntity {

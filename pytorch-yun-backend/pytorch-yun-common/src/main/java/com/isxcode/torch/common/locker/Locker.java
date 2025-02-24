@@ -46,9 +46,7 @@ public class Locker {
         lockerRepository.delete(lockerRepository.findById(id).get());
     }
 
-    /**
-     * 清理锁.
-     */
+    /** 清理锁. */
     public void clearLock(String name) {
 
         // 将name相关的删掉

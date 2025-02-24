@@ -1,10 +1,10 @@
 package com.isxcode.torch.modules.tenant.controller;
 
 import com.isxcode.torch.api.main.constants.ModuleCode;
-import com.isxcode.torch.api.tenant.pojos.req.*;
-import com.isxcode.torch.api.tenant.pojos.res.GetTenantRes;
-import com.isxcode.torch.api.tenant.pojos.res.PageTenantRes;
-import com.isxcode.torch.api.tenant.pojos.res.QueryUserTenantRes;
+import com.isxcode.torch.api.tenant.req.*;
+import com.isxcode.torch.api.tenant.res.GetTenantRes;
+import com.isxcode.torch.api.tenant.res.PageTenantRes;
+import com.isxcode.torch.api.tenant.res.QueryUserTenantRes;
 import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.tenant.service.biz.TenantBizService;
@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "租户模块")
-@RestController
 @RequestMapping(ModuleCode.TENANT)
+@RestController
 @RequiredArgsConstructor
 public class TenantController {
 

@@ -2,6 +2,7 @@ package com.isxcode.torch.modules.api.repository;
 
 import java.util.Optional;
 
+import com.isxcode.torch.api.main.constants.ModuleVipCode;
 import com.isxcode.torch.modules.api.entity.ApiEntity;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
@@ -12,12 +13,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@CacheConfig(cacheNames = {"SY_API"})
+@CacheConfig(cacheNames = {ModuleVipCode.VIP_API})
 public interface ApiRepository extends JpaRepository<ApiEntity, String> {
 
     Optional<ApiEntity> findByPathAndApiType(String path, String tenantId);
 
-    @Query("select A from ApiEntity A where A.name LIKE %:keyword% or A.remark LIKE %:keyword% order by A.lastModifiedDateTime desc")
+    @Query("select A from ApiEntity A where A.name LIKE %:keyword% or A.remark LIKE %:keyword% order by A.createDateTime desc")
     Page<ApiEntity> pageApi(@Param("keyword") String searchKeyWord, Pageable pageable);
 
     long countByStatus(String status);
