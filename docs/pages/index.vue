@@ -140,7 +140,7 @@
         <div class="right-phone">
           <img
               class="feat-img"
-              src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-4.jpg"
+              src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-4.jpg"
               alt=""
           />
         </div>
@@ -153,7 +153,7 @@
         </div>
         <div class="right">
           <img id="zoom" class="feat-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-4.jpg" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-4.jpg" alt="">
         </div>
       </div>
     </div>
@@ -161,10 +161,10 @@
       <div class="content">
         <div class="left">
           <img id="zoom" class="feat-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-5.jpg" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-5.jpg" alt="">
         </div>
         <div class="left-phone">
-          <img class="feat-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-5.jpg"
+          <img class="feat-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-5.jpg"
                alt="">
         </div>
         <div class="right">

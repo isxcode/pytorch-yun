@@ -83,7 +83,7 @@ onMounted(async () => {
   mediumZoom(document.querySelectorAll(".image-zoom"), {
     margin: 100,
     scrollOffset: 1,
-    background: "#fffaf8",
+    background: "#f1f3ff",
   });
 });
 
