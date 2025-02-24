@@ -4,10 +4,10 @@
       <div class="content">
         <div class="left">
           <div class="name">
-            至慧云
+            {{ $t("zhi_qing_yun") }}
           </div>
           <div class="slogan">
-            轻量级大模型训练平台
+            {{ $t("enterprise_data_platform") }}
           </div>
           <div class="command">
             <p id="command-shell">docker run -p 8080:8080 isxcode/zhihuiyun</p>
@@ -19,112 +19,118 @@
           </div>
           <div class="btn-div">
             <div class="guide-btn" @click="handleGuideClick">
-              <p>快速入门</p>
+              <p>{{ $t("quick_start") }}</p>
             </div>
             <div class="quick-btn" @click="handleQuickClick">
-              <p>立即体验</p>
+              <p>{{ $t("experience_now") }}</p>
               <SvgIcon name="arrow-right" class="link-right-svg"></SvgIcon>
             </div>
             <div class="movie-btn" @click="toggleVideo">
-              <p>视频介绍</p>
+              <p>{{ $t("video_introduction") }}</p>
             </div>
           </div>
         </div>
         <div class="right">
-          <div v-show="!isMobile||showVideo" class="artplayer-app"></div>
+          <div v-show="!isMobile || showVideo" class="artplayer-app"></div>
         </div>
       </div>
     </div>
     <div class="module-about">
       <div class="content">
         <div class="why-title">
-          选择至慧云
+          {{ $t("choose_light_cloud") }}
         </div>
         <div class="why-content">
-          至慧云是一款企业级大模型训练平台。具备一键Docker部署，开箱即用特色。无需额外的深度学习框架安装，即可快速实现企业级大模型训练、调优、推理等场景，兼容千义通问和DeepSeek。项目持续更新迭代，源码永久免费开源。
+          {{ $t("light_cloud_description") }}
         </div>
         <div class="why-content-mobile">
-          至慧云是一款企业级大模型训练平台。具备一键Docker部署，开箱即用特色。无需额外的深度学习框架安装，即可快速实现企业级大模型训练、调优、推理等场景。支持千义通问和DeepSeek接入，进一步扩展了平台的应用场景。
+          {{ $t("light_cloud_description_mobile") }}
         </div>
         <div class="tech-title">
-          相关技术
+          {{ $t("related_technologies") }}
         </div>
         <div class="tech-img-div">
+           <img class="tech-img"
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-pytorch.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-pytorch.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-milvus.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-milvus.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-ollama.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-ollama.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-deepseek.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-deepseek.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-ali.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-ali.png" alt="">
-          <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/tech-img/t-baidu.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-k8s.png" alt="">
         </div>
       </div>
     </div>
     <div class="module-feat-left">
       <div class="content">
         <div class="left">
-          <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-1.jpg" alt="">
+          <img id="zoom" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-1.jpg" alt="">
+        </div>
+        <div class="left-phone">
+          <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-1.jpg" alt="">
         </div>
         <div class="right">
-          <div class="line-1">多平台部署，从不娇生惯养</div>
-          <div class="line-2">支持大量计算引擎平台，如Kubernetes、Flink
-            Cluster、Yarn、CDH。可无缝迁移，无缝切换，帮助企业更优管理集群资源。
+          <div class="line-1">{{ $t("coding_capability") }}</div>
+          <div class="line-2">{{ $t("job_types_supported") }}</div>
+          <div class="line-3" @click="handleQuickClick">
+            {{ $t("experience_now") }}
           </div>
-          <div class="line-3" @click="handleQuickClick">立即体验</div>
         </div>
       </div>
     </div>
     <div class="module-feat-right">
       <div class="content">
         <div class="right-phone">
-          <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-2.jpg" alt="">
+          <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-2.jpg" alt="">
         </div>
         <div class="left">
-          <div class="line-1">驱动上传，任何姿势都能连</div>
-          <div class="line-2">
-            支持海量数据源，如Mysql、Hive、Oracle、SqlServer、TiDB、Oceanbase、Doris、Clickhouse等。用户可自定义上传多版本驱动，解决企业中多环境数据源无法同时连接的难题。
+          <div class="line-1">{{ $t("job_orchestration") }}</div>
+          <div class="line-2">{{ $t("job_support") }}</div>
+          <div class="line-3" @click="handleQuickClick">
+            {{ $t("experience_now") }}
           </div>
-          <div class="line-3" @click="handleQuickClick">立即体验</div>
         </div>
         <div class="right">
-          <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-2.jpg" alt="">
+          <img id="zoom" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-2.jpg" alt="">
         </div>
       </div>
     </div>
     <div class="module-feat-left">
       <div class="content">
         <div class="left">
-          <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-3.jpg" alt="">
+          <img id="zoom" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-3.jpg" alt="">
+        </div>
+        <div class="left-phone">
+          <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/p-3.jpg" alt="">
         </div>
         <div class="right">
-          <div class="line-1">创建租户，再大也能装下</div>
+          <div class="line-1">{{ $t("real_work") }}</div>
           <div class="line-2">
-            多租户模式，确保租户间数据隔离。租户内可单独协调集群资源、数据源驱动、作业流配置等。解决企业中规模较大、用户众多、权限难解的问题。
+            {{ $t("real_work_description") }}
           </div>
-          <div class="line-3" @click="handleQuickClick">立即体验</div>
+          <div class="line-3" @click="handleQuickClick"> {{ $t("experience_now") }}</div>
         </div>
       </div>
     </div>
     <div class="module-business">
       <div class="content">
-        <div class="line-1">数据创造价值，大数据创造大价值</div>
-        <div class="line-2">AI将至，至慧云与您携手实现企业级大数据平台落地</div>
+        <div class="line-1">{{ $t("data_drives_value") }}</div>
+        <div class="line-2">{{ $t("data_drives_value_description") }}</div>
         <div class="business-img">
-          <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-1.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-2.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-3.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-4.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-5.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-6.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-7.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-8.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-9.png" alt="">
-          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/business-img/b-10.png"
+           <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-0.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-1.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-2.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-3.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-4.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-5.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-6.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-7.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-8.png" alt="">
+          <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-9.png"
                alt="">
         </div>
       </div>
@@ -132,38 +138,50 @@
     <div class="module-feat-right">
       <div class="content">
         <div class="right-phone">
-          <img class="feat-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-4.jpg" alt="">
+          <img
+              class="feat-img"
+              src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-4.jpg"
+              alt=""
+          />
         </div>
         <div class="left">
-          <div class="line-1">编排作业，横竖都能拖拽</div>
-          <div class="line-2">
-            拥有复杂的作业执行命令，包括运行、中止、重跑、重跑下游、中断、重跑当前、发布等。且支持可视化Cron表达式调度配置，解决企业中各种复杂应用场景。
+          <div class="line-1">{{ $t("multi_platform_deployment") }}</div>
+          <div class="line-2">{{ $t("multi_platform_description") }}</div>
+          <div class="line-3" @click="handleQuickClick">
+            {{ $t("experience_now") }}
           </div>
-          <div class="line-3" @click="handleQuickClick">立即体验</div>
         </div>
         <div class="right">
-          <img class="feat-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-4.jpg" alt="">
+          <img id="zoom" class="feat-img"
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-4.jpg" alt="">
         </div>
       </div>
     </div>
     <div class="module-feat-left">
       <div class="content">
         <div class="left">
-          <img class="feat-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-5.jpg" alt="">
+          <img id="zoom" class="feat-img"
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-5.jpg" alt="">
+        </div>
+        <div class="left-phone">
+          <img class="feat-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/p-5.jpg"
+               alt="">
         </div>
         <div class="right">
-          <div class="line-1">能写代码？不单单只有FlinkSql</div>
-          <div class="line-2">
-            超多作业类型，包括数据同步、Bash、Python、FlinkSql、Jdbc、自定义Jar等。提供客户二次开发模版，任何复杂的场景都可以通过写代码的方式解决。
+          <div class="line-1">{{ $t("data_view") }}</div>
+          <div class="line-2">{{ $t("data_view_description") }}</div>
+          <div class="line-3" @click="handleQuickClick">
+            {{ $t("experience_now") }}
           </div>
-          <div class="line-3" @click="handleQuickClick">立即体验</div>
         </div>
       </div>
     </div>
     <div class="module-end">
       <div class="content">
-        <div class="line-1">开源助力企业升级大数据能力</div>
-        <div class="end-btn" @click="handleQuickClick">免费试用</div>
+        <div class="line-1">{{ $t("opensource_value") }}</div>
+        <div class="end-btn" @click="handleQuickClick">
+          {{ $t("free_trial") }}
+        </div>
       </div>
     </div>
   </div>
@@ -171,93 +189,85 @@
 </template>
 
 <script lang="ts" setup>
-import {ElMessage} from 'element-plus'
+import {ElMessage} from "element-plus";
 import Artplayer from "artplayer";
 import {defineProps} from "vue";
+import {useI18n} from "vue-i18n";
+import mediumZoom from "medium-zoom";
+
+onMounted(async () => {
+  await nextTick()
+  mediumZoom(document.querySelectorAll('#zoom'), {
+    margin: 100,
+    scrollOffset: 1,
+    background: '#f1f3ff',
+  })
+})
+
+const $t = useI18n().t;
 
 definePageMeta({
-  title: "首页",
+  title: $t("home"),
   layout: "home",
 });
 
 useSeoMeta({
-  title: "至慧云",
-  ogTitle: "至慧云",
-  description: "轻量级大模型训练平台",
-  ogDescription: "轻量级大模型训练平台",
+  title: $t("zhi_qing_yun"),
+  ogTitle: $t("zhi_yao_shu_ju"),
+  description: $t("enterprise_data_platform"),
+  ogDescription: $t("build_enterprise_open_source_software"),
 });
 
-const isMobile = useMediaQuery('(max-width: 767px)')
+const isMobile = useMediaQuery("(max-width: 767px)");
+const {locale} = useI18n();
 
 const props = defineProps({
   showVideo: {
     type: Boolean,
-    default: false,
+    default: true,
   },
-})
+});
 
-const showVideo = ref(props.showVideo)
+const showVideo = ref(props.showVideo);
 
 const toggleVideo = () => {
-  showVideo.value = !showVideo.value
-}
+  showVideo.value = !showVideo.value;
+};
 
 onMounted(() => {
   const art = new Artplayer({
     container: '.artplayer-app',
-    url: 'https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/product-img/product.mp4',
-    poster:'https://isxcode.oss-cn-shanghai.aliyuncs.com/zhiqingyun/product-img/product.jpg',
+    url: 'https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/product.mp4',
+    poster: 'https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/product-img/product.jpg',
     fullscreen: true,
     fullscreenWeb: true,
     pip: true,
     autoplay: false,
-    theme: '#ee4c2c',
+    theme: '#506bfe',
     muted: true,
     autoSize: true
   });
-})
+  window.addEventListener("scroll", handleScroll);
+  definePageMeta({
+    title: "home_title",
+    layout: "home",
+  });
+});
+
+function handleScroll() {
+  if (window.scrollY > 50) {
+    showVideo.value = false;
+  }
+}
 
 function handleGuideClick() {
-  // const router = useRouter();
-  // router.push("/docs/zh/0/0");
-   ElMessage({
-      duration: 800,
-      message: '暂未开放',
-      type: 'success',
-    });
+  const router = useRouter();
+  const langPrefix = locale.value;
+  router.push(`/${langPrefix}/docs/${langPrefix}/1/0`);
 }
 
 function handleQuickClick() {
-  // window.open("https://zhihuiyun-demo.isxcode.com");
-   ElMessage({
-      duration: 800,
-      message: '暂未开放',
-      type: 'success',
-    });
-}
-
-function handleFlinkClick() {
-  window.open("https://flink.apache.org/");
-}
-
-function handleEsClick() {
-  window.open("https://www.elastic.co/elasticsearch");
-}
-
-function handleDorisClick() {
-  window.open("https://doris.apache.org/");
-}
-
-function handleMongoClick() {
-  window.open("https://www.mongodb.com/");
-}
-
-function handleK8sClick() {
-  window.open("https://kubernetes.io/");
-}
-
-function handleHadoopClick() {
-  window.open("https://hadoop.apache.org/");
+  window.open("https://zhihuiyun-demo.isxcode.com");
 }
 
 function handleCommandCopyClick() {
@@ -270,17 +280,16 @@ function handleCommandCopyClick() {
 
 const copyContent = async (text: string) => {
   try {
-    // await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(text);
     ElMessage({
       duration: 800,
-      message: '暂未开放',
-      type: 'success',
+      message: $t("copy_success"),
+      type: "success",
     });
   } catch (err) {
     console.error("Failed to copy: ", err);
   }
 };
-
 </script>
 
 <style lang="scss" scoped>
@@ -293,11 +302,11 @@ $module-about-height: 460px;
 // 商业板块的高度
 $module-business-height: 550px;
 // 主题色
-$primary-color: #ee4c2c;
+$primary-color: #506bfe;
 // 特点1背景色
 $module-feat-left-bg-color: white;
 // 特点2背景色
-$module-feat-right-bg-color: rgba(238, 76, 44, 5%);
+$module-feat-right-bg-color: rgba(80, 107, 254, 5%);
 // 特点高度
 $module-feat-height: 440px;
 // 结束板块高度
@@ -307,18 +316,15 @@ $primary-width: 1200px;
 // 产品介绍图片大小
 $module-intro-img-width: 600px;
 
-
 .main {
-
   font-family: "阿里巴巴普惠体 2.0 45 Light", sans-serif;
-
   .module-intro {
     width: 100%;
     height: $module-intro-height;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-0.png');
+    background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/web-img/bg-0.png");
     padding-top: 200px;
     position: relative;
     overflow: hidden;
@@ -338,7 +344,7 @@ $module-intro-img-width: 600px;
       display: flex;
 
       .left {
-        width: 600px;;
+        width: 600px;
 
         .name {
           margin-top: 120px;
@@ -356,8 +362,8 @@ $module-intro-img-width: 600px;
           display: flex;
           margin-top: 20px;
           padding-left: 15px;
-          border: $primary-color solid 1px;
-          color: $primary-color;
+          border: #506bfe solid 1px;
+          color: #506bfe;
           width: 435px;
           border-radius: 3px;
           font-size: 17px;
@@ -366,7 +372,7 @@ $module-intro-img-width: 600px;
 
           .copy-icon {
             cursor: pointer;
-            margin-left: 15px;
+            margin-left: 20px;
             margin-top: 6px;
             width: 24px;
             height: 24px;
@@ -381,7 +387,7 @@ $module-intro-img-width: 600px;
             cursor: pointer;
             width: 120px;
             border-radius: 3px;
-            background: $primary-color;
+            background: #506bfe;
             color: white;
             text-align: center;
             font-size: 18px;
@@ -397,7 +403,7 @@ $module-intro-img-width: 600px;
             cursor: pointer;
             margin-left: 20px;
             width: 150px;
-            color: $primary-color;
+            color: #506bfe;
             height: 40px;
             line-height: 40px;
             text-align: center;
@@ -443,9 +449,9 @@ $module-intro-img-width: 600px;
       .why-content {
         margin: 25px auto auto;
         text-indent: 2em;
-        width: 900px;
-        line-height: 24px;
-        font-size: 17px;
+        width: 850px;
+        line-height: 26px;
+        font-size: 18px;
       }
 
       .why-content-mobile {
@@ -461,7 +467,6 @@ $module-intro-img-width: 600px;
       }
 
       .tech-img-div {
-
         .tech-img {
           cursor: pointer;
         }
@@ -485,7 +490,7 @@ $module-intro-img-width: 600px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-2.png');
+    background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/web-img/bg-2.png");
     display: flex;
     align-items: center;
     justify-content: center;
@@ -533,8 +538,12 @@ $module-intro-img-width: 600px;
   .content {
     display: flex;
 
+    .left-phone {
+      display: none;
+    }
+
     .left {
-      width: 600px;;
+      width: 600px;
 
       img {
         width: 450px;
@@ -545,7 +554,7 @@ $module-intro-img-width: 600px;
     .right {
       margin-left: 100px;
       margin-top: 50px;
-      width: 600px;;
+      width: 600px;
 
       .line-1 {
         font-family: "阿里妈妈数黑体 Bold", sans-serif;
@@ -563,12 +572,11 @@ $module-intro-img-width: 600px;
       .line-3 {
         cursor: pointer;
         margin-top: 35px;
-        color: $primary-color;
+        color: #506bfe;
         font-family: "阿里妈妈数黑体 Bold", sans-serif;
       }
     }
   }
-
 }
 
 .module-feat-right {
@@ -597,7 +605,7 @@ $module-intro-img-width: 600px;
     }
 
     .left {
-      width: 600px;;
+      width: 600px;
       margin-top: 50px;
 
       .line-1 {
@@ -616,7 +624,7 @@ $module-intro-img-width: 600px;
       .line-3 {
         cursor: pointer;
         margin-top: 35px;
-        color: $primary-color;
+        color: #506bfe;
         font-family: "阿里妈妈数黑体 Bold", sans-serif;
       }
     }
@@ -628,7 +636,7 @@ $module-intro-img-width: 600px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-image: url('https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-1.png');
+  background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/web-img/bg-1.png");
   display: flex;
   align-items: center;
   justify-content: center;
@@ -647,7 +655,7 @@ $module-intro-img-width: 600px;
       cursor: pointer;
       margin: 40px auto auto;
       background: white;
-      color: $primary-color;
+      color: #506bfe;
       width: 200px;
       font-size: 20px;
       border-radius: 3px;
@@ -666,9 +674,7 @@ $module-intro-img-width: 600px;
 // ------------------------------------------------------- 移动端 ----------------------------------------------------------------------
 
 @media (max-width: 768px) {
-
   .main {
-
     .module-intro {
       width: 100%;
       height: 850px;
@@ -721,7 +727,7 @@ $module-intro-img-width: 600px;
               cursor: pointer;
               width: 170px;
               border-radius: 3px;
-              background: $primary-color;
+              background: #506bfe;
               color: white;
               text-align: center;
               font-size: 18px;
@@ -738,7 +744,7 @@ $module-intro-img-width: 600px;
               cursor: pointer;
               width: 150px;
               margin: auto;
-              background: $primary-color;
+              background: #506bfe;
               color: white;
               height: 40px;
               line-height: 40px;
@@ -773,10 +779,10 @@ $module-intro-img-width: 600px;
         .why-content-mobile {
           display: block;
           margin: 25px auto auto;
-          text-indent: 2em;
           width: 300px;
-          line-height: 22px;
-          font-size: 18px;
+          line-height: 25px;
+          font-size: 19px;
+          text-indent: 2em;
         }
 
         .why-content {
@@ -799,7 +805,7 @@ $module-intro-img-width: 600px;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      background-image: url('https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-2.png');
+      background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-2.png");
       align-items: center;
 
       .content {
@@ -847,7 +853,13 @@ $module-intro-img-width: 600px;
       flex-direction: column;
 
       .left {
+        display: none;
+      }
+
+      .left-phone {
+        display: block;
         width: 300px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 
         img {
           width: 300px;
@@ -870,7 +882,8 @@ $module-intro-img-width: 600px;
           height: 100px;
           width: 300px;
           margin-top: 30px;
-          line-height: 22px;
+          line-height: 25px;
+          font-size: 18px;
         }
 
         .line-3 {
@@ -878,11 +891,9 @@ $module-intro-img-width: 600px;
         }
       }
     }
-
   }
 
   .module-feat-right {
-
     width: 100%;
     height: 480px;
     display: flex;
@@ -922,7 +933,8 @@ $module-intro-img-width: 600px;
           height: 100px;
           width: 300px;
           margin-top: 30px;
-          line-height: 22px;
+          line-height: 25px;
+          font-size: 18px;
         }
 
         .line-3 {
@@ -937,7 +949,7 @@ $module-intro-img-width: 600px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-1.png');
+    background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-1.png");
     display: flex;
     align-items: center;
     justify-content: center;
@@ -962,6 +974,5 @@ $module-intro-img-width: 600px;
     margin: auto;
     width: 300px;
   }
-
 }
 </style>
