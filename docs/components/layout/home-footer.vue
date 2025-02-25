@@ -7,7 +7,7 @@
         <div class="logo-name">
           {{ $t("company_name") }}
         </div>
-        <img class="wechat-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhiyao/qrcode_for_12.jpg" alt=""/>
+        <img class="wechat-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/web-img/qrcode.jpg" alt=""/>
         <div class="wechat-name">
           {{ $t("wechat_official_account") }}
         </div>
@@ -192,7 +192,7 @@
     height: 50px;
     line-height: 50px;
     text-align: center;
-    background: #ffccb4;
+    background: #dee3ff;
 
     .content {
       width: 130px;

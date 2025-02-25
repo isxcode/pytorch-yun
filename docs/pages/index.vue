@@ -50,18 +50,18 @@
           {{ $t("related_technologies") }}
         </div>
         <div class="tech-img-div">
-           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-pytorch.png" alt="">
-          <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-milvus.png" alt="">
           <img class="tech-img"
                src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-ollama.png" alt="">
           <img class="tech-img"
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-milvus.png" alt="">
+          <img class="tech-img"
                src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-deepseek.png" alt="">
+          <img class="tech-img"
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-k8s.png" alt="">
           <img class="tech-img"
                src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-ali.png" alt="">
           <img class="tech-img"
-               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-k8s.png" alt="">
+               src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-pytorch.png" alt="">
         </div>
       </div>
     </div>
@@ -805,7 +805,7 @@ $module-intro-img-width: 600px;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-2.png");
+      background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/web-img/bg-2.png");
       align-items: center;
 
       .content {
@@ -949,7 +949,7 @@ $module-intro-img-width: 600px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/web-img/bg-1.png");
+    background-image: url("https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/web-img/bg-1.png");
     display: flex;
     align-items: center;
     justify-content: center;
