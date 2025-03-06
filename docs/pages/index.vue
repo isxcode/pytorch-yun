@@ -478,7 +478,7 @@ $module-intro-img-width: 600px;
 
         img {
           width: 150px;
-          height: 55px;
+          height: 48px;
         }
       }
     }
