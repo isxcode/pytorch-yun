@@ -118,8 +118,8 @@
     </div>
     <div class="module-business">
       <div class="content">
-        <div class="line-1">{{ $t("data_drives_value") }}</div>
-        <div class="line-2">{{ $t("data_drives_value_description") }}</div>
+        <div class="line-1" style="color:#354394;">{{ $t("data_drives_value") }}</div>
+        <div class="line-2" style="color:#354394;">{{ $t("data_drives_value_description") }}</div>
         <div class="business-img">
            <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-0.png" alt="">
           <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-1.png" alt="">
@@ -178,7 +178,7 @@
     </div>
     <div class="module-end">
       <div class="content">
-        <div class="line-1">{{ $t("opensource_value") }}</div>
+        <div class="line-1" style="color:#354394;">{{ $t("opensource_value") }}</div>
         <div class="end-btn" @click="handleQuickClick">
           {{ $t("free_trial") }}
         </div>
