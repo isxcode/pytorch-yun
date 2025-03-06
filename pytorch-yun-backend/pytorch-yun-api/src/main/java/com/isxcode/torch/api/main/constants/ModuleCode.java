@@ -61,9 +61,9 @@ public interface ModuleCode {
     String MONITOR = "monitor";
 
     /**
-     * 自定义函数模块
+     * 应用模块
      */
-    String FUNC = "func";
+    String APP = "app";
 
     /**
      * 基线告警模块
