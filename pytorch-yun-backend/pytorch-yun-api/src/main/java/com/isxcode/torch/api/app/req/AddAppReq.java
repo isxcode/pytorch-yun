@@ -1,6 +1,5 @@
 package com.isxcode.torch.api.app.req;
 
-import com.isxcode.torch.api.ai.dto.AuthConfig;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -13,14 +12,14 @@ public class AddAppReq {
     @NotEmpty(message = "ai名称不能为空")
     private String name;
 
+    @Schema(title = "logo Id", example = "logo id")
+    @NotEmpty(message = "logo Id不能为空")
+    private String logoId;
+
+    @Schema(title = "AI id", example = "123")
+    @NotEmpty(message = "AI id不能为空")
+    private String aiId;
+
     @Schema(title = "备注", example = "")
     private String remark;
-
-    @Schema(title = "模型id", example = "123")
-    @NotEmpty(message = "模型id不能为空")
-    private String modelId;
-
-    @Schema(title = "Api认证", example = "")
-    private AuthConfig authConfig;
-
 }
