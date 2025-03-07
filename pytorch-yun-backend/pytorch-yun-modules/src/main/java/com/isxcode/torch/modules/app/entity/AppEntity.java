@@ -50,6 +50,8 @@ public class AppEntity {
 
     private String resources;
 
+    private String status;
+
     private String prompt;
 
     private LocalDateTime checkDateTime;

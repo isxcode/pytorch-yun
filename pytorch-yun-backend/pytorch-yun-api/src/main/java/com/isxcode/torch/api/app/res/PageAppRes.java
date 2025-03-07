@@ -1,38 +1,30 @@
 package com.isxcode.torch.api.app.res;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.isxcode.torch.api.datasource.dto.KafkaConfig;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.isxcode.torch.backend.api.base.serializer.LocalDateTimeSerializer;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PageAppRes {
 
-    private String name;
-
     private String id;
 
-    private String jdbcUrl;
+    private String name;
 
-    private String username;
+    private String logoId;
+
+    private String aiId;
 
     private String remark;
 
     private String status;
 
-    private String checkDateTime;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime createDateTime;
 
-    private String dbType;
-
-    private String connectLog;
-
-    private String driverId;
-
-    private String driverName;
-
-    private String metastoreUris;
-
-    private String kafkaConfigStr;
-
-    private KafkaConfig kafkaConfig;
+    private String createBy;
 }
