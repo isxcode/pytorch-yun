@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @CacheConfig(cacheNames = {ModuleCode.MODEL})
 public interface ModelRepository extends JpaRepository<ModelEntity, String> {
 
-    @Query("SELECT M FROM AppEntity M " + "WHERE M.name LIKE %:keyword% " + " OR M.remark LIKE %:keyword% "
-        + "OR M.name LIKE %:keyword% " + "order by M.createDateTime desc ")
+    @Query("SELECT M FROM ModelEntity M " + "WHERE M.name LIKE %:keyword% " + " OR M.remark LIKE %:keyword% "
+         + "order by M.createDateTime desc ")
     Page<ModelEntity> searchAll(@Param("keyword") String searchKeyWord, Pageable pageable);
 }

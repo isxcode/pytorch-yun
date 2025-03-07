@@ -12,6 +12,7 @@ create table if not exists PY_MODEL
     create_date_time        datetime      not null comment '创建时间',
     last_modified_by        varchar(200)  not null comment '更新人',
     last_modified_date_time datetime      not null comment '更新时间',
+    version_number          int           not null comment '版本号',
     deleted                 int default 0 not null comment '逻辑删除',
     tenant_id               varchar(200)  not null comment '租户id'
 );
@@ -19,20 +20,20 @@ create table if not exists PY_MODEL
 -- 插入默认支持的数据
 INSERT INTO PY_MODEL
 (ID, NAME, CODE, MODEL_TYPE, MODEL_SIZE, STATUS, REMARK, CREATE_BY, CREATE_DATE_TIME, LAST_MODIFIED_BY,
- LAST_MODIFIED_DATE_TIME, DELETED, TENANT_ID)
+ LAST_MODIFIED_DATE_TIME, DELETED, VERSION_NUMBER, TENANT_ID)
 VALUES ('HUI_ALI_QWEN', '通义千问[阿里]', 'HUI_ALI_QWEN', 'API', '70B', 'ENABLE', '通义千问[阿里]', 'zhihuiyun',
-        '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 1, 'zhihuiyun');
+        '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 0, 1, 'zhihuiyun');
 
 INSERT INTO PY_MODEL (ID, NAME, CODE, MODEL_TYPE, MODEL_SIZE, STATUS, REMARK, CREATE_BY, CREATE_DATE_TIME,
-                      LAST_MODIFIED_BY, LAST_MODIFIED_DATE_TIME, DELETED, TENANT_ID)
+                      LAST_MODIFIED_BY, LAST_MODIFIED_DATE_TIME, DELETED, VERSION_NUMBER, TENANT_ID)
 VALUES ('HUI_ALI_DEEPSEEK_R1', 'Deepseek-R1[阿里]', 'HUI_ALI_DEEPSEEK_R1', 'API', '70B', 'ENABLE', 'Deepseek-R1[阿里]',
-        'zhihuiyun', '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 1,
+        'zhihuiyun', '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 0, 1,
         'zhihuiyun');
 
 INSERT INTO PY_MODEL (ID, NAME, CODE, MODEL_TYPE, MODEL_SIZE, STATUS, REMARK, CREATE_BY, CREATE_DATE_TIME,
-                      LAST_MODIFIED_BY, LAST_MODIFIED_DATE_TIME, DELETED, TENANT_ID)
+                      LAST_MODIFIED_BY, LAST_MODIFIED_DATE_TIME, DELETED, VERSION_NUMBER, TENANT_ID)
 VALUES ('HUI_ALI_DEEPSEEK_V3', 'Deepseek-V3[阿里]', 'HUI_ALI_DEEPSEEK_V3', 'API', '70B', 'ENABLE', 'Deepseek-V3[阿里]',
-        'zhihuiyun', '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 1,
+        'zhihuiyun', '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 0, 1,
         'zhihuiyun');
 
 -- 智能体表
@@ -50,6 +51,7 @@ create table if not exists PY_AI
     create_date_time        datetime      not null comment '创建时间',
     last_modified_by        varchar(200)  not null comment '更新人',
     last_modified_date_time datetime      not null comment '更新时间',
+    version_number          int           not null comment '版本号',
     deleted                 int default 0 not null comment '逻辑删除',
     tenant_id               varchar(200)  not null comment '租户id'
 );
@@ -71,6 +73,7 @@ create table if not exists PY_APP
     create_date_time        datetime      not null comment '创建时间',
     last_modified_by        varchar(200)  not null comment '更新人',
     last_modified_date_time datetime      not null comment '更新时间',
+    version_number          int           not null comment '版本号',
     deleted                 int default 0 not null comment '逻辑删除',
     tenant_id               varchar(200)  not null comment '租户id'
 );
@@ -85,6 +88,7 @@ create table if not exists PY_CHAT
     create_date_time        datetime      not null comment '创建时间',
     last_modified_by        varchar(200)  not null comment '更新人',
     last_modified_date_time datetime      not null comment '更新时间',
+    version_number          int           not null comment '版本号',
     deleted                 int default 0 not null comment '逻辑删除',
     tenant_id               varchar(200)  not null comment '租户id'
 );
@@ -96,7 +100,7 @@ create table if not exists PY_CHAT_SESSION
     chat_id                 varchar(200)  not null comment '对话唯一id',
     app_id                  varchar(200)  not null comment '应用唯一id',
     session_index           int           not null comment '会话顺序',
-    status          varchar(200)  not null comment '会话状态',
+    status                  varchar(200)  not null comment '会话状态',
     session_type            varchar(200)  not null comment '会话类型',
     session_content         varchar(2000) not null comment '会话内容',
     create_by               varchar(200)  not null comment '创建人',
@@ -104,5 +108,6 @@ create table if not exists PY_CHAT_SESSION
     last_modified_by        varchar(200)  not null comment '更新人',
     last_modified_date_time datetime      not null comment '更新时间',
     deleted                 int default 0 not null comment '逻辑删除',
+    version_number          int           not null comment '版本号',
     tenant_id               varchar(200)  not null comment '租户id'
 )
