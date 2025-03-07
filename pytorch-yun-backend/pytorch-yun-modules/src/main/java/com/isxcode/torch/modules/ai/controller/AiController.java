@@ -1,13 +1,13 @@
-package com.isxcode.torch.modules.app.controller;
+package com.isxcode.torch.modules.ai.controller;
 
-import com.isxcode.torch.api.app.req.AddAppReq;
-import com.isxcode.torch.api.app.req.PageAppReq;
-import com.isxcode.torch.api.app.req.UpdateAppReq;
-import com.isxcode.torch.api.app.res.PageAppRes;
+import com.isxcode.torch.api.ai.req.AddAiReq;
+import com.isxcode.torch.api.ai.req.PageAiReq;
+import com.isxcode.torch.api.ai.req.UpdateAiReq;
+import com.isxcode.torch.api.ai.res.PageAiRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
 import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
-import com.isxcode.torch.modules.app.service.AppBizService;
+import com.isxcode.torch.modules.ai.service.AiBizService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -18,38 +18,38 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "应用模块")
+@Tag(name = "AI模块")
 @RequestMapping(ModuleCode.AI)
 @RestController
 @RequiredArgsConstructor
-public class AppController {
+public class AiController {
 
-    private final AppBizService appBizService;
+    private final AiBizService aiBizService;
 
-    @Operation(summary = "添加应用接口")
-    @PostMapping("/addApp")
+    @Operation(summary = "添加AI接口")
+    @PostMapping("/addAi")
     @SuccessResponse("添加成功")
-    public void addApp(@Valid @RequestBody AddAppReq addAppReq) {
+    public void addAi(@Valid @RequestBody AddAiReq addAiReq) {
 
-        appBizService.addApp(addAppReq);
+        aiBizService.addAi(addAiReq);
     }
 
     @Secured({RoleType.TENANT_ADMIN})
-    @Operation(summary = "更新应用接口")
-    @PostMapping("/updateApp")
+    @Operation(summary = "更新AI接口")
+    @PostMapping("/updateAi")
     @SuccessResponse("更新成功")
-    public void updateApp(@Valid @RequestBody UpdateAppReq updateAppReq) {
+    public void updateAi(@Valid @RequestBody UpdateAiReq updateAiReq) {
 
-        appBizService.updateApp(updateAppReq);
+        aiBizService.updateAi(updateAiReq);
     }
 
     @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
-    @Operation(summary = "查询应用")
-    @PostMapping("/pageApp")
+    @Operation(summary = "查询AI")
+    @PostMapping("/pageAi")
     @SuccessResponse("查询成功")
-    public Page<PageAppRes> pageApp(@Valid @RequestBody PageAppReq pageAppReq) {
+    public Page<PageAiRes> pageAi(@Valid @RequestBody PageAiReq pageAiReq) {
 
-        return appBizService.pageApps(pageAppReq);
+        return aiBizService.pageAi(pageAiReq);
     }
 
     // @Secured({RoleType.TENANT_ADMIN})
