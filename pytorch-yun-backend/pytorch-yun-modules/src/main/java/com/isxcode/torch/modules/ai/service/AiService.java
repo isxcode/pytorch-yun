@@ -14,8 +14,8 @@ public class AiService {
 
     private final AiRepository aiRepository;
 
-    public AiEntity getAi(String AiId) {
+    public AiEntity getAi(String aiId) {
 
-        return aiRepository.findById(AiId).orElseThrow(() -> new IsxAppException("ai存在"));
+        return aiRepository.findById(aiId).orElseThrow(() -> new IsxAppException("ai不存在"));
     }
 }

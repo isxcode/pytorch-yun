@@ -1,8 +1,10 @@
 package com.isxcode.torch.modules.app.controller;
 
 import com.isxcode.torch.api.app.req.AddAppReq;
+import com.isxcode.torch.api.app.req.ConfigAppReq;
 import com.isxcode.torch.api.app.req.PageAppReq;
 import com.isxcode.torch.api.app.req.UpdateAppReq;
+import com.isxcode.torch.api.app.res.AddAppRes;
 import com.isxcode.torch.api.app.res.PageAppRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
 import com.isxcode.torch.api.user.constants.RoleType;
@@ -19,7 +21,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "应用模块")
-@RequestMapping(ModuleCode.AI)
+@RequestMapping(ModuleCode.APP)
 @RestController
 @RequiredArgsConstructor
 public class AppController {
@@ -29,9 +31,9 @@ public class AppController {
     @Operation(summary = "添加应用接口")
     @PostMapping("/addApp")
     @SuccessResponse("添加成功")
-    public void addApp(@Valid @RequestBody AddAppReq addAppReq) {
+    public AddAppRes addApp(@Valid @RequestBody AddAppReq addAppReq) {
 
-        appBizService.addApp(addAppReq);
+        return appBizService.addApp(addAppReq);
     }
 
     @Secured({RoleType.TENANT_ADMIN})
@@ -43,21 +45,21 @@ public class AppController {
         appBizService.updateApp(updateAppReq);
     }
 
+    @Secured({RoleType.TENANT_ADMIN})
+    @Operation(summary = "配置应用接口")
+    @PostMapping("/configApp")
+    @SuccessResponse("配置成功")
+    public void configApp(@Valid @RequestBody ConfigAppReq configAppReq) {
+
+        appBizService.configApp(configAppReq);
+    }
+
     @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
     @Operation(summary = "查询应用")
     @PostMapping("/pageApp")
     @SuccessResponse("查询成功")
     public Page<PageAppRes> pageApp(@Valid @RequestBody PageAppReq pageAppReq) {
 
-        return appBizService.pageApps(pageAppReq);
+        return appBizService.pageApp(pageAppReq);
     }
-
-    // @Secured({RoleType.TENANT_ADMIN})
-    // @Operation(summary = "删除ai接口")
-    // @PostMapping("/deleteDatasource")
-    // @SuccessResponse("删除成功")
-    // public void deleteDatasource(@Valid @RequestBody DeleteDatasourceReq deleteDatasourceReq) {
-    //
-    // datasourceBizService.deleteDatasource(deleteDatasourceReq);
-    // }
 }

@@ -1,5 +1,8 @@
 package com.isxcode.torch.modules.app.service;
 
+import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.modules.app.entity.AppEntity;
+import com.isxcode.torch.modules.app.repository.AppRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,5 +12,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AppService {
 
+    private final AppRepository appRepository;
+
+    public AppEntity getApp(String appId) {
+
+        return appRepository.findById(appId).orElseThrow(() -> new IsxAppException("应用不存在"));
+    }
 
 }
