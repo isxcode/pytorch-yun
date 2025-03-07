@@ -1,7 +1,8 @@
 package com.isxcode.torch.modules.chat.controller;
 
-import com.isxcode.torch.api.ai.req.AddAiReq;
 import com.isxcode.torch.api.ai.req.UpdateAiReq;
+import com.isxcode.torch.api.chat.req.GetMaxChatIdReq;
+import com.isxcode.torch.api.chat.res.GetMaxChatIdRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
 import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
@@ -28,9 +29,9 @@ public class ChatController {
     @Operation(summary = "获取最大的对话")
     @PostMapping("/getMaxChatId")
     @SuccessResponse("获取成功")
-    public void addAi(@Valid @RequestBody AddAiReq addAiReq) {
+    public GetMaxChatIdRes getMaxChatId(@Valid @RequestBody GetMaxChatIdReq getMaxChatIdReq) {
 
-        // aiBizService.addAi(addAiReq);
+        return chatBizService.getMaxChatId(getMaxChatIdReq);
     }
 
     @Secured({RoleType.TENANT_ADMIN})
