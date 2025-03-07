@@ -69,4 +69,19 @@ public interface ModuleCode {
      * 基线告警模块
      */
     String ALARM = "alarm";
+
+    /**
+     * 模型仓库模块
+     */
+    String MODEL = "model";
+
+    /**
+     * Ai模块
+     */
+    String AI = "ai";
+
+    /**
+     * 对话模块
+     */
+    String CHAT = "chat";
 }
