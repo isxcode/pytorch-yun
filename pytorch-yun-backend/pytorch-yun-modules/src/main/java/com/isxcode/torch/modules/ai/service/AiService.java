@@ -1,5 +1,8 @@
 package com.isxcode.torch.modules.ai.service;
 
+import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.modules.ai.entity.AiEntity;
+import com.isxcode.torch.modules.ai.repository.AiRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,5 +12,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AiService {
 
+    private final AiRepository aiRepository;
 
+    public AiEntity getAi(String AiId) {
+
+        return aiRepository.findById(AiId).orElseThrow(() -> new IsxAppException("ai存在"));
+    }
 }
