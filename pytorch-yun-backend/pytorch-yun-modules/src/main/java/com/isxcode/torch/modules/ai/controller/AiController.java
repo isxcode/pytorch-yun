@@ -51,13 +51,4 @@ public class AiController {
 
         return aiBizService.pageAi(pageAiReq);
     }
-
-    // @Secured({RoleType.TENANT_ADMIN})
-    // @Operation(summary = "删除ai接口")
-    // @PostMapping("/deleteDatasource")
-    // @SuccessResponse("删除成功")
-    // public void deleteDatasource(@Valid @RequestBody DeleteDatasourceReq deleteDatasourceReq) {
-    //
-    // datasourceBizService.deleteDatasource(deleteDatasourceReq);
-    // }
 }

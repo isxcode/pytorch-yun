@@ -16,7 +16,7 @@ import java.util.Optional;
 @CacheConfig(cacheNames = {ModuleCode.AI})
 public interface AiRepository extends JpaRepository<AiEntity, String> {
 
-    @Query("SELECT A FROM AppEntity A" + " WHERE A.name LIKE %:keyword% " + " OR A.remark LIKE %:keyword% "
+    @Query("SELECT A FROM AiEntity A" + " WHERE A.name LIKE %:keyword% " + " OR A.remark LIKE %:keyword% "
         + "OR A.name LIKE %:keyword% " + "order by A.createDateTime desc ")
     Page<AiEntity> searchAll(@Param("keyword") String searchKeyWord, Pageable pageable);
 
