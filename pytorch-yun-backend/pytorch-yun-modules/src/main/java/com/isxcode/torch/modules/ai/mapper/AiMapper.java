@@ -16,5 +16,9 @@ public interface AiMapper {
     AiEntity addAiReqToAiEntity(AddAiReq addAiReq);
 
     @Mapping(target = "authConfig", ignore = true)
-    AiEntity updateAiReqToAiEntity(UpdateAiReq updateAiReq);
+    @Mapping(target = "id", source = "aiEntity.id")
+    @Mapping(target = "status", source = "aiEntity.status")
+    @Mapping(target = "name", source = "updateAiReq.name")
+    @Mapping(target = "remark", source = "updateAiReq.remark")
+    AiEntity updateAiReqToAiEntity(UpdateAiReq updateAiReq, AiEntity aiEntity);
 }
