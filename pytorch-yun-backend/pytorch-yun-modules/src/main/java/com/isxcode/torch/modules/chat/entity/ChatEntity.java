@@ -34,10 +34,6 @@ public class ChatEntity {
 
     private String submitter;
 
-    private String remark;
-
-    private LocalDateTime checkDateTime;
-
     @CreatedDate
     private LocalDateTime createDateTime;
 
