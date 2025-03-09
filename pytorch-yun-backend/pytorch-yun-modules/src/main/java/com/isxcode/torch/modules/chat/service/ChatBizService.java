@@ -167,7 +167,7 @@ public class ChatBizService {
         ChatSessionEntity chatSessionEntity =
             chatSessionRepository.findBySessionIndexAndChatId(getChatReq.getChatIndex(), getChatReq.getChatId()).get();
 
-        return GetChatRes.builder()
+        return GetChatRes.builder().status(chatSessionEntity.getStatus())
             .chatContent(JSON.parseObject(chatSessionEntity.getSessionContent(), ChatContent.class)).build();
     }
 

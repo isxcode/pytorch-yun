@@ -10,4 +10,6 @@ import lombok.Data;
 public class GetChatRes {
 
     private ChatContent chatContent;
+
+    private String status;
 }
