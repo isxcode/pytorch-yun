@@ -42,8 +42,6 @@ public class ChatSessionEntity {
 
     private String sessionContent;
 
-    private LocalDateTime checkDateTime;
-
     @CreatedDate
     private LocalDateTime createDateTime;
 

@@ -12,10 +12,9 @@ public class BotFactory {
 
     private final ApplicationContext applicationContext;
 
-    public Bot getBot(String botType) {
+    public Bot getBot(String modelCode) {
 
-        return applicationContext.getBeansOfType(Bot.class).values().stream().filter(bot -> bot.name().equals(botType))
-            .findFirst().orElseThrow(() -> new IsxAppException("模型不支持"));
+        return applicationContext.getBeansOfType(Bot.class).values().stream()
+            .filter(bot -> bot.name().equals(modelCode)).findFirst().orElseThrow(() -> new IsxAppException("模型不支持"));
     }
-
 }

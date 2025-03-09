@@ -1,19 +1,22 @@
 package com.isxcode.torch.modules.app.bot;
 
+import org.springframework.scheduling.annotation.Async;
+
 public abstract class Bot {
 
     /**
-     * 普通多轮对话.
+     * 流对话.
      */
-    public abstract void normalChat();
-
-    /**
-     * 6️流对话.
-     */
-    public abstract void streamChat();
+    public abstract void chat(BotChatContext botChatContext);
 
     /**
      * 智能体名称.
      */
     public abstract String name();
+
+    @Async
+    public void sendChat(BotChatContext botChatContext) {
+
+        chat(botChatContext);
+    }
 }

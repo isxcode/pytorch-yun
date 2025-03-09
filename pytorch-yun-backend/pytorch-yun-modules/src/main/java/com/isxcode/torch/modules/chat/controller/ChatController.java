@@ -1,16 +1,17 @@
 package com.isxcode.torch.modules.chat.controller;
 
-import com.isxcode.torch.api.ai.req.UpdateAiReq;
+import com.isxcode.torch.api.chat.req.GetChatReq;
 import com.isxcode.torch.api.chat.req.GetMaxChatIdReq;
+import com.isxcode.torch.api.chat.req.SendChatReq;
+import com.isxcode.torch.api.chat.res.GetChatRes;
 import com.isxcode.torch.api.chat.res.GetMaxChatIdRes;
+import com.isxcode.torch.api.chat.res.SendChatRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
-import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.chat.service.ChatBizService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,12 +35,19 @@ public class ChatController {
         return chatBizService.getMaxChatId(getMaxChatIdReq);
     }
 
-    @Secured({RoleType.TENANT_ADMIN})
     @Operation(summary = "发送对话")
-    @PostMapping("/send")
-    @SuccessResponse("更新成功")
-    public void updateAi(@Valid @RequestBody UpdateAiReq updateAiReq) {
+    @PostMapping("/sendChat")
+    @SuccessResponse("发送成功")
+    public SendChatRes sendChat(@Valid @RequestBody SendChatReq sendChatReq) {
 
-        // aiBizService.updateAi(updateAiReq);
+        return chatBizService.sendChat(sendChatReq);
+    }
+
+    @Operation(summary = "接受对话")
+    @PostMapping("/getChat")
+    @SuccessResponse("获取成功")
+    public GetChatRes getChat(@Valid @RequestBody GetChatReq getChatReq) {
+
+        return chatBizService.getChat(getChatReq);
     }
 }
