@@ -44,6 +44,8 @@ public class AiEntity {
 
     private String modelId;
 
+    private String clusterId;
+
     private String aiLog;
 
     private String authConfig;

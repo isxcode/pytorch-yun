@@ -19,6 +19,8 @@ public class PageAppRes {
 
     private String aiId;
 
+    private String aiName;
+
     private String remark;
 
     private String status;
@@ -27,4 +29,6 @@ public class PageAppRes {
     private LocalDateTime createDateTime;
 
     private String createBy;
+
+    private String createByUsername;
 }

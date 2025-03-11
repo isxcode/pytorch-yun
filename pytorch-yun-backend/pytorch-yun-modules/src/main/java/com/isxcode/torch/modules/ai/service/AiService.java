@@ -18,4 +18,10 @@ public class AiService {
 
         return aiRepository.findById(aiId).orElseThrow(() -> new IsxAppException("ai不存在"));
     }
+
+    public String getAiName(String aiId) {
+
+        AiEntity aiEntity = aiRepository.findById(aiId).orElse(null);
+        return aiEntity == null ? aiId : aiEntity.getName();
+    }
 }
