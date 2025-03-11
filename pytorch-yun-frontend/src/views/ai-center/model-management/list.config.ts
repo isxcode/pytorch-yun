@@ -46,7 +46,7 @@ export const colConfigs: colConfig[] = [
     },
     {
         prop: 'code',
-        title: '模型名',
+        title: '模型编码',
         minWidth: 130,
         showOverflowTooltip: true
     },

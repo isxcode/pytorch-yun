@@ -26,4 +26,16 @@ public class PageAiRes {
     private LocalDateTime createDateTime;
 
     private String createBy;
+
+    private String modelName;
+
+    private String clusterName;
+
+    private String clusterId;
+
+    private String aiType;
+
+    private String status;
+
+    private String createByUsername;
 }
