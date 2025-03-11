@@ -20,4 +20,10 @@ public class ModelService {
 
         return modelRepository.findById(modelId).orElseThrow(() -> new IsxAppException("模型不存在"));
     }
+
+    public String getModelName(String modelId) {
+
+        ModelEntity model = modelRepository.findById(modelId).orElse(null);
+        return model == null ? modelId : model.getName();
+    }
 }

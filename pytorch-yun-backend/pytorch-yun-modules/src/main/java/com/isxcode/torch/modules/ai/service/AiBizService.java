@@ -13,6 +13,10 @@ import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.ai.entity.AiEntity;
 import com.isxcode.torch.modules.ai.mapper.AiMapper;
 import com.isxcode.torch.modules.ai.repository.AiRepository;
+import com.isxcode.torch.modules.cluster.service.ClusterService;
+import com.isxcode.torch.modules.model.entity.ModelEntity;
+import com.isxcode.torch.modules.model.service.ModelService;
+import com.isxcode.torch.modules.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static com.isxcode.torch.common.config.CommonConfig.JPA_TENANT_MODE;
 
 @Service
 @Slf4j
@@ -33,6 +39,12 @@ public class AiBizService {
     private final AiMapper aiMapper;
 
     private final AiService aiService;
+
+    private final UserService userService;
+
+    private final ClusterService clusterService;
+
+    private final ModelService modelService;
 
     public void addAi(AddAiReq addAiReq) {
 
@@ -73,6 +85,19 @@ public class AiBizService {
         Page<AiEntity> aiEntityPage = aiRepository.searchAll(pageAiReq.getSearchKeyWord(),
             PageRequest.of(pageAiReq.getPage(), pageAiReq.getPageSize()));
 
-        return aiEntityPage.map(aiMapper::aiEntityToPageAiRes);
+        Page<PageAiRes> result = aiEntityPage.map(aiMapper::aiEntityToPageAiRes);
+        result.forEach(aiEntity -> {
+            if (aiEntity.getClusterId() != null) {
+                aiEntity.setClusterName(clusterService.getClusterName(aiEntity.getClusterId()));
+            }
+            aiEntity.setCreateByUsername(userService.getUserName(aiEntity.getCreateBy()));
+            JPA_TENANT_MODE.set(false);
+            aiEntity.setModelName(modelService.getModelName(aiEntity.getModelId()));
+            JPA_TENANT_MODE.set(true);
+            ModelEntity model = modelService.getModel(aiEntity.getModelId());
+            aiEntity.setAiType(model.getModelType());
+        });
+
+        return result;
     }
 }

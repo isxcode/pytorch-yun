@@ -45,6 +45,7 @@ create table if not exists PY_AI
     status                  varchar(200)  not null comment 'ai状态',
     check_date_time         datetime      not null comment 'ai检测时间',
     model_id                varchar(200)  not null comment '模型id',
+    cluster_id              varchar(200)  null comment '集群id',
     ai_log                  varchar(2000) null comment 'ai部署日志',
     auth_config             varchar(2000) null comment 'ai认证配置',
     create_by               varchar(200)  not null comment '创建人',

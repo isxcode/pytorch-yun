@@ -12,9 +12,11 @@ import com.isxcode.torch.api.app.req.UpdateAppReq;
 import com.isxcode.torch.api.app.res.AddAppRes;
 import com.isxcode.torch.api.app.res.PageAppRes;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.modules.ai.service.AiService;
 import com.isxcode.torch.modules.app.entity.AppEntity;
 import com.isxcode.torch.modules.app.mapper.AppMapper;
 import com.isxcode.torch.modules.app.repository.AppRepository;
+import com.isxcode.torch.modules.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +37,10 @@ public class AppBizService {
     private final AppMapper appMapper;
 
     private final AppService appService;
+
+    private final AiService aiService;
+
+    private final UserService userService;
 
     public AddAppRes addApp(AddAppReq addAppReq) {
 
@@ -79,6 +85,11 @@ public class AppBizService {
         Page<AppEntity> appEntityPage = appRepository.searchAll(pageAppReq.getSearchKeyWord(),
             PageRequest.of(pageAppReq.getPage(), pageAppReq.getPageSize()));
 
-        return appEntityPage.map(appMapper::appEntityToPageAppRes);
+        Page<PageAppRes> result = appEntityPage.map(appMapper::appEntityToPageAppRes);
+        result.forEach(appEntity -> {
+            appEntity.setAiName(aiService.getAiName(appEntity.getAiId()));
+            appEntity.setCreateByUsername(userService.getUserName(appEntity.getCreateBy()));
+        });
+        return result;
     }
 }
