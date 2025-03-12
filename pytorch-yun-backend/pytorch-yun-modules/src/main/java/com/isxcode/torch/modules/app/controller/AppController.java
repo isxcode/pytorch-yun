@@ -1,13 +1,10 @@
 package com.isxcode.torch.modules.app.controller;
 
-import com.isxcode.torch.api.app.req.AddAppReq;
-import com.isxcode.torch.api.app.req.ConfigAppReq;
-import com.isxcode.torch.api.app.req.PageAppReq;
-import com.isxcode.torch.api.app.req.UpdateAppReq;
+import com.isxcode.torch.api.app.req.*;
 import com.isxcode.torch.api.app.res.AddAppRes;
+import com.isxcode.torch.api.app.res.GetAppConfigRes;
 import com.isxcode.torch.api.app.res.PageAppRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
-import com.isxcode.torch.api.user.constants.RoleType;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.app.service.AppBizService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +14,6 @@ import javax.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "应用模块")
@@ -36,7 +32,6 @@ public class AppController {
         return appBizService.addApp(addAppReq);
     }
 
-    @Secured({RoleType.TENANT_ADMIN})
     @Operation(summary = "更新应用接口")
     @PostMapping("/updateApp")
     @SuccessResponse("更新成功")
@@ -45,7 +40,6 @@ public class AppController {
         appBizService.updateApp(updateAppReq);
     }
 
-    @Secured({RoleType.TENANT_ADMIN})
     @Operation(summary = "配置应用接口")
     @PostMapping("/configApp")
     @SuccessResponse("配置成功")
@@ -54,7 +48,14 @@ public class AppController {
         appBizService.configApp(configAppReq);
     }
 
-    @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
+    @Operation(summary = "获取应用配置接口")
+    @PostMapping("/getAppConfig")
+    @SuccessResponse("获取成功")
+    public GetAppConfigRes getAppConfig(@Valid @RequestBody GetAppConfigReq getAppConfigReq) {
+
+        return appBizService.getAppConfig(getAppConfigReq);
+    }
+
     @Operation(summary = "查询应用")
     @PostMapping("/pageApp")
     @SuccessResponse("查询成功")
