@@ -5,11 +5,10 @@ import javax.transaction.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.isxcode.torch.api.app.constants.AppStatus;
-import com.isxcode.torch.api.app.req.AddAppReq;
-import com.isxcode.torch.api.app.req.ConfigAppReq;
-import com.isxcode.torch.api.app.req.PageAppReq;
-import com.isxcode.torch.api.app.req.UpdateAppReq;
+import com.isxcode.torch.api.app.dto.BaseConfig;
+import com.isxcode.torch.api.app.req.*;
 import com.isxcode.torch.api.app.res.AddAppRes;
+import com.isxcode.torch.api.app.res.GetAppConfigRes;
 import com.isxcode.torch.api.app.res.PageAppRes;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.ai.service.AiService;
@@ -91,5 +90,13 @@ public class AppBizService {
             appEntity.setCreateByUsername(userService.getUserName(appEntity.getCreateBy()));
         });
         return result;
+    }
+
+    public GetAppConfigRes getAppConfig(GetAppConfigReq getAppConfigReq) {
+
+        AppEntity app = appService.getApp(getAppConfigReq.getId());
+
+        return GetAppConfigRes.builder().baseConfig(JSON.parseObject(app.getBaseConfig(), BaseConfig.class))
+            .prompt(app.getPrompt()).resources(JSON.parseArray(app.getResources(), String.class)).build();
     }
 }
