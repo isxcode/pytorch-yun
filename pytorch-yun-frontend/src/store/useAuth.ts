@@ -1,5 +1,11 @@
 import { defineStore } from "pinia";
 
+interface ChatInfo {
+  chatId: string
+  isTalking: boolean,
+  appInfo: any
+}
+
 interface AuthState {
   userInfo: Record<string, any>
   token: string
@@ -7,6 +13,7 @@ interface AuthState {
   role: string
   currentMenu: string
   isCollapse: boolean
+  chatInfo: ChatInfo
 }
 
 export const useAuthStore = defineStore('authStore', {
@@ -16,7 +23,12 @@ export const useAuthStore = defineStore('authStore', {
     tenantId: '',
     role: '',
     currentMenu: '',
-    isCollapse: false
+    isCollapse: false,
+    chatInfo: {
+      chatId: '',
+      isTalking: false,
+      appInfo: null
+    }
   }),
   actions: {
     setUserInfo(this: AuthState, userInfo: Record<string, any>): void {
@@ -36,6 +48,9 @@ export const useAuthStore = defineStore('authStore', {
     },
     setCollapse(this: AuthState, isCollapse: boolean): void {
       this.isCollapse = isCollapse
+    },
+    setChatInfo(this: AuthState, chatInfo: any): void {
+      this.chatInfo = chatInfo
     }
   },
   persist: true
