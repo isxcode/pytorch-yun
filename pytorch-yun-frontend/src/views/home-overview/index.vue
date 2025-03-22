@@ -162,7 +162,8 @@ function sendQuestionEvent() {
         maxChatIndexId.value = res.data.responseIndexId
         getChatResult()
     }).catch(() => {
-
+        talkMessage.value = ''
+        requestLoading.value = false
     })
 }
 
