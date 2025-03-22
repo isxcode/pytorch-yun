@@ -51,7 +51,7 @@ export const colConfigs: colConfig[] = [
         showOverflowTooltip: true
     },
     {
-        prop: 'modelId',
+        prop: 'modelName',
         title: '模型',
         minWidth: 140,
         showOverflowTooltip: true
@@ -63,12 +63,12 @@ export const colConfigs: colConfig[] = [
         customSlot: 'statusTag'
     },
     {
-        prop: 'modelType',
+        prop: 'aiType',
         title: '类型',
         minWidth: 100
     },
     {
-        prop: 'createBy',
+        prop: 'createByUsername',
         title: '创建人',
         minWidth: 120
     },
