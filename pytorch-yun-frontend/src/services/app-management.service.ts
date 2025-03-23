@@ -33,6 +33,15 @@ export function UpdateAppData(params: any): Promise<any> {
     })
 }
 
+// 获取配置
+export function GetConfigAppData(params: any): Promise<any> {
+    return http.request({
+        method: 'post',
+        url: '/app/getAppConfig',
+        params: params
+    })
+}
+
 // 配置
 export function ConfigAppData(params: any): Promise<any> {
     return http.request({

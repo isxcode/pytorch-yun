@@ -39,7 +39,9 @@
                     </span>
                 </div>
             </div>
-            <div v-if="requestLoading" class="stop-think">停止思考</div>
+            <div v-if="requestLoading">
+                <span class="stop-think">停止思考</span>
+            </div>
         </el-scrollbar>
     </div>
 </template>
@@ -160,7 +162,7 @@ defineExpose({
                 position: absolute;
             }
             .chat-message-item {
-                margin-bottom: 20px;
+                margin-bottom: 14px;
                 background-color: #0000000f;
                 line-height: 1.5;
                 padding: 3px 16px;
