@@ -29,6 +29,11 @@ public class ChatService {
         return chatRepository.findById(chatId).orElseThrow(() -> new IsxAppException("会话不存在"));
     }
 
+    public ChatEntity getChat(String chatId, String userId) {
+
+        return chatRepository.findByIdAndSubmitter(chatId, userId).orElseThrow(() -> new IsxAppException("会话不存在"));
+    }
+
     public BotChatContext transSessionListToBotChatContext(List<ChatSessionEntity> chatSessionList, AppEntity app,
         AiEntity aiEntity, Integer nowIndex, String chatId) {
 

@@ -19,4 +19,10 @@ public class AppService {
         return appRepository.findById(appId).orElseThrow(() -> new IsxAppException("应用不存在"));
     }
 
+    public String getAppName(String appId) {
+
+        AppEntity appEntity = appRepository.findById(appId).orElse(null);
+        return appEntity == null ? appId : appEntity.getName();
+    }
+
 }
