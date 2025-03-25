@@ -63,4 +63,12 @@ public class AppController {
 
         return appBizService.pageApp(pageAppReq);
     }
+
+    @Operation(summary = "设置默认应用")
+    @PostMapping("/setDefaultApp")
+    @SuccessResponse("设置成功")
+    public void setDefaultApp(@Valid @RequestBody SetDefaultAppReq setDefaultAppReq) {
+
+        appBizService.setDefaultApp(setDefaultAppReq);
+    }
 }

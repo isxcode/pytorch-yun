@@ -1,6 +1,7 @@
 package com.isxcode.torch.modules.chat.service;
 
 import com.alibaba.fastjson.JSON;
+import com.isxcode.torch.api.app.constants.DefaultAppStatus;
 import com.isxcode.torch.api.chat.ao.ChatAo;
 import com.isxcode.torch.api.chat.constants.ChatSessionStatus;
 import com.isxcode.torch.api.chat.constants.ChatSessionType;
@@ -14,6 +15,7 @@ import com.isxcode.torch.modules.app.bot.Bot;
 import com.isxcode.torch.modules.app.bot.BotChatContext;
 import com.isxcode.torch.modules.app.bot.BotFactory;
 import com.isxcode.torch.modules.app.entity.AppEntity;
+import com.isxcode.torch.modules.app.repository.AppRepository;
 import com.isxcode.torch.modules.app.service.AppService;
 import com.isxcode.torch.modules.chat.entity.ChatEntity;
 import com.isxcode.torch.modules.chat.entity.ChatSessionEntity;
@@ -33,6 +35,7 @@ import javax.transaction.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.isxcode.torch.common.config.CommonConfig.*;
 
@@ -58,10 +61,20 @@ public class ChatBizService {
 
     private final ChatMapper chatMapper;
 
+    private final AppRepository appRepository;
+
     public GetMaxChatIdRes getMaxChatId(GetMaxChatIdReq getMaxChatIdReq) {
 
         if (Strings.isEmpty(getMaxChatIdReq.getChatId())) {
             getMaxChatIdReq.setChatId(null);
+        }
+
+        if (Strings.isEmpty(getMaxChatIdReq.getAppId())) {
+            Optional<AppEntity> byDefaultApp = appRepository.findByDefaultApp(DefaultAppStatus.ENABLE);
+            if (!byDefaultApp.isPresent()) {
+                throw new IsxAppException("没有默认可用应用");
+            }
+            getMaxChatIdReq.setAppId(byDefaultApp.get().getId());
         }
 
         // 判断应用是否存在
