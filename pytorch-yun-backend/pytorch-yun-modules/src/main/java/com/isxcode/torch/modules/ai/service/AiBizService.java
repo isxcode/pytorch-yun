@@ -73,6 +73,8 @@ public class AiBizService {
         appEntity.setStatus(AiStatus.ENABLE);
         appEntity.setName(addAiReq.getName());
         appEntity.setAiId(aiEntity.getId());
+        appEntity.setCheckDateTime(LocalDateTime.now());
+        appEntity.setLogoId("");
         appEntity.setRemark("默认自建");
 
         // 判断是否需要制定默认app应用
