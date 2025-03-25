@@ -103,7 +103,7 @@ create table if not exists PY_CHAT_SESSION
     session_index           int           not null comment '会话顺序',
     status                  varchar(200)  not null comment '会话状态',
     session_type            varchar(200)  not null comment '会话类型',
-    session_content         varchar(2000) not null comment '会话内容',
+    session_content         longblob not null comment '会话内容',
     create_by               varchar(200)  not null comment '创建人',
     create_date_time        datetime      not null comment '创建时间',
     last_modified_by        varchar(200)  not null comment '更新人',
