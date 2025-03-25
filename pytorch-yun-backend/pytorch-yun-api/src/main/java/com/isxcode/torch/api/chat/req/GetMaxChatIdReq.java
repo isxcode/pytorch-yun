@@ -3,7 +3,6 @@ package com.isxcode.torch.api.chat.req;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
 
 @Data
 public class GetMaxChatIdReq {
