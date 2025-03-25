@@ -1,17 +1,14 @@
 package com.isxcode.torch.modules.chat.controller;
 
-import com.isxcode.torch.api.chat.req.GetChatReq;
-import com.isxcode.torch.api.chat.req.GetMaxChatIdReq;
-import com.isxcode.torch.api.chat.req.SendChatReq;
-import com.isxcode.torch.api.chat.res.GetChatRes;
-import com.isxcode.torch.api.chat.res.GetMaxChatIdRes;
-import com.isxcode.torch.api.chat.res.SendChatRes;
+import com.isxcode.torch.api.chat.req.*;
+import com.isxcode.torch.api.chat.res.*;
 import com.isxcode.torch.api.main.constants.ModuleCode;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import com.isxcode.torch.modules.chat.service.ChatBizService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,5 +46,21 @@ public class ChatController {
     public GetChatRes getChat(@Valid @RequestBody GetChatReq getChatReq) {
 
         return chatBizService.getChat(getChatReq);
+    }
+
+    @Operation(summary = "搜索聊天历史")
+    @PostMapping("/pageChatHistory")
+    @SuccessResponse("查询成功")
+    public Page<PageChatHistoryRes> pageChatHistory(@Valid @RequestBody PageChatHistoryReq pageChatHistoryReq) {
+
+        return chatBizService.pageChatHistory(pageChatHistoryReq);
+    }
+
+    @Operation(summary = "获取完整对话")
+    @PostMapping("/getFullChat")
+    @SuccessResponse("获取成功")
+    public GetFullChatRes getFullChat(@Valid @RequestBody GetFullChatReq getFullChatReq) {
+
+        return chatBizService.getFullChat(getFullChatReq);
     }
 }

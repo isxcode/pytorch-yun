@@ -6,12 +6,9 @@ import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 
 @Data
-public class GetMaxChatIdReq {
+public class GetFullChatReq {
 
     @Schema(title = "会话id", example = "123")
+    @NotEmpty(message = "会话id不能为空")
     private String chatId;
-
-    @Schema(title = "应用id", example = "")
-    @NotEmpty(message = "应用id不能为空")
-    private String appId;
 }

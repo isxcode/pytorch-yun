@@ -1,15 +1,12 @@
 package com.isxcode.torch.modules.chat.service;
 
 import com.alibaba.fastjson.JSON;
+import com.isxcode.torch.api.chat.ao.ChatAo;
 import com.isxcode.torch.api.chat.constants.ChatSessionStatus;
 import com.isxcode.torch.api.chat.constants.ChatSessionType;
 import com.isxcode.torch.api.chat.dto.ChatContent;
-import com.isxcode.torch.api.chat.req.GetChatReq;
-import com.isxcode.torch.api.chat.req.GetMaxChatIdReq;
-import com.isxcode.torch.api.chat.req.SendChatReq;
-import com.isxcode.torch.api.chat.res.GetChatRes;
-import com.isxcode.torch.api.chat.res.GetMaxChatIdRes;
-import com.isxcode.torch.api.chat.res.SendChatRes;
+import com.isxcode.torch.api.chat.req.*;
+import com.isxcode.torch.api.chat.res.*;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.ai.entity.AiEntity;
 import com.isxcode.torch.modules.ai.service.AiService;
@@ -20,20 +17,24 @@ import com.isxcode.torch.modules.app.entity.AppEntity;
 import com.isxcode.torch.modules.app.service.AppService;
 import com.isxcode.torch.modules.chat.entity.ChatEntity;
 import com.isxcode.torch.modules.chat.entity.ChatSessionEntity;
+import com.isxcode.torch.modules.chat.mapper.ChatMapper;
 import com.isxcode.torch.modules.chat.repository.ChatRepository;
 import com.isxcode.torch.modules.chat.repository.ChatSessionRepository;
 import com.isxcode.torch.modules.model.entity.ModelEntity;
 import com.isxcode.torch.modules.model.service.ModelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.isxcode.torch.common.config.CommonConfig.JPA_TENANT_MODE;
-import static com.isxcode.torch.common.config.CommonConfig.USER_ID;
+import static com.isxcode.torch.common.config.CommonConfig.*;
 
 @Service
 @Slf4j
@@ -55,7 +56,13 @@ public class ChatBizService {
 
     private final ModelService modelService;
 
+    private final ChatMapper chatMapper;
+
     public GetMaxChatIdRes getMaxChatId(GetMaxChatIdReq getMaxChatIdReq) {
+
+        if (Strings.isEmpty(getMaxChatIdReq.getChatId())) {
+            getMaxChatIdReq.setChatId(null);
+        }
 
         // 判断应用是否存在
         AppEntity app = appService.getApp(getMaxChatIdReq.getAppId());
@@ -171,5 +178,39 @@ public class ChatBizService {
             .chatContent(JSON.parseObject(chatSessionEntity.getSessionContent(), ChatContent.class)).build();
     }
 
+    public Page<PageChatHistoryRes> pageChatHistory(PageChatHistoryReq pageChatHistoryReq) {
+
+        // 查询个人所有的聊天，时间倒序
+        JPA_TENANT_MODE.set(false);
+        Page<ChatAo> chatAoPage = chatSessionRepository.pageChatHistory(TENANT_ID.get(),
+            pageChatHistoryReq.getSearchKeyWord(), pageChatHistoryReq.getAppId(), USER_ID.get(),
+            PageRequest.of(pageChatHistoryReq.getPage(), pageChatHistoryReq.getPageSize()));
+        JPA_TENANT_MODE.set(true);
+
+        // 翻译
+        Page<PageChatHistoryRes> map = chatAoPage.map(chatMapper::chatAoToPageChatHistoryRes);
+        map.forEach(e -> {
+            e.setAppName(appService.getAppName(e.getAppId()));
+            e.setChatContent(JSON.parseObject(e.getSessionContent(), ChatContent.class));
+        });
+        return map;
+    }
+
+    public GetFullChatRes getFullChat(GetFullChatReq getFullChatReq) {
+
+        // 判断会话是否存在
+        ChatEntity chat = chatService.getChat(getFullChatReq.getChatId(), USER_ID.get());
+
+        // 封装对话
+        List<ChatSessionEntity> chatSessionList = chatSessionRepository.findAllByChatId(chat.getId());
+        List<ChatContent> chatSessions = new ArrayList<>();
+        chatSessionList.forEach(e -> {
+            ChatContent chatContent = JSON.parseObject(e.getSessionContent(), ChatContent.class);
+            chatSessions.add(ChatContent.builder().content(chatContent.getContent()).role(e.getSessionType())
+                .index(e.getSessionIndex()).build());
+        });
+
+        return GetFullChatRes.builder().chatSessions(chatSessions).build();
+    }
 
 }

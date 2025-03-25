@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class SendChatReq {
 
-    @Schema(title = "回话id", example = "123")
+    @Schema(title = "会话id", example = "123")
     private String chatId;
 
     @Schema(title = "应用id", example = "")
