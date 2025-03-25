@@ -81,7 +81,7 @@ public class AiBizService {
         List<AppEntity> allApp = appRepository.findAll();
         if (allApp.isEmpty()) {
             appEntity.setDefaultApp(DefaultAppStatus.ENABLE);
-        }else{
+        } else {
             appEntity.setDefaultApp(DefaultAppStatus.DISABLE);
         }
         appRepository.save(appEntity);
