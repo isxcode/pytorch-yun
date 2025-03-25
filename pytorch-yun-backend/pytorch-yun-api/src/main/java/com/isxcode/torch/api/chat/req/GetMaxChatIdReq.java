@@ -12,6 +12,5 @@ public class GetMaxChatIdReq {
     private String chatId;
 
     @Schema(title = "应用id", example = "")
-    @NotEmpty(message = "应用id不能为空")
     private String appId;
 }
