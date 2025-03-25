@@ -21,4 +21,6 @@ public interface AppRepository extends JpaRepository<AppEntity, String> {
     Page<AppEntity> searchAll(@Param("keyword") String searchKeyWord, Pageable pageable);
 
     Optional<AppEntity> findByName(String name);
+
+    Optional<AppEntity> findByDefaultApp(String defaultApp);
 }

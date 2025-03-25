@@ -5,6 +5,7 @@ import javax.transaction.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.isxcode.torch.api.app.constants.AppStatus;
+import com.isxcode.torch.api.app.constants.DefaultAppStatus;
 import com.isxcode.torch.api.app.dto.BaseConfig;
 import com.isxcode.torch.api.app.req.*;
 import com.isxcode.torch.api.app.res.AddAppRes;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -50,6 +52,7 @@ public class AppBizService {
 
         AppEntity appEntity = appMapper.addAppReqToAppEntity(addAppReq);
         appEntity.setStatus(AppStatus.ENABLE);
+        appEntity.setDefaultApp(DefaultAppStatus.DISABLE);
         appEntity.setCheckDateTime(LocalDateTime.now());
         appEntity = appRepository.save(appEntity);
 
@@ -98,5 +101,18 @@ public class AppBizService {
 
         return GetAppConfigRes.builder().baseConfig(JSON.parseObject(app.getBaseConfig(), BaseConfig.class))
             .prompt(app.getPrompt()).resources(JSON.parseArray(app.getResources(), String.class)).build();
+    }
+
+    public void setDefaultApp(SetDefaultAppReq setDefaultAppReq) {
+
+        AppEntity app = appService.getApp(setDefaultAppReq.getId());
+
+        List<AppEntity> allApp = appRepository.findAll();
+        allApp.forEach(e -> e.setDefaultApp(DefaultAppStatus.DISABLE));
+        appRepository.saveAll(allApp);
+
+        // 再把当前改为ENABLE
+        app.setDefaultApp(DefaultAppStatus.ENABLE);
+        appRepository.save(app);
     }
 }

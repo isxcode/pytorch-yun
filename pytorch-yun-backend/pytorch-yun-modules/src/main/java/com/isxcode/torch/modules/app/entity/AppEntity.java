@@ -54,6 +54,8 @@ public class AppEntity {
 
     private String prompt;
 
+    private String defaultApp;
+
     private LocalDateTime checkDateTime;
 
     @CreatedDate
