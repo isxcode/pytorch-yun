@@ -1,6 +1,6 @@
 # 至慧云
 
-### 超轻量级大模型训练平台
+### 超轻量级模型训练平台
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/isxcode/zhihuiyun)](https://hub.docker.com/r/isxcode/zhihuiyun)
 [![build](https://github.com/isxcode/pytorch-yun/actions/workflows/build-zhihuiyun.yml/badge.svg?branch=main)](https://github.com/isxcode/pytorch-yun/actions/workflows/build-zhihuiyun.yml)
@@ -23,7 +23,7 @@
 
 ### 产品介绍
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;至慧云是一款超轻量级、企业级大模型训练平台，基于Pytorch生态打造。一键部署，开箱即用。快速实现大模型训练、模型调用、机器人代理、模型编排、自定义接口、等多种功能，为企业提供高效便捷的大模型解决方案。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;至慧云是一款超轻量级、企业级模型训练平台，基于Pytorch生态打造。一键部署，开箱即用。快速实现大模型训练、模型调用、机器人代理、模型编排、自定义接口、等多种功能，为企业提供高效便捷的大模型解决方案。
 
 ### 功能特点
 

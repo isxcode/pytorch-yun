@@ -1,7 +1,7 @@
 application:
   title: 至慧云
   website: https://zhihuiyun.isxcode.com
-  describe: 企业级大模型训练平台
+  describe: 企业级模型训练平台
 
 server:
   tomcat:

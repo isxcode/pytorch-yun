@@ -112,8 +112,8 @@
     </div>
     <div class="module-business">
       <div class="content">
-        <div class="line-1" style="color:#3051ff;">{{ $t("data_drives_value") }}</div>
-        <div class="line-2" style="color:#3051ff;">{{ $t("data_drives_value_description") }}</div>
+        <div class="line-1" style="color:#506bfe;">{{ $t("data_drives_value") }}</div>
+        <div class="line-2" style="color:#506bfe;">{{ $t("data_drives_value_description") }}</div>
         <div class="business-img">
            <img src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-0.png" alt="">
           <img class="bus-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/business-img/b-1.png" alt="">
@@ -164,7 +164,7 @@
     </div>
     <div class="module-end">
       <div class="content">
-        <div class="line-1" style="color:#3051ff;">{{ $t("opensource_value") }}</div>
+        <div class="line-1" style="color:#506bfe;">{{ $t("opensource_value") }}</div>
         <div class="end-btn" @click="handleQuickClick">
           {{ $t("free_trial") }}
         </div>
@@ -186,7 +186,7 @@ onMounted(async () => {
   mediumZoom(document.querySelectorAll('#zoom'), {
     margin: 100,
     scrollOffset: 1,
-    background: '#f1f3ff',
+    background: '#f4f9ff',
   })
 })
 
