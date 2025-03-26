@@ -1,6 +1,6 @@
 # 至慧云
 
-### 超轻量级大模型训练平台
+### 超轻量级模型训练平台
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/isxcode/zhihuiyun)](https://hub.docker.com/r/isxcode/zhihuiyun)
 [![build](https://github.com/isxcode/pytorch-yun/actions/workflows/build-zhihuiyun.yml/badge.svg?branch=main)](https://github.com/isxcode/pytorch-yun/actions/workflows/build-zhihuiyun.yml)
@@ -23,7 +23,7 @@
 
 ### 产品介绍
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;至慧云是一款超轻量级、企业级大模型训练平台，基于Pytorch生态打造。一键部署，开箱即用。快速实现大模型训练、模型调用、机器人代理、模型编排、自定义接口、等多种功能，为企业提供高效便捷的大模型解决方案。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;至慧云是一款超轻量级、企业级模型训练平台，基于Pytorch生态打造。一键部署，开箱即用。快速实现大模型训练、模型调用、机器人代理、模型编排、自定义接口、等多种功能，为企业提供高效便捷的大模型解决方案。
 
 ### 功能特点
 
@@ -33,12 +33,14 @@
 
 ### 立即体验
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;演示地址：https://zhihuiyun-demo.isxcode.com </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;体验账号：user001 </br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;账号密码：welcome1
+> [!TIP]
+> 演示地址：https://zhihuiyun-demo.isxcode.com </br>
+> 体验账号：user001 </br>
+> 账号密码：welcome1
 
 ### 快速部署
 
+> [!NOTE]
 > 访问地址：http://localhost:8080 <br/>
 > 管理员账号：admin <br/>
 > 管理员密码：admin123
@@ -56,12 +58,14 @@ docker run -p 8080:8080 -d isxcode/zhihuiyun
 
 ### 源码构建
 
-> 注意！！！编译环境需访问外网，且需提前安装Nodejs和Java，推荐版本如下: </br>
+> [!WARNING]
+> 编译环境需访问外网，且需提前安装Nodejs和Java，推荐版本如下: </br>
 > Java: zulu8.78.0.19-ca-jdk8.0.412-x64 </br>
 > Nodejs: node-v18.20.3-x64
 
 ##### MacOS/Linux
 
+> [!IMPORTANT]
 > 安装包路径: pytorch-yun/pytorch-yun-dist/build/distributions/zhihuiyun.tar.gz
 
 ```bash
@@ -72,7 +76,8 @@ cd pytorch-yun
 
 ##### Windows10/11
 
-> 注意！！！请使用Git Bash终端工具执行以下命令
+> [!CAUTION]
+> 请使用Git Bash终端工具执行以下命令
 
 ```bash
 git clone https://github.com/isxcode/pytorch-yun.git
@@ -80,6 +85,6 @@ cd pytorch-yun
 ./gradlew.bat install clean package
 ```
 
-### 联系我们
+### 收藏历史
 
-邮箱：hello@isxcode.com
+[![Star History Chart](https://api.star-history.com/svg?repos=isxcode/pytorch-yun&type=Date)](https://www.star-history.com/#isxcode/pytorch-yun&Date)
