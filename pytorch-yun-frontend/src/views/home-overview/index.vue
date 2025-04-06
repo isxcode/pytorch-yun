@@ -183,7 +183,7 @@ function getMaxChatData() {
         }).then((res: any) => {
             appInfo.value = {
                 id: res.data.appId,
-                name: res.data.appName || appInfo.value.name
+                name: res.data?.appName || appInfo.value?.name
             }
             chatId.value = res.data.chatId
             maxChatIndexId.value = res.data.chatIndexId
