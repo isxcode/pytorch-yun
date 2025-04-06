@@ -27,3 +27,21 @@ export function GetChatDetailData(params: any): Promise<any> {
     })
 }
 
+// 获取对话记录
+export function GetChatDetailList(params: any): Promise<any> {
+    return http.request({
+        method: 'post',
+        url: '/chat/getFullChat',
+        params: params
+    })
+}
+
+// 获取历史对话
+export function GetHistoryChatList(params: any): Promise<any> {
+    return http.request({
+        method: 'post',
+        url: '/chat/pageChatHistory',
+        params: params
+    })
+}
+
