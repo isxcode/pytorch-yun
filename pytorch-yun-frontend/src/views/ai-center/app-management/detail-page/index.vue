@@ -17,7 +17,7 @@
                 :readonly="!isTalking"
                 placeholder="请输入对话"
                 :autosize="{ minRows: 2, maxRows: 2 }"
-                @keyup.prevent="onKeyupEvent"
+                @keydown.enter.prevent="onKeyupEvent"
             ></el-input>
             <div class="option-container">
                 <el-button v-if="isTalking" link @click="stopChat">新对话</el-button>
@@ -77,14 +77,16 @@ function initData() {
 }
 
 function onKeyupEvent(e: any) {
-    if (e.type === 'keyup' && e.key === 'Enter') {
+    if (e.type === 'keydown' && e.key === 'Enter') {
         sendQuestionEvent()
     }
-    // e.stopPropagation();
 }
 
 // 发送问题
 function sendQuestionEvent() {
+    if (!talkMessage.value) {
+        return
+    }
     isTalking.value = true
     talkMsgList.value.push({
         type: 'user',
