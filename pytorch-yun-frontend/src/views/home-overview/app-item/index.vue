@@ -6,6 +6,7 @@
     >
         <div class="ai-app-list">
             <div class="zqy-seach">
+                <span class="app-label">我的应用</span>
                 <el-input
                     v-model="keyword"
                     placeholder="请输入搜索条件 回车进行搜索"
@@ -114,6 +115,14 @@ function initData(tableLoading?: boolean) {
     })
 }
 
+function getAppItem() {
+    let appItem = null
+    if (appItemList.value && appItemList.value.length) {
+        appItem = appItemList.value[0]
+    }
+    return appItem
+}
+
 function clickAppEvent(data: any) {
     emit('clickAppEvent', data)
 }
@@ -132,6 +141,10 @@ function handleCurrentChange(e: number) {
 onMounted(() => {
     initData()
 })
+
+defineExpose({
+    getAppItem
+})
 </script>
 
 <style lang="scss">
@@ -141,10 +154,14 @@ onMounted(() => {
     .zqy-seach {
         height: 50px;
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         align-items: center;
         padding: 0 20px;
         box-sizing: border-box;
+        .app-label {
+            font-size: 14px;
+            color: getCssVar('color', 'info')
+        }
         .el-input {
             width: 260px;
         }

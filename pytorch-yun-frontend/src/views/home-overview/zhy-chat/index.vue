@@ -5,14 +5,14 @@
                 v-for="(item, index) in talkMsgList"
                 class="card-item"
                 :key="index"
-                :class="{ 'card-item__ai': item.type === 'ai' }"
+                :class="{ 'card-item__ai': item.type !== 'user' }"
             >
                 <el-avatar
                     :style="{
-                        left: item.type === 'ai' ? '-44px' : '',
+                        left: item.type === 'user' ? '' : '-44px',
                         right: item.type === 'user' ? '-44px' : '',
                         color: '#FFFFFF',
-                        'background-color': item.type === 'ai' ? '#516bfe' : '#88d069'
+                        'background-color': item.type !== 'user' ? '#516bfe' : '#88d069'
                     }"
                     :icon="UserFilled"
                     :size="30"
@@ -31,7 +31,7 @@
                     :size="30"
                 />
                 <div class="chat-message-item chat-message-item__loading">
-                    <span class="loading-text">
+                    <span class="loading-text__chat">
                         <el-icon class="is-loading">
                             <Loading />
                         </el-icon>
@@ -174,7 +174,7 @@ defineExpose({
                     padding: 16px 16px;
                 }
 
-                .loading-text {
+                .loading-text__chat {
                     color: getCssVar('color', 'primary');
                     display: flex;
                     align-items: center;
