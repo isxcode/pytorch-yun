@@ -1,45 +1,56 @@
 <template>
     <div class="home-overview">
-        <div class="ai-top-container">
-            <div class="guide-title" v-if="!appInfo">欢迎使用智慧云！</div>
-            <div class="app-title" :class="{ 'app-title__show': !!appInfo }">
-                <div class="close-chat">
-                    <el-button link type="primary" @click="stopChat">退出对话</el-button>
+        <LoadingPage
+            class="zqy-loading__home"
+            :visible="loading"
+            :network-error="networkError"
+            @loading-refresh="getChatDetailListData"
+        >
+            <div class="ai-top-container">
+                <div class="guide-title" v-if="!appInfo">欢迎使用智慧云！</div>
+                <div class="app-title" :class="{ 'app-title__show': !!appInfo }">
+                    <div class="close-chat">
+                        <el-button link type="primary" @click="stopChat">退出对话</el-button>
+                    </div>
+                    <div>{{ appInfo?.name }}</div>
                 </div>
-                <div>{{ appInfo?.name }}</div>
-                <div class="header-option">
+                <div class="history-btn">
                     <el-button link @click="showHistoryEvent">历史记录</el-button>
                 </div>
             </div>
-        </div>
-        <ZhyChat
-            :isTalking="isTalking"
-            :requestLoading="requestLoading"
-            :talkMsgList="talkMsgList"
-        ></ZhyChat>
-        <div class="ai-input-container" :class="{ 'ai-input-container__bottom': isTalking }">
-            <el-input
-                v-model="talkMessage"
-                type="textarea"
-                resize="none"
-                :readonly="!isTalking"
-                placeholder="请输入对话"
-                :autosize="{ minRows: 2, maxRows: 2 }"
-                @keyup="onKeyupEvent"
-            ></el-input>
-            <div class="option-container">
-                <el-button v-if="isTalking" link @click="stopChat">新对话</el-button>
-                <el-button
-                    :disabled="!talkMessage"
-                    :loading="requestLoading"
-                    @click="sendQuestionEvent"
-                >
-                    <el-icon><Promotion /></el-icon>
-                </el-button>
+            <ZhyChat
+                :isTalking="isTalking"
+                :requestLoading="requestLoading"
+                :talkMsgList="talkMsgList"
+            ></ZhyChat>
+            <div class="ai-input-container" :class="{ 'ai-input-container__bottom': isTalking }">
+                <el-input
+                    v-model="talkMessage"
+                    type="textarea"
+                    resize="none"
+                    placeholder="请输入对话"
+                    :autosize="{ minRows: 2, maxRows: 2 }"
+                    @keydown.enter.prevent="onKeyupEvent"
+                ></el-input>
+                <div class="option-container">
+                    <el-button v-if="isTalking" link @click="stopChat">新对话</el-button>
+                    <el-button
+                        type="primary"
+                        :disabled="!talkMessage"
+                        :loading="requestLoading"
+                        @click="sendQuestionEvent"
+                    >
+                        <el-icon><Promotion /></el-icon>
+                    </el-button>
+                </div>
             </div>
-        </div>
-        <AppItem class="ai-app-container" :class="{ 'ai-app-container__hide': isTalking }" @clickAppEvent="clickAppEvent"></AppItem>
-        <!-- <HistoryList ref="historyListRef"></HistoryList> -->
+            <AppItem
+                class="ai-app-container"
+                :class="{ 'ai-app-container__hide': isTalking }"
+                @clickAppEvent="clickAppEvent"
+            ></AppItem>
+        </LoadingPage>
+        <HistoryList ref="historyListRef" @historyClickEvent="historyClickEvent"></HistoryList>
     </div>
 </template>
 
@@ -48,12 +59,14 @@ import { onMounted, reactive, ref, nextTick } from 'vue'
 import ZhyChat from './zhy-chat/index.vue'
 import AppItem from './app-item/index.vue'
 import LoadingPage from '@/components/loading/index.vue'
-import { GetChatDetailData, GetMaxChatData, SendMessageToAi } from '@/services/ai-cheat.service.ts'
+import { GetChatDetailData, GetChatDetailList, GetMaxChatData, SendMessageToAi } from '@/services/ai-cheat.service.ts'
 import { useAuthStore } from '@/store/useAuth'
-
-// import HistoryList from './history-list/index.vue'
+import HistoryList from './history-list/index.vue'
 
 const authStore = useAuthStore()
+
+const loading = ref(false)
+const networkError = ref(false)
 
 // 消息部分
 const talkMessage = ref<string>('')
@@ -61,14 +74,19 @@ const appInfo = ref<any>(null)    // 应用的信息
 const chatId = ref<string>('')
 const maxChatIndexId = ref<number>(0)
 
-// const historyListRef = ref<any>()
+const historyListRef = ref<any>()
 const requestLoading = ref<boolean>(false)  // 发送消息-加载状态
 const isTalking = ref<boolean>(false)       // 是否已经开启了对话
 const talkMsgList = ref<any[]>([])          // 当前对话的记录
 
 // 打开历史记录
 function showHistoryEvent() {
-    // historyListRef.value.showModal()
+    historyListRef.value.showModal({
+        page: 0,
+        pageSize: 20,
+        searchKeyWord: '',
+        appId: appInfo.value ? appInfo.value.id : null
+    })
 }
 
 // 选择应用
@@ -76,7 +94,9 @@ function clickAppEvent(e: any) {
     appInfo.value = e
     isTalking.value = true
 
-    getMaxChatData()
+    getMaxChatData().then(() => {
+        getChatDetailListData()
+    })
 }
 
 // 结束对话
@@ -92,25 +112,6 @@ function stopChat() {
         chatId: chatId.value,
         isTalking: isTalking.value,
         appInfo: null
-    })
-}
-
-// 获取最大对话
-function getMaxChatData() {
-    GetMaxChatData({
-        chatId: chatId.value || null,
-        appId: appInfo.value.id,
-    }).then((res: any) => {
-        chatId.value = res.data.chatId
-        maxChatIndexId.value = res.data.chatIndexId
-
-        authStore.setChatInfo({
-            chatId: chatId.value,
-            isTalking: isTalking.value,
-            appInfo: appInfo.value
-        })
-    }).catch(() => {
-
     })
 }
 
@@ -141,16 +142,22 @@ function getChatResult() {
 }
 
 // 发送问题
-function sendQuestionEvent() {
+async function sendQuestionEvent() {
+    if (!talkMessage.value) {
+        return
+    }
     isTalking.value = true
     talkMsgList.value.push({
         type: 'user',
         content: talkMessage.value
     })
     requestLoading.value = true
+    if (!appInfo.value) {
+        await getMaxChatData()
+    }
     SendMessageToAi({
-        chatId: chatId.value,
-        appId: appInfo.value.id,
+        chatId: chatId.value || null,
+        appId: appInfo.value ? appInfo.value.id : null,
         maxChatIndexId: maxChatIndexId.value,
         chatContent: {
             content: talkMessage.value,
@@ -167,8 +174,77 @@ function sendQuestionEvent() {
     })
 }
 
+// 获取最大对话
+function getMaxChatData() {
+    return new Promise((resolve: any, reject: any) => {
+        GetMaxChatData({
+            chatId: chatId.value || null,
+            appId: appInfo.value ? appInfo.value.id : null,
+        }).then((res: any) => {
+            appInfo.value = {
+                id: res.data.appId,
+                name: res.data.appName || appInfo.value.name
+            }
+            chatId.value = res.data.chatId
+            maxChatIndexId.value = res.data.chatIndexId
+
+            authStore.setChatInfo({
+                chatId: chatId.value,
+                isTalking: isTalking.value,
+                appInfo: appInfo.value
+            })
+            resolve()
+        }).catch((err: any) => {
+            reject(err)
+        })
+    })
+}
+
+
+// 获取对话记录
+function getChatDetailListData() {
+    return new Promise((resolve: any, reject: any) => {
+        loading.value = true
+        networkError.value = networkError.value || false
+        GetChatDetailList({
+            chatId: chatId.value || null,
+        }).then((res: any) => {
+            talkMsgList.value = (res.data?.chatSessions || []).map((item: any) => {
+                return {
+                    type: item.role,
+                    content: item.content
+                }
+            })
+            loading.value = false
+            networkError.value = false
+            resolve()
+        }).catch((err: any) => {
+            loading.value = false
+            networkError.value = false
+            reject(err)
+        })
+    })
+}
+
+// 选择历史对话
+function historyClickEvent(data: any) {
+    chatId.value = data.chatId
+    isTalking.value = true
+    authStore.setChatInfo({
+        chatId: data.chatId,
+        isTalking: true,
+        appInfo: {
+            id: data.appId,
+            name: data.appName
+        }
+    })
+    getMaxChatData().then(() => {
+        getChatDetailListData()
+    })
+}
+
 function onKeyupEvent(e: any) {
-    if (e.type === 'keyup' && e.key === 'Enter') {
+    if (e.type === 'keydown' && e.key === 'Enter') {
         sendQuestionEvent()
     }
 }
@@ -180,7 +256,9 @@ onMounted(() => {
     chatId.value = chatInfo.chatId
 
     if (chatId.value) {
-        getMaxChatData()
+        getChatDetailListData().then(() => {
+            getMaxChatData()
+        })
     }
 })
 </script>
@@ -193,6 +271,11 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     flex-direction: column;
+    .zqy-loading__home {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+    }
     .ai-top-container {
         height: calc(100% - 356px);
         overflow-x: hidden;
@@ -202,7 +285,7 @@ onMounted(() => {
 
         .app-title {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             position: absolute;
             width: 100%;
             left: 0;
@@ -220,9 +303,9 @@ onMounted(() => {
             }
 
             .close-chat {
-                // position: absolute;
-                // top: 0;
-                // left: 0;
+                position: absolute;
+                top: 16px;
+                left: 20px;
             }
         }
 
@@ -233,6 +316,11 @@ onMounted(() => {
             text-align: center;
             font-weight: 500;
             margin-bottom: 30px;
+        }
+        .history-btn {
+            position: absolute;
+            top: 16px;
+            right: 20px;
         }
     }
 
