@@ -2,9 +2,11 @@ package com.isxcode.torch.modules.chat.service;
 
 import com.alibaba.fastjson.JSON;
 import com.isxcode.torch.api.app.constants.DefaultAppStatus;
+import com.isxcode.torch.api.app.dto.BaseConfig;
 import com.isxcode.torch.api.chat.ao.ChatAo;
 import com.isxcode.torch.api.chat.constants.ChatSessionStatus;
 import com.isxcode.torch.api.chat.constants.ChatSessionType;
+import com.isxcode.torch.api.chat.constants.ChatType;
 import com.isxcode.torch.api.chat.dto.ChatContent;
 import com.isxcode.torch.api.chat.req.*;
 import com.isxcode.torch.api.chat.res.*;
@@ -65,6 +67,10 @@ public class ChatBizService {
 
     public GetMaxChatIdRes getMaxChatId(GetMaxChatIdReq getMaxChatIdReq) {
 
+        if (getMaxChatIdReq.getChatType() == null) {
+            getMaxChatIdReq.setChatType(ChatType.PROD);
+        }
+
         if (Strings.isEmpty(getMaxChatIdReq.getChatId())) {
             getMaxChatIdReq.setChatId(null);
         }
@@ -88,6 +94,7 @@ public class ChatBizService {
             ChatEntity chat = new ChatEntity();
             chat.setAppId(app.getId());
             chat.setSubmitter(USER_ID.get());
+            chat.setChatType(getMaxChatIdReq.getChatType());
             chat = chatRepository.save(chat);
             getMaxChatIdRes.setChatIndexId(0);
             getMaxChatIdRes.setChatId(chat.getId());
@@ -129,10 +136,17 @@ public class ChatBizService {
         // 判断会话是否存在
         ChatEntity chat = chatService.getChat(sendChatReq.getChatId());
 
+        // 判断会话index是否存在
+        if (chatSessionRepository.existsBySessionIndexAndChatId(sendChatReq.getMaxChatIndexId(),
+            sendChatReq.getChatId())) {
+            throw new IsxAppException("当前index已存在");
+        }
+
         // 判断上一个会话是否结束
         if (sendChatReq.getMaxChatIndexId() != 0) {
             ChatSessionEntity chatSession = chatSessionRepository
-                .findBySessionIndexAndChatId(sendChatReq.getMaxChatIndexId() - 1, sendChatReq.getChatId()).get();
+                .findBySessionIndexAndChatId(sendChatReq.getMaxChatIndexId() - 1, sendChatReq.getChatId())
+                .orElseThrow(() -> new IsxAppException("请等待上一个会话结束"));
             if (ChatSessionStatus.CHATTING.equals(chatSession.getStatus())) {
                 throw new IsxAppException("等待会话结束");
             }
@@ -161,6 +175,9 @@ public class ChatBizService {
         // 封装会话请求体
         BotChatContext botChatContext = chatService.transSessionListToBotChatContext(chatSessionList, app, ai,
             sendChatReq.getMaxChatIndexId(), sendChatReq.getChatId());
+        if (!Strings.isEmpty(app.getBaseConfig())) {
+            botChatContext.setBaseConfig(JSON.parseObject(app.getBaseConfig(), BaseConfig.class));
+        }
 
         // 发送请求
         Bot bot = botFactory.getBot(model.getCode());
@@ -187,8 +204,8 @@ public class ChatBizService {
     public GetChatRes getChat(GetChatReq getChatReq) {
 
         ChatSessionEntity chatSessionEntity =
-            chatSessionRepository.findBySessionIndexAndChatId(getChatReq.getChatIndex(), getChatReq.getChatId()).get();
-
+            chatSessionRepository.findBySessionIndexAndChatId(getChatReq.getChatIndex(), getChatReq.getChatId())
+                .orElseThrow(() -> new IsxAppException("当前会话不存在"));
         return GetChatRes.builder().status(chatSessionEntity.getStatus())
             .chatContent(JSON.parseObject(chatSessionEntity.getSessionContent(), ChatContent.class)).build();
     }

@@ -7,6 +7,7 @@ import com.alibaba.dashscope.common.Message;
 import com.alibaba.dashscope.exception.InputRequiredException;
 import com.alibaba.dashscope.exception.NoApiKeyException;
 import com.alibaba.fastjson.JSON;
+import com.isxcode.torch.api.app.dto.BaseConfig;
 import com.isxcode.torch.api.chat.constants.ChatSessionStatus;
 import com.isxcode.torch.api.chat.dto.ChatContent;
 import com.isxcode.torch.api.model.constant.ModelCode;
@@ -31,6 +32,9 @@ public class AliQwen extends Bot {
     @Override
     public void chat(BotChatContext botChatContext) {
 
+        // 获取基础配置
+        BaseConfig baseConfig = botChatContext.getBaseConfig();
+
         // 重新封装对应的请求
         List<Message> messages = new ArrayList<>();
         botChatContext.getChats().forEach(chat -> {
@@ -39,25 +43,43 @@ public class AliQwen extends Bot {
 
         Generation gen = new Generation();
 
-        QwenParam qwenParam = QwenParam.builder().prompt(botChatContext.getPrompt()) // 提示词
-            // .maxTokens(50) // 生成文本的最大长度
-            .model("qwen-plus") // 使用的模型
-            // .seed(12) // 随机种子
-            // .temperature((float) 0.85) // 温度参数
-            // .repetitionPenalty((float) 1) // 重复惩罚因子
-            // .resultFormat("message") // 返回格式
-            .messages(messages)
-            // .topK()
-            // .topP()
-            // .responseFormat(ResponseFormat.from("text")) // 返回格式
-            // .resources() //
-            .apiKey(botChatContext.getAuthConfig().getApiKey()) // key
-            // .enableSearch(false) // 是否联网搜索
-            // .enableEncrypt(false) // 是否加密
-            .build();
+        QwenParam.QwenParamBuilder<?, ?> modelBuild = QwenParam.builder();
+
+        if (botChatContext.getPrompt() != null) {
+            modelBuild = modelBuild.prompt(botChatContext.getPrompt());
+        }
+
+        if (baseConfig.getMaxTokens() != null) {
+            modelBuild = modelBuild.maxTokens(baseConfig.getMaxTokens());
+        }
+
+        if (baseConfig.getSeed() != null) {
+            modelBuild = modelBuild.seed(baseConfig.getSeed());
+        }
+
+        if (baseConfig.getTopK() != null) {
+            modelBuild = modelBuild.topK(baseConfig.getTopK());
+        }
+
+        if (baseConfig.getTopP() != null) {
+            modelBuild = modelBuild.topP(baseConfig.getTopP());
+        }
+
+        if (baseConfig.getTemperature() != null) {
+            modelBuild = modelBuild.temperature(baseConfig.getTemperature());
+        }
+
+        if (baseConfig.getRepetitionPenalty() != null) {
+            modelBuild = modelBuild.repetitionPenalty(baseConfig.getRepetitionPenalty());
+        }
+
+        if (baseConfig.getEnableSearch() != null) {
+            modelBuild = modelBuild.enableSearch(baseConfig.getEnableSearch());
+        }
 
         try {
-            GenerationResult call = gen.call(qwenParam);
+            GenerationResult call = gen.call(modelBuild.model("qwen-plus").resultFormat("message").messages(messages)
+                .apiKey(botChatContext.getAuthConfig().getApiKey()).build());
 
             // 提交当前会话
             ChatSessionEntity nowChatSession = chatSessionRepository

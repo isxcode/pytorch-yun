@@ -51,7 +51,7 @@ public class AppBizService {
         }
 
         AppEntity appEntity = appMapper.addAppReqToAppEntity(addAppReq);
-        appEntity.setStatus(AppStatus.ENABLE);
+        appEntity.setStatus(AppStatus.DISABLE);
         appEntity.setDefaultApp(DefaultAppStatus.DISABLE);
         appEntity.setCheckDateTime(LocalDateTime.now());
         appEntity = appRepository.save(appEntity);
@@ -75,6 +75,11 @@ public class AppBizService {
 
         AppEntity app = appService.getApp(configAppReq.getId());
 
+        // 先下线才能配置
+        if (AppStatus.ENABLE.equals(app.getStatus())) {
+            throw new IsxAppException("先下线才能配置");
+        }
+
         app.setPrompt(configAppReq.getPrompt());
         app.setBaseConfig(JSON.toJSONString(configAppReq.getBaseConfig()));
         app.setResources(JSON.toJSONString(configAppReq.getResources()));
@@ -84,8 +89,12 @@ public class AppBizService {
 
     public Page<PageAppRes> pageApp(PageAppReq pageAppReq) {
 
+        if (pageAppReq.getAppStatus() == null) {
+            pageAppReq.setAppStatus(AppStatus.ENABLE);
+        }
+
         Page<AppEntity> appEntityPage = appRepository.searchAll(pageAppReq.getSearchKeyWord(),
-            PageRequest.of(pageAppReq.getPage(), pageAppReq.getPageSize()));
+            pageAppReq.getAppStatus(), PageRequest.of(pageAppReq.getPage(), pageAppReq.getPageSize()));
 
         Page<PageAppRes> result = appEntityPage.map(appMapper::appEntityToPageAppRes);
         result.forEach(appEntity -> {

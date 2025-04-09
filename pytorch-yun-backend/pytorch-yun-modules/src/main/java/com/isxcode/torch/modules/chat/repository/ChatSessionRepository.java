@@ -28,7 +28,9 @@ public interface ChatSessionRepository extends JpaRepository<ChatSessionEntity, 
     List<ChatSessionEntity> findAllByChatId(String chatId);
 
     @Query(
-        value = "select new com.isxcode.torch.api.chat.ao.ChatAo(C2.sessionContent,C1.id,C1.appId,C1.createDateTime) from ChatEntity C1 left join ChatSessionEntity C2 on C1.id=C2.chatId and C2.sessionIndex=0 where C1.submitter = :userId and (:appId is null or :appId ='' or C1.appId=:appId) and C2.sessionContent like %:searchKeyWord% and C1.tenantId=:tenantId order by C1.createDateTime desc")
+        value = "select new com.isxcode.torch.api.chat.ao.ChatAo(C2.sessionContent,C1.id,C1.appId,C1.createDateTime) from ChatEntity C1 left join ChatSessionEntity C2 on C1.id=C2.chatId and C2.sessionIndex=0 and C1.chatType = 'PROD' where C1.submitter = :userId and (:appId is null or :appId ='' or C1.appId=:appId) and C2.sessionContent like %:searchKeyWord% and C1.tenantId=:tenantId order by C1.createDateTime desc")
     Page<ChatAo> pageChatHistory(@Param("tenantId") String tenantId, @Param("searchKeyWord") String searchKeyWord,
         @Param("appId") String appId, @Param("userId") String userId, Pageable pageable);
+
+    Boolean existsBySessionIndexAndChatId(Integer sessionIndex, String chatId);
 }
