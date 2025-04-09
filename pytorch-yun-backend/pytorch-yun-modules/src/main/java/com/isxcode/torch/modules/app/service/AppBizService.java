@@ -89,10 +89,6 @@ public class AppBizService {
 
     public Page<PageAppRes> pageApp(PageAppReq pageAppReq) {
 
-        if (pageAppReq.getAppStatus() == null) {
-            pageAppReq.setAppStatus(AppStatus.ENABLE);
-        }
-
         Page<AppEntity> appEntityPage = appRepository.searchAll(pageAppReq.getSearchKeyWord(),
             pageAppReq.getAppStatus(), PageRequest.of(pageAppReq.getPage(), pageAppReq.getPageSize()));
 
