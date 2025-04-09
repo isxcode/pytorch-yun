@@ -116,6 +116,8 @@ public class ChatBizService {
             getMaxChatIdRes.setAppId(getMaxChatIdReq.getAppId());
         }
 
+        getMaxChatIdRes.setAppName(appService.getAppName(getMaxChatIdRes.getAppId()));
+
         return getMaxChatIdRes;
     }
 
@@ -223,7 +225,8 @@ public class ChatBizService {
                 .index(e.getSessionIndex()).build());
         });
 
-        return GetFullChatRes.builder().chatSessions(chatSessions).build();
+        return GetFullChatRes.builder().appName(appService.getAppName(chat.getAppId())).chatSessions(chatSessions)
+            .build();
     }
 
 }
