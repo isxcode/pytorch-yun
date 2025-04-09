@@ -17,4 +17,6 @@ public class GetMaxChatIdRes {
     private String appId;
 
     private String chatId;
+
+    private String appName;
 }

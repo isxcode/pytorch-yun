@@ -10,5 +10,7 @@ import java.util.List;
 @Builder
 public class GetFullChatRes {
 
-    List<ChatContent> chatSessions;
+    private String appName;
+
+    private List<ChatContent> chatSessions;
 }
