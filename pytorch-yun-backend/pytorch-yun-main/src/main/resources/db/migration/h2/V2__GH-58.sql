@@ -86,6 +86,7 @@ create table if not exists PY_CHAT
     id                      varchar(200)  not null unique primary key comment '对话唯一id',
     app_id                  varchar(500) comment '应用id',
     submitter               varchar(200)  not null comment '提交人',
+    chat_type               varchar(200)  not null comment '会话类型，测试聊天还是正式聊天',
     create_by               varchar(200)  not null comment '创建人',
     create_date_time        datetime      not null comment '创建时间',
     last_modified_by        varchar(200)  not null comment '更新人',
