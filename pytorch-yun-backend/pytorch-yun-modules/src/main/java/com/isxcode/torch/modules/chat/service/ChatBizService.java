@@ -35,9 +35,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.isxcode.torch.common.config.CommonConfig.*;
 
@@ -64,6 +62,8 @@ public class ChatBizService {
     private final ChatMapper chatMapper;
 
     private final AppRepository appRepository;
+
+    public static final Map<String, Thread> CHAT_THREAD_MAP = new HashMap<>();
 
     public GetMaxChatIdRes getMaxChatId(GetMaxChatIdReq getMaxChatIdReq) {
 
@@ -179,9 +179,15 @@ public class ChatBizService {
             botChatContext.setBaseConfig(JSON.parseObject(app.getBaseConfig(), BaseConfig.class));
         }
 
+        // 记录当前线程
+        CHAT_THREAD_MAP.put(chatSession.getId(), Thread.currentThread());
+
         // 发送请求
         Bot bot = botFactory.getBot(model.getCode());
         bot.sendChat(botChatContext);
+
+        // 删除当前线程
+        CHAT_THREAD_MAP.remove(chatSession.getId());
 
         // 保存请求会话
         chatSessionRepository.save(chatSession);
@@ -198,7 +204,8 @@ public class ChatBizService {
 
         // 返回成功和响应的index
         return SendChatRes.builder().chatId(sendChatReq.getChatId())
-            .responseIndexId(sendChatReq.getMaxChatIndexId() + 1).appId(sendChatReq.getAppId()).build();
+            .responseIndexId(sendChatReq.getMaxChatIndexId() + 1).chatSessionId(chatSession.getId())
+            .appId(sendChatReq.getAppId()).build();
     }
 
     public GetChatRes getChat(GetChatReq getChatReq) {
@@ -246,4 +253,23 @@ public class ChatBizService {
             .build();
     }
 
+    public void stopChat(StopChatReq stopChatReq) {
+
+        // 杀死进程
+        Thread thread = CHAT_THREAD_MAP.get(stopChatReq.getChatSessionId());
+        try {
+            thread.interrupt();
+        } catch (Exception ignored) {
+
+        }
+
+        Optional<ChatSessionEntity> sessionRepositoryById =
+            chatSessionRepository.findById(stopChatReq.getChatSessionId());
+        if (sessionRepositoryById.isPresent()) {
+            ChatSessionEntity chatSessionEntity = sessionRepositoryById.get();
+            chatSessionEntity.setSessionContent(JSON.toJSONString(ChatContent.builder().content("已停止思考").build()));
+            chatSessionEntity.setStatus(ChatSessionStatus.OVER);
+            chatSessionRepository.save(chatSessionEntity);
+        }
+    }
 }

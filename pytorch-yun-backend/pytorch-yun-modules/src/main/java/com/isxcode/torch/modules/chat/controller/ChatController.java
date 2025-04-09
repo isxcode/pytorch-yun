@@ -63,4 +63,12 @@ public class ChatController {
 
         return chatBizService.getFullChat(getFullChatReq);
     }
+
+    @Operation(summary = "停止思考")
+    @PostMapping("/stopChat")
+    @SuccessResponse("停止成功")
+    public void stopChat(@Valid @RequestBody StopChatReq stopChatReq) {
+
+        chatBizService.stopChat(stopChatReq);
+    }
 }

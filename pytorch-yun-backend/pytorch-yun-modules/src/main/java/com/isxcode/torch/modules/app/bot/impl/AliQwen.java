@@ -33,7 +33,8 @@ public class AliQwen extends Bot {
     public void chat(BotChatContext botChatContext) {
 
         // 获取基础配置
-        BaseConfig baseConfig = botChatContext.getBaseConfig();
+        BaseConfig baseConfig =
+            botChatContext.getBaseConfig() == null ? new BaseConfig() : botChatContext.getBaseConfig();
 
         // 重新封装对应的请求
         List<Message> messages = new ArrayList<>();
@@ -78,7 +79,7 @@ public class AliQwen extends Bot {
         }
 
         try {
-            GenerationResult call = gen.call(modelBuild.model("qwen-plus").resultFormat("message").messages(messages)
+            GenerationResult call = gen.call(modelBuild.model("qwen-plus").messages(messages)
                 .apiKey(botChatContext.getAuthConfig().getApiKey()).build());
 
             // 提交当前会话
