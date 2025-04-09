@@ -13,4 +13,6 @@ public class SendChatRes {
     private String appId;
 
     private Integer responseIndexId;
+
+    private String chatSessionId;
 }
