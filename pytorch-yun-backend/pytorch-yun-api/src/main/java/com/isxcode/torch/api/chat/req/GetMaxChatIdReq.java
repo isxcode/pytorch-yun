@@ -12,4 +12,7 @@ public class GetMaxChatIdReq {
 
     @Schema(title = "应用id", example = "")
     private String appId;
+
+    @Schema(title = "会话类型", example = "测试(TEST)还是真实使用(PROD)")
+    private String chatType;
 }

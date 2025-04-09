@@ -34,6 +34,8 @@ public class ChatEntity {
 
     private String submitter;
 
+    private String chatType;
+
     @CreatedDate
     private LocalDateTime createDateTime;
 
