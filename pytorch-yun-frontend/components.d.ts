@@ -50,7 +50,4 @@ declare module 'vue' {
     ZStatusTag: typeof import('./src/components/z-status-tag/index.vue')['default']
     ZSvgIcon: typeof import('./src/components/z-svg-icon/index.vue')['default']
   }
-  export interface ComponentCustomProperties {
-    vInfiniteScroll: typeof import('element-plus/es')['ElInfiniteScroll']
-  }
 }
