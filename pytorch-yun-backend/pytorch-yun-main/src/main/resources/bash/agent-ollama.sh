@@ -96,89 +96,12 @@ if ! command -v java &>/dev/null; then
   if [ ! -n "$JAVA_HOME" ]; then
     json_output="{ \
     \"status\": \"INSTALL_ERROR\", \
-    \"log\": \"未检测到java1.8.x环境,节点请安装java 推荐命令: sudo yum install java-1.8.0-openjdk-devel java-1.8.0-openjdk -y,或者配置 ${agent_path}/conf/agent-env.sh文件中的JAVA_HOME变量\" \
+    \"log\": \"未检测到ollama环境,节点请安装ollama\" \
     }"
     echo $json_output
     rm ${BASE_PATH}/agent-yarn.sh
     exit 0
   fi
-fi
-
-# 判断是否配置HADOOP_HOME环境变量
-if [ -z "$HADOOP_HOME" ]; then
-  json_output="{ \
-            \"status\": \"INSTALL_ERROR\", \
-            \"log\": \"未配置HADOOP_HOME环境变量,节点请配置 ${agent_path}/conf/agent-env.sh文件中的HADOOP_HOME变量\" \
-          }"
-  echo $json_output
-  rm ${BASE_PATH}/agent-yarn.sh
-  exit 0
-fi
-
-# 判断是否配置HADOOP_CONF_DIR环境变量
-if [ -z "$HADOOP_CONF_DIR" ]; then
-  json_output="{ \
-            \"status\": \"INSTALL_ERROR\", \
-            \"log\": \"未配置HADOOP_CONF_DIR环境变量,节点请配置 ${agent_path}/conf/agent-env.sh文件中的HADOOP_CONF_DIR变量\" \
-          }"
-  echo $json_output
-  rm ${BASE_PATH}/agent-yarn.sh
-  exit 0
-fi
-
-# 判断本地是否有yarn命令
-if ! command -v yarn &>/dev/null; then
-  json_output="{ \
-      \"status\": \"INSTALL_ERROR\", \
-      \"log\": \"未检测到yarn命令\" \
-    }"
-  echo $json_output
-  rm ${BASE_PATH}/agent-yarn.sh
-  exit 0
-fi
-
-# 判断本地是否启动yarn服务
-if [[ "$OSTYPE" == "linux-gnu" ]]; then
-    # 判断yarn是否正常运行
-    if ! timeout 60s yarn node -list &>/dev/null; then
-      json_output="{ \
-            \"status\": \"INSTALL_ERROR\", \
-            \"log\": \"未启动yarn服务\" \
-          }"
-      echo $json_output
-      rm ${BASE_PATH}/agent-yarn.sh
-      exit 0
-    fi
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # 判断yarn是否正常运行
-    if ! yarn node -list &>/dev/null; then
-      json_output="{ \
-            \"status\": \"INSTALL_ERROR\", \
-            \"log\": \"未启动yarn服务\" \
-          }"
-      echo $json_output
-      rm ${BASE_PATH}/agent-yarn.sh
-      exit 0
-    fi
-else
-    json_output="{ \
-                      \"status\": \"INSTALL_ERROR\", \
-                      \"log\": \"该系统不支持安装\" \
-                    }"
-      echo $json_output
-      rm ${BASE_PATH}/agent-yarn.sh
-      exit 0
-fi
-
-# 判断代理端口号是否被占用
-if ! netstat -tln | awk '$4 ~ /:'"$agent_port"'$/ {exit 1}'; then
-  json_output="{ \
-          \"status\": \"INSTALL_ERROR\", \
-          \"log\": \"${agent_port} 端口号已被占用\" \
-        }"
-  echo $json_output
-  rm ${BASE_PATH}/agent-yarn.sh
-  exit 0
 fi
 
 # 返回可以安装
@@ -190,4 +113,4 @@ json_output="{ \
 echo $json_output
 
 # 删除本地检测脚本
-rm ${BASE_PATH}/agent-yarn.sh
+rm ${BASE_PATH}/agent-ollama.sh

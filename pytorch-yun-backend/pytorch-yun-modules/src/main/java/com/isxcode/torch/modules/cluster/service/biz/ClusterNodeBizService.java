@@ -89,14 +89,7 @@ public class ClusterNodeBizService {
         // 设置默认代理安装地址
         clusterNode.setAgentHomePath(
             clusterNodeService.getDefaultAgentHomePath(addClusterNodeReq.getUsername().trim(), clusterNode));
-
-        // 如果是默认安装spark,设置默认路径
-        if (addClusterNodeReq.getInstallSparkLocal() || !AgentType.StandAlone.equals(cluster.getClusterType())) {
-            clusterNode.setSparkHomePath(clusterNode.getAgentHomePath() + "/" + PathConstants.AGENT_PATH_NAME + "/"
-                + PathConstants.SPARK_MIN_HOME);
-        } else {
-            clusterNode.setSparkHomePath(addClusterNodeReq.getSparkHomePath());
-        }
+        clusterNode.setSparkHomePath(addClusterNodeReq.getSparkHomePath());
 
         // 持久化数据
         clusterNodeRepository.save(clusterNode);
@@ -131,12 +124,7 @@ public class ClusterNodeBizService {
             clusterNodeService.getDefaultAgentHomePath(updateClusterNodeReq.getUsername(), clusterNode));
 
         // 如果是默认安装spark,设置默认路径
-        if (updateClusterNodeReq.getInstallSparkLocal() || !AgentType.StandAlone.equals(cluster.getClusterType())) {
-            clusterNode.setSparkHomePath(clusterNode.getAgentHomePath() + "/" + PathConstants.AGENT_PATH_NAME + "/"
-                + PathConstants.SPARK_MIN_HOME);
-        } else {
-            clusterNode.setSparkHomePath(updateClusterNodeReq.getSparkHomePath());
-        }
+        clusterNode.setSparkHomePath(updateClusterNodeReq.getSparkHomePath());
 
         // 设置代理端口号
         clusterNode.setAgentPort(clusterNodeService.getDefaultAgentPort(updateClusterNodeReq.getAgentPort()));

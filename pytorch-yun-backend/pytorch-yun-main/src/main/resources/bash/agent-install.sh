@@ -66,66 +66,6 @@ else
 fi
 echo $! >${agent_path}/zhihuiyun-agent.pid
 
-# 如果用户需要默认spark
-if [ ${spark_local} = "true" ]; then
-
-  # 如何需要本地安装，则自动修改配置
-  # 修改spark-defaults.conf
-  if [ ! -f ${agent_path}/spark-min/conf/spark-defaults.conf ]; then
-    cp ${agent_path}/spark-min/conf/spark-defaults.conf.template ${agent_path}/spark-min/conf/spark-defaults.conf
-    cat <<-'EOF' >> ${agent_path}/spark-min/conf/spark-defaults.conf
-spark.master          spark://localhost:7077
-spark.master.web.url  http://localhost:8081
-EOF
-  fi
-
-  # 修改spark-env.sh
-  if [ ! -f ${agent_path}/spark-min/conf/spark-env.sh ]; then
-    cp ${agent_path}/spark-min/conf/spark-env.sh.template ${agent_path}/spark-min/conf/spark-env.sh
-    cat <<-'EOF' >> ${agent_path}/spark-min/conf/spark-env.sh
-export SPARK_MASTER_PORT=7077
-export SPARK_MASTER_WEBUI_PORT=8081
-export SPARK_WORKER_OPTS="-Dspark.worker.cleanup.enabled=true -Dspark.worker.cleanup.appDataTtl=1800 -Dspark.worker.cleanup.interval=60"
-EOF
-  fi
-
-  # 如果用户没有id_rsa.pub,帮他初始化
-  if [ ! -f ~/.ssh/id_rsa.pub ]; then
-    nohup ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/id_rsa > /dev/null 2>&1 &
-  fi
-  # 如果用户没有authorized_keys,帮他初始化
-  if [ ! -f ~/.ssh/authorized_keys ]; then
-    touch ~/.ssh/authorized_keys
-  fi
-  # 如果用户没有配置免密,帮他配置
-  if ! grep -q "$(cat ~/.ssh/id_rsa.pub)" ~/.ssh/authorized_keys; then
-    sleep 5
-    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-    chmod 0600 ~/.ssh/authorized_keys
-  fi
-
-  if [[ "$OSTYPE" == "linux-gnu" ]]; then
-    # 修改spark的配置文件,修改为内网ip
-    if netstat -tln | awk '$4 ~ /:'7077'$/ {exit 1}'; then
-      interIp=$(ip addr show | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
-      sed -i.bak -E "s/spark:\/\/localhost:7077/spark:\/\/$interIp:7077/g" ${agent_path}/spark-min/conf/spark-defaults.conf
-      nohup bash ${agent_path}/spark-min/sbin/start-all.sh > /dev/null 2>&1 &
-    fi
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    nohup bash ${agent_path}/spark-min/sbin/start-master.sh  > /dev/null 2>&1 &
-    sleep 5
-    nohup bash ${agent_path}/spark-min/sbin/start-worker.sh --webui-port 8081 spark://localhost:7077 > /dev/null 2>&1 &
-  else
-    json_output="{ \
-                      \"status\": \"INSTALL_ERROR\", \
-                      \"log\": \"该系统不支持安装\" \
-                    }"
-    echo $json_output
-    rm ${BASE_PATH}/agent-install.sh
-    exit 0
-  fi
-fi
-
 # 检查是否安装
 if [ -e "${agent_path}/zhihuiyun-agent.pid" ]; then
   pid=$(cat "${agent_path}/zhihuiyun-agent.pid")

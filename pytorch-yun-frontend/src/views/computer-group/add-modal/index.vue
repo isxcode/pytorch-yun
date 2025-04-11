@@ -80,17 +80,9 @@ const rules = reactive<FormRules>({
 })
 const typeList = reactive([
   {
-    label: 'Kubernetes',
-    value: 'kubernetes',
-  },
-  {
-    label: 'Yarn',
-    value: 'yarn',
-  },
-  {
-    label: 'StandAlone',
-    value: 'standalone',
-  },
+    label: 'Ollama',
+    value: 'Ollama',
+  }
 ]);
 
 function showModal(cb: () => void, data: any): void {
