@@ -21,7 +21,7 @@ pytorch-yun-backend/pytorch-yun-main/src/main/resources/static
 pytorch-yun-backend/pytorch-yun-main/src/main/resources/agent
 
 # 企业版代码不提交
-pytorch-yun-vip
+ollama-yun-vip
 
 # 资源文件不提交
 resources/file
