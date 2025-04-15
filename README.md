@@ -1,35 +1,36 @@
 # 至慧云
 
-### 超轻量级大模型训练平台
+### 超轻量级大模型训练平台/人工智能/智能中心
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/isxcode/zhihuiyun)](https://hub.docker.com/r/isxcode/zhihuiyun)
-[![build](https://github.com/isxcode/pytorch-yun/actions/workflows/build-zhihuiyun.yml/badge.svg?branch=main)](https://github.com/isxcode/pytorch-yun/actions/workflows/build-zhihuiyun.yml)
-[![GitHub Repo stars](https://img.shields.io/github/stars/isxcode/pytorch-yun)](https://github.com/isxcode/pytorch-yun)
-[![GitHub forks](https://img.shields.io/github/forks/isxcode/pytorch-yun)](https://github.com/isxcode/pytorch-yun/fork)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fisxcode%2Fpytorch-yun.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fisxcode%2Fpytorch-yun?ref=badge_shield&issueType=license)
-[![GitHub License](https://img.shields.io/github/license/isxcode/pytorch-yun)](https://github.com/isxcode/pytorch-yun/blob/main/LICENSE)
+[![build](https://github.com/isxcode/ollama-yun/actions/workflows/build-zhihuiyun.yml/badge.svg?branch=main)](https://github.com/isxcode/ollama-yun/actions/workflows/build-zhihuiyun.yml)
+[![GitHub Repo stars](https://img.shields.io/github/stars/isxcode/ollama-yun)](https://github.com/isxcode/ollama-yun)
+[![GitHub forks](https://img.shields.io/github/forks/isxcode/ollama-yun)](https://github.com/isxcode/ollama-yun/fork)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fisxcode%2Follama-yun.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fisxcode%2Follama-yun?ref=badge_shield&issueType=license)
+[![GitHub License](https://img.shields.io/github/license/isxcode/ollama-yun)](https://github.com/isxcode/ollama-yun/blob/main/LICENSE)
 
-|           |                                                                         |
-|-----------|-------------------------------------------------------------------------|
-| 官网地址:     | https://zhihuiyun.isxcode.com                                           |
-| 源码地址:     | https://github.com/isxcode/pytorch-yun                                  |
-| 演示环境:     | https://zhihuiyun-demo.isxcode.com                                      |
-| 安装包下载:    | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/zhihuiyun.tar.gz |
-| 许可证下载:    | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/license.lic      |
-| docker镜像: | https://hub.docker.com/r/isxcode/zhihuiyun                              |
-| 阿里云镜像:    | https://zhihuiyun.isxcode.com/zh/docs/zh/1/1-docker                     |
-| 关键词:      | 大模型平台, 模型调用, 模型编排, 人工智能, Pytorch, Docker                                |
-|           |                                                                         |
+|           |                                                                                                                                                         |
+|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 官网地址:     | https://zhihuiyun.isxcode.com                                                                                                                           |
+| 源码地址:     | https://github.com/isxcode/ollama-yun                                                                                                                   |
+| 演示环境:     | https://zhihuiyun-demo.isxcode.com                                                                                                                      |
+| 安装包下载:    | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/zhihuiyun.tar.gz                                                                                 |
+| 许可证下载:    | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/license.lic                                                                                      |
+| docker镜像: | https://hub.docker.com/r/isxcode/zhihuiyun                                                                                                              |
+| 阿里云镜像:    | https://zhihuiyun.isxcode.com/zh/docs/zh/1/1-docker                                                                                                     |
+| 产品矩阵:     | [至轻云](https://zhiqingyun.isxcode.com), [至流云](https://zhiliuyun.isxcode.com), [至慧云](https://zhihuiyun.isxcode.com), [至数云](https://zhishuyun.isxcode.com) |
+| 关键词:      | 大模型训练, 智能中心, 模型调用, 模型编排, 人工智能, Ollama, Pytorch, Docker                                                                                                  |
+|           |                                                                                                                                                         |
 
 ### 产品介绍
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;至慧云是一款超轻量级、企业级模型训练平台，基于Pytorch生态打造。一键部署，开箱即用。快速实现大模型训练、模型调用、机器人代理、模型编排、自定义接口、等多种功能，为企业提供高效便捷的大模型解决方案。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;至慧云是一款超轻量级、企业级模型训练平台，基于Ollama生态打造。一键部署，开箱即用。快速实现大模型离线部署、离线训练、模型调用、机器人代理、模型编排、自定义接口等多种功能，为企业提供高效便捷的大模型解决方案。
 
 ### 功能特点
 
 - **轻量级产品**: 无需额外组件安装，一键部署，开箱即用。
 - **云原生私有化**: 兼容云原生架构，支持多节点安装与高可用集群部署。
-- **复杂模型调试**: 基于原生Pytorch分布式架构，高效地执行模型训练计算。
+- **离线大模型部署**: 基于Ollama架构，高效地执行模型离线训练部署。
 
 ### 立即体验
 
@@ -54,7 +55,7 @@ docker run -p 8080:8080 -d isxcode/zhihuiyun
 - [快速入门](https://zhihuiyun.isxcode.com/zh/docs/zh/1/0)
 - [产品手册](https://zhihuiyun.isxcode.com/zh/docs/zh/2/0)
 - [开发手册](https://zhihuiyun.isxcode.com/zh/docs/zh/6/1)
-- [博客](https://ispong.isxcode.com/tags/pytorch/)
+- [博客](https://ispong.isxcode.com/tags/ollama/)
 
 ### 源码构建
 
@@ -66,11 +67,11 @@ docker run -p 8080:8080 -d isxcode/zhihuiyun
 ##### MacOS/Linux
 
 > [!IMPORTANT]
-> 安装包路径: pytorch-yun/pytorch-yun-dist/build/distributions/zhihuiyun.tar.gz
+> 安装包路径: ollama-yun/ollama-yun-dist/build/distributions/zhihuiyun.tar.gz
 
 ```bash
-git clone https://github.com/isxcode/pytorch-yun.git
-cd pytorch-yun
+git clone https://github.com/isxcode/ollama-yun.git
+cd ollama-yun
 ./gradlew install clean package
 ```
 
@@ -80,11 +81,11 @@ cd pytorch-yun
 > 请使用Git Bash终端工具执行以下命令
 
 ```bash
-git clone https://github.com/isxcode/pytorch-yun.git
-cd pytorch-yun
+git clone https://github.com/isxcode/ollama-yun.git
+cd ollama-yun
 ./gradlew.bat install clean package
 ```
 
 ### 收藏历史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=isxcode/pytorch-yun&type=Date)](https://www.star-history.com/#isxcode/pytorch-yun&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=isxcode/ollama-yun&type=Date)](https://www.star-history.com/#isxcode/ollama-yun&Date)
