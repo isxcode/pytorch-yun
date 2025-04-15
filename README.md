@@ -55,7 +55,7 @@ docker run -p 8080:8080 -d isxcode/zhihuiyun
 - [快速入门](https://zhihuiyun.isxcode.com/zh/docs/zh/1/0)
 - [产品手册](https://zhihuiyun.isxcode.com/zh/docs/zh/2/0)
 - [开发手册](https://zhihuiyun.isxcode.com/zh/docs/zh/6/1)
-- [博客](https://ispong.isxcode.com/tags/ollama/)
+- [博客](https://ispong.isxcode.com/tags/pytorch/)
 
 ### 源码构建
 
