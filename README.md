@@ -9,18 +9,18 @@
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fisxcode%2Follama-yun.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fisxcode%2Follama-yun?ref=badge_shield&issueType=license)
 [![GitHub License](https://img.shields.io/github/license/isxcode/ollama-yun)](https://github.com/isxcode/ollama-yun/blob/main/LICENSE)
 
-|           |                                                                                                                                                         |
-|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 官网地址:     | https://zhihuiyun.isxcode.com                                                                                                                           |
-| 源码地址:     | https://github.com/isxcode/ollama-yun                                                                                                                   |
-| 演示环境:     | https://zhihuiyun-demo.isxcode.com                                                                                                                      |
-| 安装包下载:    | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/zhihuiyun.tar.gz                                                                                 |
-| 许可证下载:    | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/license.lic                                                                                      |
-| docker镜像: | https://hub.docker.com/r/isxcode/zhihuiyun                                                                                                              |
-| 阿里云镜像:    | https://zhihuiyun.isxcode.com/zh/docs/zh/1/1-docker                                                                                                     |
-| 产品矩阵:     | [至轻云](https://zhiqingyun.isxcode.com), [至流云](https://zhiliuyun.isxcode.com), [至慧云](https://zhihuiyun.isxcode.com), [至数云](https://zhishuyun.isxcode.com) |
-| 关键词:      | 大模型训练, 智能中心, 模型调用, 模型编排, 人工智能, Ollama, Pytorch, Docker                                                                                                  |
-|           |                                                                                                                                                         |
+|             |                                                                                                                                                         |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 官网地址:       | https://zhihuiyun.isxcode.com                                                                                                                           |
+| 源码地址:       | https://github.com/isxcode/ollama-yun                                                                                                                   |
+| 演示环境:       | https://zhihuiyun-demo.isxcode.com                                                                                                                      |
+| 安装包下载:      | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/zhihuiyun.tar.gz                                                                                 |
+| 许可证下载:      | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/license.lic                                                                                      |
+| Docker Hub: | https://hub.docker.com/r/isxcode/zhihuiyun                                                                                                              |
+| 阿里云镜像:      | https://zhihuiyun.isxcode.com/zh/docs/zh/1/1-docker                                                                                                     |
+| 产品矩阵:       | [至轻云](https://zhiqingyun.isxcode.com), [至流云](https://zhiliuyun.isxcode.com), [至慧云](https://zhihuiyun.isxcode.com), [至数云](https://zhishuyun.isxcode.com) |
+| 关键词:        | 大模型训练, 智能中心, 模型调用, 模型编排, 人工智能, Ollama, Pytorch, Docker                                                                                                  |
+|             |                                                                                                                                                         |
 
 ### 产品介绍
 
