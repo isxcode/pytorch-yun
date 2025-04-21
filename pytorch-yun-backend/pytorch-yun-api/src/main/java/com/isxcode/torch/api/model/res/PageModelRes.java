@@ -19,7 +19,11 @@ public class PageModelRes {
 
     private String modelType;
 
-    private String modelSize;
+    private String modelLabel;
+
+    private String modelFile;
+
+    private String modelFileName;
 
     private String status;
 

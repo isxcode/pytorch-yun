@@ -5,7 +5,8 @@ create table if not exists PY_MODEL
     name                    varchar(200)  not null comment '模型名称',
     code                    varchar(200)  not null comment '模型编码',
     model_type              varchar(200)  not null comment '模型类型',
-    model_size              varchar(200)  not null comment '模型大小',
+    model_label             varchar(200) null comment '模型标签',
+    model_file              varchar(200)  null comment '模型文件',
     status                  varchar(200)  not null comment '模型状态',
     remark                  varchar(500) comment '模型描述',
     create_by               varchar(200)  not null comment '创建人',
@@ -19,22 +20,10 @@ create table if not exists PY_MODEL
 
 -- 插入默认支持的数据
 INSERT INTO PY_MODEL
-(ID, NAME, CODE, MODEL_TYPE, MODEL_SIZE, STATUS, REMARK, CREATE_BY, CREATE_DATE_TIME, LAST_MODIFIED_BY,
+(ID, NAME, CODE, MODEL_TYPE, MODEL_LABEL, STATUS, REMARK, CREATE_BY, CREATE_DATE_TIME, LAST_MODIFIED_BY,
  LAST_MODIFIED_DATE_TIME, DELETED, VERSION_NUMBER, TENANT_ID)
-VALUES ('HUI_ALI_QWEN', '通义千问[阿里]', 'HUI_ALI_QWEN', 'API', '70B', 'ENABLE', '通义千问[阿里]', 'zhihuiyun',
+VALUES ('qwen-plus', '通义千问-Plus', 'Qwen-Plus', 'API', '671b', 'ENABLE', '系统默认', 'zhihuiyun',
         '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 0, 1, 'zhihuiyun');
-
-INSERT INTO PY_MODEL (ID, NAME, CODE, MODEL_TYPE, MODEL_SIZE, STATUS, REMARK, CREATE_BY, CREATE_DATE_TIME,
-                      LAST_MODIFIED_BY, LAST_MODIFIED_DATE_TIME, DELETED, VERSION_NUMBER, TENANT_ID)
-VALUES ('HUI_ALI_DEEPSEEK_R1', 'Deepseek-R1[阿里]', 'HUI_ALI_DEEPSEEK_R1', 'API', '70B', 'ENABLE', 'Deepseek-R1[阿里]',
-        'zhihuiyun', '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 0, 1,
-        'zhihuiyun');
-
-INSERT INTO PY_MODEL (ID, NAME, CODE, MODEL_TYPE, MODEL_SIZE, STATUS, REMARK, CREATE_BY, CREATE_DATE_TIME,
-                      LAST_MODIFIED_BY, LAST_MODIFIED_DATE_TIME, DELETED, VERSION_NUMBER, TENANT_ID)
-VALUES ('HUI_ALI_DEEPSEEK_V3', 'Deepseek-V3[阿里]', 'HUI_ALI_DEEPSEEK_V3', 'API', '70B', 'ENABLE', 'Deepseek-V3[阿里]',
-        'zhihuiyun', '2025-03-07 16:02:59.000000', 'zhihuiyun', '2025-03-07 16:03:06.000000', 0, 1,
-        'zhihuiyun');
 
 -- 智能体表
 create table if not exists PY_AI

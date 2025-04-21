@@ -55,10 +55,7 @@ export const colConfigs: colConfig[] = [
     minWidth: 110,
     formatter: (data: any) => {
       const obj = {
-        JOB: '作业',
-        FUNC: '函数',
-        LIB: '依赖',
-        EXCEL: 'Excel'
+        MODEL_FILE: '模型文件',
       }
       return obj[data.cellValue]
     }
