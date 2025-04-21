@@ -1,4 +1,0 @@
-dependencies {
-
-    api(project(":ollama-yun-backend:ollama-yun-api-base"))
-}

@@ -1,9 +1,0 @@
-dependencies {
-
-    api(project(':ollama-yun-backend:ollama-yun-api'))
-    api(project(':ollama-yun-backend:ollama-yun-common'))
-}
-
-bootJar {
-    archiveFileName = 'zhihuiyun-agent.jar'
-}

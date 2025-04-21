@@ -50,7 +50,7 @@
           {{ $t("related_technologies") }}
         </div>
         <div class="tech-img-div">
-          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-ollama.png" alt="">
+          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-pytorch.png" alt="">
           <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-milvus.png" alt="">
           <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-deepseek.png" alt="">
           <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-k8s.png" alt="">

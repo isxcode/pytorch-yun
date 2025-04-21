@@ -135,7 +135,7 @@ const menuData: Array<MenuData> = reactive([
   {
     title: "github",
     icon: "github",
-    path: "https://github.com/isxcode/ollama-yun",
+    path: "https://github.com/isxcode/pytorch-yun",
     type: "link",
   },
 ]);
