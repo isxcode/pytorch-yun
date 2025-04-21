@@ -15,5 +15,5 @@ public class SparkYunProperties {
     private String tmpDir = "/tmp";
 
     /** 代理默认端口号. */
-    private String defaultAgentPort = "30177";
+    private String defaultAgentPort = "30179";
 }

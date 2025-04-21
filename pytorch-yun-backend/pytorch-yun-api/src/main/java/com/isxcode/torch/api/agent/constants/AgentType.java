@@ -5,5 +5,5 @@ package com.isxcode.torch.api.agent.constants;
  */
 public interface AgentType {
 
-    String Pytorch = "Pytorch";
+    String HuggingFace = "HuggingFace";
 }
