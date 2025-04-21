@@ -59,20 +59,8 @@ const form = ref<FormInstance>()
 const callback = ref<any>()
 const typeList = ref([
   {
-    label: '作业',
-    value: 'JOB',
-  },
-  {
-    label: '函数',
-    value: 'FUNC',
-  },
-  {
-    label: '依赖',
-    value: 'LIB',
-  },
-  {
-    label: 'Excel',
-    value: 'EXCEL',
+    label: '模型文件',
+    value: 'MODEL_FILE',
   }
 ])
 const renderSence = ref<string>('new')
