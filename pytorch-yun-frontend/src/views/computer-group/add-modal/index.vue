@@ -80,8 +80,8 @@ const rules = reactive<FormRules>({
 })
 const typeList = reactive([
   {
-    label: 'Pytorch',
-    value: 'Pytorch',
+    label: 'HuggingFace',
+    value: 'HuggingFace',
   }
 ]);
 
