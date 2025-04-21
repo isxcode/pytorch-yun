@@ -184,7 +184,6 @@ fi
 # 返回可以安装
 json_output="{ \
           \"status\": \"CAN_INSTALL\", \
-          \"hadoopHome\": \"$HADOOP_HOME\", \
           \"log\": \"允许安装\" \
         }"
 echo $json_output
