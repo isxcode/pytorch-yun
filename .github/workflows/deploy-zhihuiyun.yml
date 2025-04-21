@@ -28,11 +28,11 @@ jobs:
           sudo timedatectl set-timezone Asia/Shanghai
           date
 
-      - name: Checkout ollama-yun
+      - name: Checkout pytorch-yun
         uses: actions/checkout@v4
         with:
           token: ${{ env.ADMIN_GITHUB_TOKEN }}
-          repository: "isxcode/ollama-yun"
+          repository: "isxcode/pytorch-yun"
           ref: 'main'
 
       - name: Download zhihuiyun
