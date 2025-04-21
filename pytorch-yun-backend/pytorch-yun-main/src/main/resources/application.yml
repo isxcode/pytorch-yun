@@ -29,8 +29,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
+      max-file-size: 1000GB
+      max-request-size: 1000GB
       enabled: true
 
   banner:
