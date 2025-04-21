@@ -44,7 +44,9 @@ public class ModelEntity {
 
     private String modelType;
 
-    private String modelSize;
+    private String modelLabel;
+
+    private String modelFile;
 
     private String status;
 

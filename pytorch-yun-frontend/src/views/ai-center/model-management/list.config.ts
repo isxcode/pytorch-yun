@@ -46,13 +46,24 @@ export const colConfigs: colConfig[] = [
     },
     {
         prop: 'code',
-        title: '模型编码',
+        title: '编码',
         minWidth: 130,
         showOverflowTooltip: true
     },
     {
-        prop: 'modelSize',
-        title: '大小',
+        prop: 'modelLabel',
+        title: '标签',
+        minWidth: 80,
+        showOverflowTooltip: true
+    },
+    {
+        prop: 'modelType',
+        title: '类型',
+        minWidth: 100
+    },
+    {
+        prop: 'modelFileName',
+        title: '模型文件',
         minWidth: 80,
         showOverflowTooltip: true
     },
@@ -61,11 +72,6 @@ export const colConfigs: colConfig[] = [
         title: '状态',
         minWidth: 100,
         customSlot: 'statusTag'
-    },
-    {
-        prop: 'modelType',
-        title: '类型',
-        minWidth: 100
     },
     {
         prop: 'createDateTime',
