@@ -20,6 +20,9 @@ public class AddAiReq {
     @NotEmpty(message = "模型id不能为空")
     private String modelId;
 
+    @Schema(title = "集群id", example = "123")
+    private String clusterId;
+
     @Schema(title = "Api认证", example = "")
     private AuthConfig authConfig;
 

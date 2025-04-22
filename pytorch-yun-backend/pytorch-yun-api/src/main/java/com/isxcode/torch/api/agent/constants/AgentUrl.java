@@ -7,5 +7,9 @@ import com.isxcode.torch.api.main.constants.ModuleCode;
  */
 public interface AgentUrl {
 
-    String HEART_CHECK_URL = "/" + ModuleCode.SPARK_YUN_AGENT + "/heartCheck";
+    String HEART_CHECK_URL = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/heartCheck";
+
+    String DEPLOY_AI = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/deployAi";
+
+    String CHAT_AI = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/chatAi";
 }

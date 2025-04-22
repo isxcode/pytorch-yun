@@ -1,14 +1,13 @@
-# filename: main.py
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 import torch
+import os
 
 app = FastAPI()
 
 # 模型加载（使用你本地路径）
-model_path = "/Users/ispong/Downloads/qwen-0.5b"
+model_path = os.getenv("MODEL_PATH")
 config = AutoConfig.from_pretrained(f"{model_path}/config.json")
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForCausalLM.from_pretrained(

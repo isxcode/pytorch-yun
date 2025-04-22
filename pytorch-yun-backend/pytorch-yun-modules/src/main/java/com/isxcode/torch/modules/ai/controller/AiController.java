@@ -1,6 +1,7 @@
 package com.isxcode.torch.modules.ai.controller;
 
 import com.isxcode.torch.api.ai.req.AddAiReq;
+import com.isxcode.torch.api.ai.req.DeployAiReq;
 import com.isxcode.torch.api.ai.req.PageAiReq;
 import com.isxcode.torch.api.ai.req.UpdateAiReq;
 import com.isxcode.torch.api.ai.res.PageAiRes;
@@ -51,4 +52,22 @@ public class AiController {
 
         return aiBizService.pageAi(pageAiReq);
     }
+
+    @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
+    @Operation(summary = "部署智能体接口")
+    @PostMapping("/deployAi")
+    @SuccessResponse("部署中")
+    public void deployAi(@Valid @RequestBody DeployAiReq deployAiReq) {
+
+        aiBizService.deployAi(deployAiReq);
+    }
+
+    // @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
+    // @Operation(summary = "停止智能体接口")
+    // @PostMapping("/addModel")
+    // @SuccessResponse("添加成功")
+    // public void addModel(@Valid @RequestBody AddModelReq addModelReq) {
+    //
+    // modelBizService.addModel(addModelReq);
+    // }
 }

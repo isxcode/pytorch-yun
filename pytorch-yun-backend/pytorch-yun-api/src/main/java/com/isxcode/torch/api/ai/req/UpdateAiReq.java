@@ -21,5 +21,8 @@ public class UpdateAiReq {
     private String remark;
 
     @Schema(title = "Api认证", example = "")
+    private String clusterId;
+
+    @Schema(title = "Api认证", example = "")
     private AuthConfig authConfig;
 }

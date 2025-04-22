@@ -7,4 +7,6 @@ public interface ModelType {
     String LOCAL = "LOCAL";
 
     String BUILD = "BUILD";
+
+    String MANUAL = "MANUAL";
 }

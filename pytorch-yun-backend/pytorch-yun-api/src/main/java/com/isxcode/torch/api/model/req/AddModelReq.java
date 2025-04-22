@@ -22,4 +22,7 @@ public class AddModelReq {
     @Schema(title = "模型文件", example = "py_123")
     @NotEmpty(message = "模型文件不能为空")
     private String modelFile;
+
+    @Schema(title = "备注", example = "备注")
+    private String remark;
 }
