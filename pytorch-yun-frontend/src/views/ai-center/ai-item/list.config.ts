@@ -45,27 +45,27 @@ export const colConfigs: colConfig[] = [
         showOverflowTooltip: true
     },
     {
-        prop: 'code',
-        title: '集群',
-        minWidth: 120,
-        showOverflowTooltip: true
-    },
-    {
         prop: 'modelName',
         title: '模型',
         minWidth: 140,
         showOverflowTooltip: true
     },
     {
-        prop: 'status',
-        title: '状态',
-        minWidth: 100,
-        customSlot: 'statusTag'
+        prop: 'clusterName',
+        title: '集群',
+        minWidth: 120,
+        showOverflowTooltip: true
     },
     {
         prop: 'aiType',
         title: '类型',
         minWidth: 100
+    },
+    {
+        prop: 'status',
+        title: '状态',
+        minWidth: 100,
+        customSlot: 'statusTag'
     },
     {
         prop: 'createByUsername',

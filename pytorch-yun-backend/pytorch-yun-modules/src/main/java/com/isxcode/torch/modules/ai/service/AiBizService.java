@@ -3,6 +3,7 @@ package com.isxcode.torch.modules.ai.service;
 import com.alibaba.fastjson.JSON;
 import com.isxcode.torch.api.ai.constant.AiStatus;
 import com.isxcode.torch.api.ai.req.AddAiReq;
+import com.isxcode.torch.api.ai.req.DeployAiReq;
 import com.isxcode.torch.api.ai.req.PageAiReq;
 import com.isxcode.torch.api.ai.req.UpdateAiReq;
 import com.isxcode.torch.api.ai.res.PageAiRes;
@@ -10,10 +11,13 @@ import com.isxcode.torch.api.ai.res.PageAiRes;
 import javax.transaction.Transactional;
 
 import com.isxcode.torch.api.app.constants.DefaultAppStatus;
+import com.isxcode.torch.api.model.constant.ModelType;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.ai.entity.AiEntity;
 import com.isxcode.torch.modules.ai.mapper.AiMapper;
 import com.isxcode.torch.modules.ai.repository.AiRepository;
+import com.isxcode.torch.modules.ai.run.DeployAiContext;
+import com.isxcode.torch.modules.ai.run.DeployAiService;
 import com.isxcode.torch.modules.app.entity.AppEntity;
 import com.isxcode.torch.modules.app.repository.AppRepository;
 import com.isxcode.torch.modules.cluster.service.ClusterService;
@@ -52,6 +56,8 @@ public class AiBizService {
 
     private final AppRepository appRepository;
 
+    private final DeployAiService deployAiService;
+
     public void addAi(AddAiReq addAiReq) {
 
         // 检测数据源名称重复
@@ -60,12 +66,31 @@ public class AiBizService {
             throw new IsxAppException("Ai名称重复");
         }
 
+        // 封装智能体对象
         AiEntity aiEntity = aiMapper.addAiReqToAiEntity(addAiReq);
-        if (addAiReq.getAuthConfig() != null) {
+
+        // 通过模型id判断当前所需参数
+        JPA_TENANT_MODE.set(false);
+        ModelEntity model = modelService.getModel(addAiReq.getModelId());
+        JPA_TENANT_MODE.set(true);
+
+        if (ModelType.API.equals(model.getModelType())) {
+            if (addAiReq.getAuthConfig() == null) {
+                throw new IsxAppException("验证信息缺失");
+            }
             aiEntity.setAuthConfig(JSON.toJSONString(addAiReq.getAuthConfig()));
+            aiEntity.setStatus(AiStatus.ENABLE);
+        } else if (ModelType.MANUAL.equals(model.getModelType())) {
+            if (addAiReq.getClusterId() == null) {
+                throw new IsxAppException("集群配置缺失");
+            }
+            aiEntity.setClusterId(addAiReq.getClusterId());
+            aiEntity.setStatus(AiStatus.DISABLE);
+        } else {
+            throw new IsxAppException("当前模型不支持");
         }
+
         aiEntity.setCheckDateTime(LocalDateTime.now());
-        aiEntity.setStatus(AiStatus.ENABLE);
         aiEntity = aiRepository.save(aiEntity);
 
         // 自动创建对应的应用
@@ -96,11 +121,31 @@ public class AiBizService {
         }
 
         AiEntity ai = aiService.getAi(updateAiReq.getId());
+        if (AiStatus.DEPLOYING.equals(ai.getStatus())) {
+            throw new IsxAppException("部署中，不可编辑");
+        }
 
         AiEntity aiEntity = aiMapper.updateAiReqToAiEntity(updateAiReq, ai);
-        if (updateAiReq.getAuthConfig() != null) {
+
+        JPA_TENANT_MODE.set(true);
+        ModelEntity model = modelService.getModel(updateAiReq.getId());
+        JPA_TENANT_MODE.set(false);
+
+        if (ModelType.API.equals(model.getModelType())) {
+            if (updateAiReq.getAuthConfig() == null) {
+                throw new IsxAppException("验证信息缺失");
+            }
             aiEntity.setAuthConfig(JSON.toJSONString(updateAiReq.getAuthConfig()));
+        } else if (ModelType.MANUAL.equals(model.getModelType())) {
+            if (updateAiReq.getClusterId() == null) {
+                throw new IsxAppException("集群配置缺失");
+            }
+            aiEntity.setClusterId(updateAiReq.getClusterId());
+            aiEntity.setStatus(AiStatus.DISABLE);
+        } else {
+            throw new IsxAppException("当前模型不支持");
         }
+
         aiRepository.save(aiEntity);
     }
 
@@ -123,5 +168,28 @@ public class AiBizService {
         });
 
         return result;
+    }
+
+    public void deployAi(DeployAiReq deployAiReq) {
+
+        // 判断智能体是否存在
+        AiEntity ai = aiService.getAi(deployAiReq.getId());
+
+        // 状态是否可以部署
+        if (AiStatus.ENABLE.equals(ai.getStatus())) {
+            throw new IsxAppException("当前状态不可部署");
+        }
+
+        // 获取模型仓库
+        ModelEntity model = modelService.getModel(ai.getModelId());
+
+        // 封装请求体
+        DeployAiContext deployAiContext = DeployAiContext.builder().aiId(ai.getId()).clusterId(ai.getClusterId())
+            .modelCode(model.getCode()).modelFileId(model.getModelFile()).build();
+        deployAiService.deployAi(deployAiContext);
+
+        // 修改状态
+        ai.setStatus(AiStatus.DEPLOYING);
+        aiRepository.save(ai);
     }
 }

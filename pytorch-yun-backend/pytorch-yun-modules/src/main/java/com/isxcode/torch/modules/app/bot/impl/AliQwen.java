@@ -97,6 +97,6 @@ public class AliQwen extends Bot {
 
     @Override
     public String name() {
-        return ModelCode.HUI_ALI_QWEN;
+        return ModelCode.QWEN_PLUS;
     }
 }

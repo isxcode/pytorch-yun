@@ -2,6 +2,8 @@ package com.isxcode.torch.modules.model.service;
 
 import com.isxcode.torch.api.datasource.req.*;
 import com.isxcode.torch.api.datasource.res.*;
+import com.isxcode.torch.api.model.constant.ModelStatus;
+import com.isxcode.torch.api.model.constant.ModelType;
 import com.isxcode.torch.api.model.req.AddModelReq;
 import com.isxcode.torch.api.model.req.PageModelReq;
 import com.isxcode.torch.api.model.req.UpdateModelReq;
@@ -9,6 +11,7 @@ import com.isxcode.torch.api.model.res.PageModelRes;
 
 import javax.transaction.Transactional;
 
+import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.file.service.FileService;
 import com.isxcode.torch.modules.model.entity.ModelEntity;
 import com.isxcode.torch.modules.model.mapper.ModelMapper;
@@ -32,6 +35,8 @@ public class ModelBizService {
 
     private final ModelMapper modelMapper;
 
+    private final ModelService modelService;
+
     private final FileService fileService;
 
     public Page<PageModelRes> pageModel(PageModelReq pageModelReq) {
@@ -54,10 +59,38 @@ public class ModelBizService {
 
     public void addModel(AddModelReq addModelReq) {
 
+        // 判断名称是否重复
+        modelRepository.findByName(addModelReq.getName()).ifPresent(e -> {
+            throw new IsxAppException("模型名称重复");
+        });
 
+        // 转换对象
+        ModelEntity modelEntity = modelMapper.addModelReqToModelEntity(addModelReq);
+
+        // 手动创建的仓库
+        modelEntity.setModelType(ModelType.MANUAL);
+        modelEntity.setStatus(ModelStatus.ENABLE);
+
+        // 持久化
+        modelRepository.save(modelEntity);
     }
 
     public void updateModel(UpdateModelReq updateModelReq) {
 
+        // 判断模型是否存在
+        ModelEntity model = modelService.getModel(updateModelReq.getId());
+
+        // 判断名称是否重复
+        modelRepository.findByName(updateModelReq.getName()).ifPresent(e -> {
+            if (!updateModelReq.getId().equals(e.getId())) {
+                throw new IsxAppException("模型名称重复");
+            }
+        });
+
+        // 修改标签备注模型文件
+        model = modelMapper.updateModelReqToModelEntity(updateModelReq, model);
+
+        // 持久化
+        modelRepository.save(model);
     }
 }

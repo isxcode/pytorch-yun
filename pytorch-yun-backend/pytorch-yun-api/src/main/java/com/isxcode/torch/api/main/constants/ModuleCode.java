@@ -48,7 +48,7 @@ public interface ModuleCode {
     /**
      * 至慧云代理模块
      */
-    String SPARK_YUN_AGENT = "pytorch-yun-agent";
+    String PYTORCH_YUN_AGENT = "pytorch-yun-agent";
 
     /**
      * 资源文件模块

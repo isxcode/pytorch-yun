@@ -48,6 +48,8 @@ public class AiEntity {
 
     private String aiLog;
 
+    private String aiPort;
+
     private String authConfig;
 
     private String remark;
