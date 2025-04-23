@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthConfig {
+public class ClusterConfig {
 
-    @Schema(title = "api的key", example = "ai")
-    private String apiKey;
+    @Schema(title = "集群id", example = "ai")
+    private String clusterId;
 }

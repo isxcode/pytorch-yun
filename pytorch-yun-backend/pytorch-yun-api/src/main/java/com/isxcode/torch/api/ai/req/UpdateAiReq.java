@@ -1,6 +1,7 @@
 package com.isxcode.torch.api.ai.req;
 
 import com.isxcode.torch.api.ai.dto.AuthConfig;
+import com.isxcode.torch.api.ai.dto.ClusterConfig;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -20,8 +21,8 @@ public class UpdateAiReq {
     @Schema(title = "备注", example = "")
     private String remark;
 
-    @Schema(title = "Api认证", example = "")
-    private String clusterId;
+    @Schema(title = "集群配置", example = "")
+    private ClusterConfig clusterConfig;
 
     @Schema(title = "Api认证", example = "")
     private AuthConfig authConfig;
