@@ -8,9 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 
 @Slf4j
@@ -31,9 +29,9 @@ public class PytorchYunAgentBizService {
     public DeployAiRes deployAi(DeployAiReq deployAiReq) {
 
         // 先解压
-        String unzipModelCommand = "unzip -oj " + deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/file/" +
-            deployAiReq.getModelFileId() + " -d " + deployAiReq.getAgentHomePath() +
-            "/zhihuiyun-agent/ai/" + deployAiReq.getAiId();
+        String unzipModelCommand =
+            "unzip -oj " + deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/file/" + deployAiReq.getModelFileId()
+                + " -d " + deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/ai/" + deployAiReq.getAiId();
 
         // 执行命令
         Process execUnzip = RuntimeUtil.exec(unzipModelCommand);
@@ -57,10 +55,10 @@ public class PytorchYunAgentBizService {
         // 部署命令
         String aiPath = deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/ai/" + deployAiReq.getAiId();
         String pluginPath = deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/plugins/" + pluginName;
-        String[] deployCommand = {
-            "bash", "-c",
-            "cd " + aiPath + " && nohup bash -c \"MODEL_PATH='" + aiPath + "' uvicorn ai:app --host 127.0.0.1 --app-dir " + pluginPath + " --port " + aiPort + " \" > ai.log 2>&1 & echo $!"
-        };
+        String[] deployCommand = {"bash", "-c",
+                "cd " + aiPath + " && nohup bash -c \"MODEL_PATH='" + aiPath
+                    + "' uvicorn ai:app --host 127.0.0.1 --app-dir " + pluginPath + " --port " + aiPort
+                    + " \" > ai.log 2>&1 & echo $!"};
         String pid = RuntimeUtil.execForStr(deployCommand);
         return DeployAiRes.builder().aiPort(String.valueOf(aiPort)).aiPid(pid.replace("\n", "")).build();
     }
