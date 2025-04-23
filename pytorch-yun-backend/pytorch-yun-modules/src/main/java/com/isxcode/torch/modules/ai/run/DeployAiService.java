@@ -27,7 +27,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -97,8 +96,10 @@ public class DeployAiService {
             }
 
             // 调用模型部署接口
-            DeployAiReq deployAiReq = DeployAiReq.builder().agentHomePath(engineNode.getAgentHomePath()).modelCode(deployAiContext.getModelCode()).modelFileId(deployAiContext.getModelFileId()).aiId(ai.getId()).build();
-            BaseResponse<?>baseResponse = HttpUtils.doPost(
+            DeployAiReq deployAiReq = DeployAiReq.builder().agentHomePath(engineNode.getAgentHomePath())
+                .modelCode(deployAiContext.getModelCode()).modelFileId(deployAiContext.getModelFileId())
+                .aiId(ai.getId()).build();
+            BaseResponse<?> baseResponse = HttpUtils.doPost(
                 httpUrlUtils.genHttpUrl(engineNode.getHost(), engineNode.getAgentPort(), AgentUrl.DEPLOY_AI_URL),
                 deployAiReq, BaseResponse.class);
             if (!String.valueOf(HttpStatus.OK.value()).equals(baseResponse.getCode())) {

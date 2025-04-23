@@ -158,7 +158,8 @@ public class AiBizService {
         Page<PageAiRes> result = aiEntityPage.map(aiMapper::aiEntityToPageAiRes);
         result.forEach(aiEntity -> {
             if (aiEntity.getClusterConfig() != null) {
-                aiEntity.setClusterName(clusterService.getClusterName(JSON.parseObject(aiEntity.getClusterConfig(), ClusterConfig.class).getClusterId()));
+                aiEntity.setClusterName(clusterService
+                    .getClusterName(JSON.parseObject(aiEntity.getClusterConfig(), ClusterConfig.class).getClusterId()));
             }
             aiEntity.setCreateByUsername(userService.getUserName(aiEntity.getCreateBy()));
             JPA_TENANT_MODE.set(false);
@@ -185,8 +186,9 @@ public class AiBizService {
         ModelEntity model = modelService.getModel(ai.getModelId());
 
         // 封装请求体
-        DeployAiContext deployAiContext = DeployAiContext.builder().aiId(ai.getId()).clusterConfig(JSON.parseObject(ai.getClusterConfig(), ClusterConfig.class))
-            .modelCode(model.getCode()).modelFileId(model.getModelFile()).build();
+        DeployAiContext deployAiContext = DeployAiContext.builder().aiId(ai.getId())
+            .clusterConfig(JSON.parseObject(ai.getClusterConfig(), ClusterConfig.class)).modelCode(model.getCode())
+            .modelFileId(model.getModelFile()).build();
         deployAiService.deployAi(deployAiContext);
 
         // 修改状态
