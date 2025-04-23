@@ -31,7 +31,7 @@ public class PageAiRes {
 
     private String clusterName;
 
-    private String clusterId;
+    private String clusterConfig;
 
     private String aiType;
 

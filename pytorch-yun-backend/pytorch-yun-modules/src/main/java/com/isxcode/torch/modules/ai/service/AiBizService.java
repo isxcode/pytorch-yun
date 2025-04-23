@@ -2,6 +2,7 @@ package com.isxcode.torch.modules.ai.service;
 
 import com.alibaba.fastjson.JSON;
 import com.isxcode.torch.api.ai.constant.AiStatus;
+import com.isxcode.torch.api.ai.dto.ClusterConfig;
 import com.isxcode.torch.api.ai.req.AddAiReq;
 import com.isxcode.torch.api.ai.req.DeployAiReq;
 import com.isxcode.torch.api.ai.req.PageAiReq;
@@ -81,10 +82,10 @@ public class AiBizService {
             aiEntity.setAuthConfig(JSON.toJSONString(addAiReq.getAuthConfig()));
             aiEntity.setStatus(AiStatus.ENABLE);
         } else if (ModelType.MANUAL.equals(model.getModelType())) {
-            if (addAiReq.getClusterId() == null) {
+            if (addAiReq.getClusterConfig() == null) {
                 throw new IsxAppException("集群配置缺失");
             }
-            aiEntity.setClusterId(addAiReq.getClusterId());
+            aiEntity.setClusterConfig(JSON.toJSONString(addAiReq.getClusterConfig()));
             aiEntity.setStatus(AiStatus.DISABLE);
         } else {
             throw new IsxAppException("当前模型不支持");
@@ -137,10 +138,10 @@ public class AiBizService {
             }
             aiEntity.setAuthConfig(JSON.toJSONString(updateAiReq.getAuthConfig()));
         } else if (ModelType.MANUAL.equals(model.getModelType())) {
-            if (updateAiReq.getClusterId() == null) {
+            if (updateAiReq.getClusterConfig() == null) {
                 throw new IsxAppException("集群配置缺失");
             }
-            aiEntity.setClusterId(updateAiReq.getClusterId());
+            aiEntity.setClusterConfig(JSON.toJSONString(updateAiReq.getClusterConfig()));
             aiEntity.setStatus(AiStatus.DISABLE);
         } else {
             throw new IsxAppException("当前模型不支持");
@@ -156,8 +157,8 @@ public class AiBizService {
 
         Page<PageAiRes> result = aiEntityPage.map(aiMapper::aiEntityToPageAiRes);
         result.forEach(aiEntity -> {
-            if (aiEntity.getClusterId() != null) {
-                aiEntity.setClusterName(clusterService.getClusterName(aiEntity.getClusterId()));
+            if (aiEntity.getClusterConfig() != null) {
+                aiEntity.setClusterName(clusterService.getClusterName(JSON.parseObject(aiEntity.getClusterConfig(), ClusterConfig.class).getClusterId()));
             }
             aiEntity.setCreateByUsername(userService.getUserName(aiEntity.getCreateBy()));
             JPA_TENANT_MODE.set(false);
@@ -184,7 +185,7 @@ public class AiBizService {
         ModelEntity model = modelService.getModel(ai.getModelId());
 
         // 封装请求体
-        DeployAiContext deployAiContext = DeployAiContext.builder().aiId(ai.getId()).clusterId(ai.getClusterId())
+        DeployAiContext deployAiContext = DeployAiContext.builder().aiId(ai.getId()).clusterConfig(JSON.parseObject(ai.getClusterConfig(), ClusterConfig.class))
             .modelCode(model.getCode()).modelFileId(model.getModelFile()).build();
         deployAiService.deployAi(deployAiContext);
 

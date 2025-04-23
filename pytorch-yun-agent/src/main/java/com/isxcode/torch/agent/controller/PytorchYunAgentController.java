@@ -1,8 +1,9 @@
 package com.isxcode.torch.agent.controller;
 
 import com.isxcode.torch.agent.service.PytorchYunAgentBizService;
-import com.isxcode.torch.api.agent.DeployAiReq;
+import com.isxcode.torch.api.agent.req.DeployAiReq;
 import com.isxcode.torch.api.agent.constants.AgentUrl;
+import com.isxcode.torch.api.agent.res.DeployAiRes;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,15 +23,15 @@ public class PytorchYunAgentController {
     private final PytorchYunAgentBizService pytorchYunAgentBizService;
 
     @Operation(summary = "部署ai接口")
-    @PostMapping(AgentUrl.DEPLOY_AI)
+    @PostMapping(AgentUrl.DEPLOY_AI_URL)
     @SuccessResponse("部署成功")
-    public void deployAi(@Valid @RequestBody DeployAiReq deployAiReq) {
+    public DeployAiRes deployAi(@Valid @RequestBody DeployAiReq deployAiReq) {
 
-        pytorchYunAgentBizService.deployAi(deployAiReq);
+        return pytorchYunAgentBizService.deployAi(deployAiReq);
     }
 
     @Operation(summary = "调用ai接口")
-    @PostMapping(AgentUrl.CHAT_AI)
+    @PostMapping(AgentUrl.CHAT_AI_URL)
     @SuccessResponse("对话请求成功")
     public void chatAi() {
 

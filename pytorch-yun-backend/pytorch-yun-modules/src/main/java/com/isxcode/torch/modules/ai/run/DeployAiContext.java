@@ -1,5 +1,6 @@
 package com.isxcode.torch.modules.ai.run;
 
+import com.isxcode.torch.api.ai.dto.ClusterConfig;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,7 +10,7 @@ public class DeployAiContext {
 
     private String aiId;
 
-    private String clusterId;
+    private ClusterConfig clusterConfig;
 
     private String modelCode;
 

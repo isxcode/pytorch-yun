@@ -1,49 +1,67 @@
 package com.isxcode.torch.agent.service;
 
-import com.isxcode.torch.api.agent.DeployAiReq;
+import cn.hutool.core.util.RuntimeUtil;
+import com.isxcode.torch.api.agent.req.DeployAiReq;
+import com.isxcode.torch.api.agent.res.DeployAiRes;
+import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PytorchYunAgentBizService {
 
-    public void deployAi(DeployAiReq deployAiReq) {
+    public static int findUnusedPort() {
+
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new IsxAppException("未存在可使用端口号");
+        }
+    }
+
+    public DeployAiRes deployAi(DeployAiReq deployAiReq) {
 
         // 先解压
-        // String command = "unzip " + deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/file/" +
-        // deployAiReq.getModelFileId() + " -d " + deployAiReq.getAgentHomePath() +
-        // "/zhihuiyun-agent/model/" + deployAiReq.getAiId();
-        // String mkdir = "mkdir -p /root/zhihuiyun-agent/ai";
-        // String command = "unzip -j /root/zhihuiyun-agent/file/py_1914577920949641216 -d
-        // /root/zhihuiyun-agent/ai/py_1914598559278309376";
-        //
-        // // 然后找到对应的插件
-        // if ("Qwen2.5-0.5B".equals(deployAiReq.getModelCode())) {
-        // String deployCommand = "MODEL_PATH='/root/zhihuiyun-agent/ai/py_1914598559278309376' uvicorn
-        // ai4:app --host 127.0.0.1 --port 8000";
-        // }
-        //
-        // nohup bash -c "MODEL_PATH='/root/zhihuiyun-agent/ai/py_1914598559278309376' uvicorn ai4:app
-        // --host 127.0.0.1 --port 8000" > app.log 2>&1 &
-        // echo $! > uvicorn.pid
-        // cat app.log
-        // cat uvicorn.pid
-        // netstat -nlpt | grep 8000
-        //
-        // curl -X POST http://localhost:8000/chat \
-        // -H "Content-Type: application/json" \
-        // -d '{"prompt": "你是谁？"}'
+        String unzipModelCommand = "unzip -oj " + deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/file/" +
+            deployAiReq.getModelFileId() + " -d " + deployAiReq.getAgentHomePath() +
+            "/zhihuiyun-agent/ai/" + deployAiReq.getAiId();
 
-        // 获得一个随机端口号
+        // 执行命令
+        Process execUnzip = RuntimeUtil.exec(unzipModelCommand);
+        try {
+            if (execUnzip.waitFor() != 0) {
+                throw new IsxAppException(RuntimeUtil.getErrorResult(execUnzip));
+            }
+        } catch (InterruptedException e) {
+            throw new IsxAppException(e.getMessage());
+        }
 
-        // 然后调用命令
-        // xxxx:app --模型的地址
+        // 然后找到对应的插件
+        String pluginName = "";
+        if ("Qwen2.5-0.5B".equals(deployAiReq.getModelCode())) {
+            pluginName = "qwen2.5";
+        }
 
-        // 检测接口是否运行成功
+        // 获取端口
+        int aiPort = findUnusedPort();
 
-        // 返回日志，返回端口号，返回进程号，模型日志文件，models/
+        // 部署命令
+        String aiPath = deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/ai/" + deployAiReq.getAiId();
+        String pluginPath = deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/plugins/" + pluginName;
+        String[] deployCommand = {
+            "bash", "-c",
+            "cd " + aiPath + " && nohup bash -c \"MODEL_PATH='" + aiPath + "' uvicorn ai:app --host 127.0.0.1 --app-dir " + pluginPath + " --port " + aiPort + " \" > ai.log 2>&1 & echo $!"
+        };
+        String pid = RuntimeUtil.execForStr(deployCommand);
+        return DeployAiRes.builder().aiPort(String.valueOf(aiPort)).aiPid(pid.replace("\n", "")).build();
     }
 }

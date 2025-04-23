@@ -44,11 +44,13 @@ public class AiEntity {
 
     private String modelId;
 
-    private String clusterId;
-
     private String aiLog;
 
     private String aiPort;
+
+    private String aiPid;
+
+    private String clusterConfig;
 
     private String authConfig;
 

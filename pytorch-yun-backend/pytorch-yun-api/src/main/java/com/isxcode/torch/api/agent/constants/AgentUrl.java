@@ -9,7 +9,7 @@ public interface AgentUrl {
 
     String HEART_CHECK_URL = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/heartCheck";
 
-    String DEPLOY_AI = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/deployAi";
+    String DEPLOY_AI_URL = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/deployAi";
 
-    String CHAT_AI = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/chatAi";
+    String CHAT_AI_URL = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/chatAi";
 }

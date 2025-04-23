@@ -1,4 +1,4 @@
-package com.isxcode.torch.api.agent;
+package com.isxcode.torch.api.agent.req;
 
 import lombok.Builder;
 import lombok.Data;
