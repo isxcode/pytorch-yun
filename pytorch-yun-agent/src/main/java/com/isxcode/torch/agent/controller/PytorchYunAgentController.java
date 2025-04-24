@@ -3,7 +3,10 @@ package com.isxcode.torch.agent.controller;
 import com.isxcode.torch.agent.service.PytorchYunAgentBizService;
 import com.isxcode.torch.api.agent.req.DeployAiReq;
 import com.isxcode.torch.api.agent.constants.AgentUrl;
+import com.isxcode.torch.api.agent.req.GetAgentAiLogReq;
+import com.isxcode.torch.api.agent.req.StopAgentAiReq;
 import com.isxcode.torch.api.agent.res.DeployAiRes;
+import com.isxcode.torch.api.agent.res.GetAgentAiLogRes;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +31,22 @@ public class PytorchYunAgentController {
     public DeployAiRes deployAi(@Valid @RequestBody DeployAiReq deployAiReq) {
 
         return pytorchYunAgentBizService.deployAi(deployAiReq);
+    }
+
+    @Operation(summary = "停止ai接口")
+    @PostMapping(AgentUrl.STOP_AI_URL)
+    @SuccessResponse("停止成功")
+    public void stopAi(@Valid @RequestBody StopAgentAiReq stopAgentAiReq) {
+
+        pytorchYunAgentBizService.stopAi(stopAgentAiReq);
+    }
+
+    @Operation(summary = "获取ai日志接口")
+    @PostMapping(AgentUrl.GET_AI_LOG_URL)
+    @SuccessResponse("获取成功")
+    public GetAgentAiLogRes getAiLog(@Valid @RequestBody GetAgentAiLogReq getAgentAiLogReq) {
+
+        return pytorchYunAgentBizService.getAiLog(getAgentAiLogReq);
     }
 
     @Operation(summary = "调用ai接口")

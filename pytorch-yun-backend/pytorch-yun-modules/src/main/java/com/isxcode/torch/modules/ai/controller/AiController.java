@@ -1,9 +1,7 @@
 package com.isxcode.torch.modules.ai.controller;
 
-import com.isxcode.torch.api.ai.req.AddAiReq;
-import com.isxcode.torch.api.ai.req.DeployAiReq;
-import com.isxcode.torch.api.ai.req.PageAiReq;
-import com.isxcode.torch.api.ai.req.UpdateAiReq;
+import com.isxcode.torch.api.ai.req.*;
+import com.isxcode.torch.api.ai.res.GetAiLogRes;
 import com.isxcode.torch.api.ai.res.PageAiRes;
 import com.isxcode.torch.api.main.constants.ModuleCode;
 import com.isxcode.torch.api.user.constants.RoleType;
@@ -62,12 +60,21 @@ public class AiController {
         aiBizService.deployAi(deployAiReq);
     }
 
-    // @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
-    // @Operation(summary = "停止智能体接口")
-    // @PostMapping("/addModel")
-    // @SuccessResponse("添加成功")
-    // public void addModel(@Valid @RequestBody AddModelReq addModelReq) {
-    //
-    // modelBizService.addModel(addModelReq);
-    // }
+    @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
+    @Operation(summary = "停止智能体接口")
+    @PostMapping("/stopAi")
+    @SuccessResponse("下线成功")
+    public void stopAi(@Valid @RequestBody StopAiReq stopAiReq) {
+
+        aiBizService.stopAi(stopAiReq);
+    }
+
+    @Secured({RoleType.TENANT_MEMBER, RoleType.TENANT_ADMIN})
+    @Operation(summary = "获取智能体日志接口")
+    @PostMapping("/getAiLog")
+    @SuccessResponse("获取成功")
+    public GetAiLogRes getAiLog(@Valid @RequestBody GetAiLogReq getAiLogReq) {
+
+        return aiBizService.getAiLog(getAiLogReq);
+    }
 }

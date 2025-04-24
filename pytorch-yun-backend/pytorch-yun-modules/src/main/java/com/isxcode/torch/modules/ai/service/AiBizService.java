@@ -1,19 +1,27 @@
 package com.isxcode.torch.modules.ai.service;
 
 import com.alibaba.fastjson.JSON;
+import com.isxcode.torch.api.agent.constants.AgentUrl;
+import com.isxcode.torch.api.agent.req.GetAgentAiLogReq;
+import com.isxcode.torch.api.agent.req.StopAgentAiReq;
+import com.isxcode.torch.api.agent.res.GetAgentAiLogRes;
 import com.isxcode.torch.api.ai.constant.AiStatus;
 import com.isxcode.torch.api.ai.dto.ClusterConfig;
-import com.isxcode.torch.api.ai.req.AddAiReq;
-import com.isxcode.torch.api.ai.req.DeployAiReq;
-import com.isxcode.torch.api.ai.req.PageAiReq;
-import com.isxcode.torch.api.ai.req.UpdateAiReq;
+import com.isxcode.torch.api.ai.req.*;
+import com.isxcode.torch.api.ai.res.GetAiLogRes;
 import com.isxcode.torch.api.ai.res.PageAiRes;
 
 import javax.transaction.Transactional;
 
 import com.isxcode.torch.api.app.constants.DefaultAppStatus;
+import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
+import com.isxcode.torch.api.cluster.dto.ScpFileEngineNodeDto;
 import com.isxcode.torch.api.model.constant.ModelType;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.backend.api.base.pojos.BaseResponse;
+import com.isxcode.torch.common.utils.aes.AesUtils;
+import com.isxcode.torch.common.utils.http.HttpUrlUtils;
+import com.isxcode.torch.common.utils.http.HttpUtils;
 import com.isxcode.torch.modules.ai.entity.AiEntity;
 import com.isxcode.torch.modules.ai.mapper.AiMapper;
 import com.isxcode.torch.modules.ai.repository.AiRepository;
@@ -21,19 +29,25 @@ import com.isxcode.torch.modules.ai.run.DeployAiContext;
 import com.isxcode.torch.modules.ai.run.DeployAiService;
 import com.isxcode.torch.modules.app.entity.AppEntity;
 import com.isxcode.torch.modules.app.repository.AppRepository;
+import com.isxcode.torch.modules.cluster.entity.ClusterNodeEntity;
+import com.isxcode.torch.modules.cluster.mapper.ClusterNodeMapper;
+import com.isxcode.torch.modules.cluster.repository.ClusterNodeRepository;
 import com.isxcode.torch.modules.cluster.service.ClusterService;
 import com.isxcode.torch.modules.model.entity.ModelEntity;
 import com.isxcode.torch.modules.model.service.ModelService;
 import com.isxcode.torch.modules.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.ap.internal.util.Strings;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static com.isxcode.torch.common.config.CommonConfig.JPA_TENANT_MODE;
 
@@ -58,6 +72,14 @@ public class AiBizService {
     private final AppRepository appRepository;
 
     private final DeployAiService deployAiService;
+
+    private final HttpUrlUtils httpUrlUtils;
+
+    private final ClusterNodeRepository clusterNodeRepository;
+
+    private final ClusterNodeMapper clusterNodeMapper;
+
+    private final AesUtils aesUtils;
 
     public void addAi(AddAiReq addAiReq) {
 
@@ -194,5 +216,81 @@ public class AiBizService {
         // 修改状态
         ai.setStatus(AiStatus.DEPLOYING);
         aiRepository.save(ai);
+    }
+
+    public void stopAi(StopAiReq stopAiReq) {
+
+        // 判断ai是否存在
+        AiEntity ai = aiService.getAi(stopAiReq.getId());
+
+        // 判断pid值
+        if (Strings.isEmpty(ai.getAiPid())) {
+            throw new IsxAppException("智能体启动异常");
+        }
+        // 随机一个集群id
+        List<ClusterNodeEntity> allEngineNodes = clusterNodeRepository.findAllByClusterIdAndStatus(
+            JSON.parseObject(ai.getClusterConfig(), ClusterConfig.class).getClusterId(), ClusterNodeStatus.RUNNING);
+        if (allEngineNodes.isEmpty()) {
+            throw new IsxAppException("申请资源失败 : 集群不存在可用节点，请切换一个集群  \n");
+        }
+        ClusterNodeEntity engineNode = allEngineNodes.get(new Random().nextInt(allEngineNodes.size()));
+
+        // 翻译节点信息
+        ScpFileEngineNodeDto scpFileEngineNodeDto =
+            clusterNodeMapper.engineNodeEntityToScpFileEngineNodeDto(engineNode);
+        scpFileEngineNodeDto.setPasswd(aesUtils.decrypt(scpFileEngineNodeDto.getPasswd()));
+
+        // 获取pid
+        StopAgentAiReq stopAgentAiReq = StopAgentAiReq.builder().pid(ai.getAiPid()).build();
+
+        // 调用代理停止
+        BaseResponse<?> baseResponse = HttpUtils.doPost(
+            httpUrlUtils.genHttpUrl(engineNode.getHost(), engineNode.getAgentPort(), AgentUrl.STOP_AI_URL),
+            stopAgentAiReq, BaseResponse.class);
+        if (!String.valueOf(HttpStatus.OK.value()).equals(baseResponse.getCode())) {
+            throw new IsxAppException(baseResponse.getMsg());
+        }
+
+        // 修改智能体状态
+        ai.setStatus(AiStatus.DISABLE);
+        ai.setAiLog(ai.getAiLog() + "\n已经停止");
+        aiRepository.save(ai);
+    }
+
+    public GetAiLogRes getAiLog(GetAiLogReq getAiLogReq) {
+
+        // 判断ai是否存在
+        AiEntity ai = aiService.getAi(getAiLogReq.getId());
+
+        // 随机一个集群id
+        List<ClusterNodeEntity> allEngineNodes = clusterNodeRepository.findAllByClusterIdAndStatus(
+            JSON.parseObject(ai.getClusterConfig(), ClusterConfig.class).getClusterId(), ClusterNodeStatus.RUNNING);
+        if (allEngineNodes.isEmpty()) {
+            throw new IsxAppException("申请资源失败 : 集群不存在可用节点，请切换一个集群  \n");
+        }
+        ClusterNodeEntity engineNode = allEngineNodes.get(new Random().nextInt(allEngineNodes.size()));
+
+        // 翻译节点信息
+        ScpFileEngineNodeDto scpFileEngineNodeDto =
+            clusterNodeMapper.engineNodeEntityToScpFileEngineNodeDto(engineNode);
+        scpFileEngineNodeDto.setPasswd(aesUtils.decrypt(scpFileEngineNodeDto.getPasswd()));
+
+        // 封装请求
+        GetAgentAiLogReq getAgentAiLogReq =
+            GetAgentAiLogReq.builder().agentHomePath(engineNode.getAgentHomePath()).aiId(ai.getId()).build();
+
+        // 调用代理停止
+        BaseResponse<?> baseResponse = HttpUtils.doPost(
+            httpUrlUtils.genHttpUrl(engineNode.getHost(), engineNode.getAgentPort(), AgentUrl.GET_AI_LOG_URL),
+            getAgentAiLogReq, BaseResponse.class);
+        if (!String.valueOf(HttpStatus.OK.value()).equals(baseResponse.getCode())) {
+            throw new IsxAppException(baseResponse.getMsg());
+        }
+
+        // 修改智能体状态
+        GetAgentAiLogRes getAgentAiLogRes =
+            JSON.parseObject(JSON.toJSONString(baseResponse.getData()), GetAgentAiLogRes.class);
+
+        return GetAiLogRes.builder().log(getAgentAiLogRes.getLog()).build();
     }
 }
