@@ -1,6 +1,7 @@
 package com.isxcode.torch.modules.app.bot;
 
 import com.isxcode.torch.api.ai.dto.AuthConfig;
+import com.isxcode.torch.api.ai.dto.ClusterConfig;
 import com.isxcode.torch.api.app.dto.BaseConfig;
 import com.isxcode.torch.api.chat.dto.ChatContent;
 import lombok.Builder;
@@ -13,6 +14,10 @@ import java.util.List;
 public class BotChatContext {
 
     private String prompt;
+
+    private ClusterConfig clusterConfig;
+
+    private String aiPort;
 
     private AuthConfig authConfig;
 

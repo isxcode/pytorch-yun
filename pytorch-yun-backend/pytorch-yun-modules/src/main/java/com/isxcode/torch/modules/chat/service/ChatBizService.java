@@ -1,6 +1,7 @@
 package com.isxcode.torch.modules.chat.service;
 
 import com.alibaba.fastjson.JSON;
+import com.isxcode.torch.api.ai.dto.ClusterConfig;
 import com.isxcode.torch.api.app.constants.DefaultAppStatus;
 import com.isxcode.torch.api.app.dto.BaseConfig;
 import com.isxcode.torch.api.chat.ao.ChatAo;
@@ -10,6 +11,7 @@ import com.isxcode.torch.api.chat.constants.ChatType;
 import com.isxcode.torch.api.chat.dto.ChatContent;
 import com.isxcode.torch.api.chat.req.*;
 import com.isxcode.torch.api.chat.res.*;
+import com.isxcode.torch.api.model.constant.ModelType;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.ai.entity.AiEntity;
 import com.isxcode.torch.modules.ai.service.AiService;
@@ -177,6 +179,10 @@ public class ChatBizService {
             sendChatReq.getMaxChatIndexId(), sendChatReq.getChatId());
         if (!Strings.isEmpty(app.getBaseConfig())) {
             botChatContext.setBaseConfig(JSON.parseObject(app.getBaseConfig(), BaseConfig.class));
+        }
+        if (ModelType.MANUAL.equals(model.getModelType())) {
+            botChatContext.setAiPort(ai.getAiPort());
+            botChatContext.setClusterConfig(JSON.parseObject(ai.getClusterConfig(), ClusterConfig.class));
         }
 
         // 记录当前线程
