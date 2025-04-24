@@ -11,5 +11,9 @@ public interface AgentUrl {
 
     String DEPLOY_AI_URL = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/deployAi";
 
+    String STOP_AI_URL = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/stopAi";
+
+    String GET_AI_LOG_URL = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/getAiLog";
+
     String CHAT_AI_URL = "/" + ModuleCode.PYTORCH_YUN_AGENT + "/chatAi";
 }

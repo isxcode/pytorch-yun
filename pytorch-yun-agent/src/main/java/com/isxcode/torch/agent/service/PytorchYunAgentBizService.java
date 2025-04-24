@@ -2,7 +2,10 @@ package com.isxcode.torch.agent.service;
 
 import cn.hutool.core.util.RuntimeUtil;
 import com.isxcode.torch.api.agent.req.DeployAiReq;
+import com.isxcode.torch.api.agent.req.GetAgentAiLogReq;
+import com.isxcode.torch.api.agent.req.StopAgentAiReq;
 import com.isxcode.torch.api.agent.res.DeployAiRes;
+import com.isxcode.torch.api.agent.res.GetAgentAiLogRes;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,11 +58,34 @@ public class PytorchYunAgentBizService {
         // 部署命令
         String aiPath = deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/ai/" + deployAiReq.getAiId();
         String pluginPath = deployAiReq.getAgentHomePath() + "/zhihuiyun-agent/plugins/" + pluginName;
-        String[] deployCommand = {"bash", "-c",
-                "cd " + aiPath + " && nohup bash -c \"MODEL_PATH='" + aiPath
-                    + "' uvicorn ai:app --host 127.0.0.1 --app-dir " + pluginPath + " --port " + aiPort
-                    + " \" > ai.log 2>&1 & echo $!"};
+        String[] deployCommand =
+            {"bash", "-c", "nohup bash -c \"MODEL_PATH='" + aiPath + "' uvicorn ai:app --host 127.0.0.1 --app-dir "
+                + pluginPath + " --port " + aiPort + " \" > " + aiPath + "/ai.log 2>&1 & echo $!"};
         String pid = RuntimeUtil.execForStr(deployCommand);
         return DeployAiRes.builder().aiPort(String.valueOf(aiPort)).aiPid(pid.replace("\n", "")).build();
+    }
+
+    public void stopAi(StopAgentAiReq stopAgentAiReq) {
+
+        String stopAiCommand = "kill -9 " + stopAgentAiReq.getPid();
+
+        // 执行命令
+        Process stopAi = RuntimeUtil.exec(stopAiCommand);
+        try {
+            if (stopAi.waitFor() != 0) {
+                throw new IsxAppException(RuntimeUtil.getErrorResult(stopAi));
+            }
+        } catch (InterruptedException e) {
+            throw new IsxAppException(e.getMessage());
+        }
+    }
+
+    public GetAgentAiLogRes getAiLog(GetAgentAiLogReq getAgentAiLogReq) {
+
+
+        String aiPath = getAgentAiLogReq.getAgentHomePath() + "/zhihuiyun-agent/ai/" + getAgentAiLogReq.getAiId();
+        String[] getAiLog = {"bash", "-c", "cat " + aiPath + "/ai.log"};
+
+        return GetAgentAiLogRes.builder().log(RuntimeUtil.execForStr(getAiLog)).build();
     }
 }
