@@ -1,10 +1,12 @@
 package com.isxcode.torch.agent.controller;
 
 import com.isxcode.torch.agent.service.PytorchYunAgentBizService;
+import com.isxcode.torch.api.agent.req.ChatAgentAiReq;
 import com.isxcode.torch.api.agent.req.DeployAiReq;
 import com.isxcode.torch.api.agent.constants.AgentUrl;
 import com.isxcode.torch.api.agent.req.GetAgentAiLogReq;
 import com.isxcode.torch.api.agent.req.StopAgentAiReq;
+import com.isxcode.torch.api.agent.res.ChatAgentAiRes;
 import com.isxcode.torch.api.agent.res.DeployAiRes;
 import com.isxcode.torch.api.agent.res.GetAgentAiLogRes;
 import com.isxcode.torch.common.annotations.successResponse.SuccessResponse;
@@ -52,8 +54,9 @@ public class PytorchYunAgentController {
     @Operation(summary = "调用ai接口")
     @PostMapping(AgentUrl.CHAT_AI_URL)
     @SuccessResponse("对话请求成功")
-    public void chatAi() {
+    public ChatAgentAiRes chatAi(@Valid @RequestBody ChatAgentAiReq chatAgentAiReq) {
 
+        return pytorchYunAgentBizService.chatAi(chatAgentAiReq);
     }
 
     @Operation(summary = "心跳检测接口")

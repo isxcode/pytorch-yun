@@ -1,12 +1,13 @@
 package com.isxcode.torch.agent.service;
 
 import cn.hutool.core.util.RuntimeUtil;
-import com.isxcode.torch.api.agent.req.DeployAiReq;
-import com.isxcode.torch.api.agent.req.GetAgentAiLogReq;
-import com.isxcode.torch.api.agent.req.StopAgentAiReq;
+import com.isxcode.torch.api.agent.req.ChatAgentAiContent;
+import com.isxcode.torch.api.agent.req.*;
+import com.isxcode.torch.api.agent.res.ChatAgentAiRes;
 import com.isxcode.torch.api.agent.res.DeployAiRes;
 import com.isxcode.torch.api.agent.res.GetAgentAiLogRes;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.common.utils.http.HttpUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -87,5 +88,15 @@ public class PytorchYunAgentBizService {
         String[] getAiLog = {"bash", "-c", "cat " + aiPath + "/ai.log"};
 
         return GetAgentAiLogRes.builder().log(RuntimeUtil.execForStr(getAiLog)).build();
+    }
+
+    public ChatAgentAiRes chatAi(ChatAgentAiReq chatAgentAiReq) {
+
+        ChatAgentAiContent chatAgentAiContent = new ChatAgentAiContent();
+        chatAgentAiContent.setPrompt(chatAgentAiReq.getPrompt());
+
+        return HttpUtils.doPost("http://localhost:" + chatAgentAiReq.getAiPort() + "/chat", chatAgentAiContent,
+            ChatAgentAiRes.class);
+
     }
 }

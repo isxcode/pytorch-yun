@@ -21,11 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class AliQwen extends Bot {
+public class QwenPlus extends Bot {
 
     private final ChatSessionRepository chatSessionRepository;
 
-    public AliQwen(ChatSessionRepository chatSessionRepository) {
+    public QwenPlus(ChatSessionRepository chatSessionRepository) {
         this.chatSessionRepository = chatSessionRepository;
     }
 
