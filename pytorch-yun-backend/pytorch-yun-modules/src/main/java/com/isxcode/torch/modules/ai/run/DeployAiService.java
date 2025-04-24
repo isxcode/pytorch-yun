@@ -1,0 +1,127 @@
+package com.isxcode.torch.modules.ai.run;
+
+import com.alibaba.fastjson.JSON;
+import com.isxcode.torch.api.agent.constants.AgentUrl;
+import com.isxcode.torch.api.agent.req.DeployAiReq;
+import com.isxcode.torch.api.agent.res.DeployAiRes;
+import com.isxcode.torch.api.ai.constant.AiStatus;
+import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
+import com.isxcode.torch.api.cluster.dto.ScpFileEngineNodeDto;
+import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
+import com.isxcode.torch.backend.api.base.pojos.BaseResponse;
+import com.isxcode.torch.backend.api.base.properties.IsxAppProperties;
+import com.isxcode.torch.common.utils.aes.AesUtils;
+import com.isxcode.torch.common.utils.http.HttpUrlUtils;
+import com.isxcode.torch.common.utils.http.HttpUtils;
+import com.isxcode.torch.common.utils.path.PathUtils;
+import com.isxcode.torch.modules.ai.entity.AiEntity;
+import com.isxcode.torch.modules.ai.repository.AiRepository;
+import com.isxcode.torch.modules.ai.service.AiService;
+import com.isxcode.torch.modules.cluster.entity.ClusterNodeEntity;
+import com.isxcode.torch.modules.cluster.mapper.ClusterNodeMapper;
+import com.isxcode.torch.modules.cluster.repository.ClusterNodeRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.util.List;
+import java.util.Random;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class DeployAiService {
+
+    private final AiService aiService;
+
+    private final AiRepository aiRepository;
+
+    private final ClusterNodeRepository clusterNodeRepository;
+
+    private final ClusterNodeMapper clusterNodeMapper;
+
+    private final AesUtils aesUtils;
+
+    private final ScpFileService scpFileService;
+
+    private final IsxAppProperties isxAppProperties;
+
+    private final HttpUrlUtils httpUrlUtils;
+
+    @Async
+    public void deployAi(DeployAiContext deployAiContext) {
+
+        AiEntity ai = aiService.getAi(deployAiContext.getAiId());
+
+        // 随机一个集群id
+        List<ClusterNodeEntity> allEngineNodes = clusterNodeRepository
+            .findAllByClusterIdAndStatus(deployAiContext.getClusterConfig().getClusterId(), ClusterNodeStatus.RUNNING);
+        if (allEngineNodes.isEmpty()) {
+            throw new IsxAppException("申请资源失败 : 集群不存在可用节点，请切换一个集群  \n");
+        }
+        ClusterNodeEntity engineNode = allEngineNodes.get(new Random().nextInt(allEngineNodes.size()));
+
+        // 翻译节点信息
+        ScpFileEngineNodeDto scpFileEngineNodeDto =
+            clusterNodeMapper.engineNodeEntityToScpFileEngineNodeDto(engineNode);
+        scpFileEngineNodeDto.setPasswd(aesUtils.decrypt(scpFileEngineNodeDto.getPasswd()));
+
+        try {
+            String srcPath = PathUtils.parseProjectPath(isxAppProperties.getResourcesPath()) + File.separator + "file"
+                + File.separator + engineNode.getTenantId() + File.separator + deployAiContext.getModelFileId();
+            String distPath =
+                engineNode.getAgentHomePath() + "/zhihuiyun-agent/file/" + deployAiContext.getModelFileId();
+
+            // 看看模型是否存在
+            boolean fileIsUpload = scpFileService.modelFileIsUpload(scpFileEngineNodeDto, srcPath, distPath);
+            if (!fileIsUpload) {
+                // 异步上传安装包
+                scpFileService.scpFile(scpFileEngineNodeDto, srcPath, distPath);
+
+                // 添加日志
+                ai = aiService.getAi(deployAiContext.getAiId());
+                ai.setAiLog("开始上传模型");
+                ai = aiRepository.save(ai);
+
+                // 同步监听进度
+                scpFileService.listenScpPercent(scpFileEngineNodeDto, srcPath, distPath, ai);
+            } else {
+                // 添加日志
+                ai = aiService.getAi(deployAiContext.getAiId());
+                ai.setAiLog("模型已经上传");
+                aiRepository.save(ai);
+            }
+
+            // 调用模型部署接口
+            DeployAiReq deployAiReq = DeployAiReq.builder().agentHomePath(engineNode.getAgentHomePath())
+                .modelCode(deployAiContext.getModelCode()).modelFileId(deployAiContext.getModelFileId())
+                .aiId(ai.getId()).build();
+            BaseResponse<?> baseResponse = HttpUtils.doPost(
+                httpUrlUtils.genHttpUrl(engineNode.getHost(), engineNode.getAgentPort(), AgentUrl.DEPLOY_AI_URL),
+                deployAiReq, BaseResponse.class);
+            if (!String.valueOf(HttpStatus.OK.value()).equals(baseResponse.getCode())) {
+                throw new IsxAppException(baseResponse.getMsg());
+            }
+            // 解析返回状态，并保存
+            DeployAiRes deployAiRes = JSON.parseObject(JSON.toJSONString(baseResponse.getData()), DeployAiRes.class);
+
+            // 运行返回端口号
+            ai = aiService.getAi(deployAiContext.getAiId());
+            ai.setAiLog(ai.getAiLog() + "\n运行中");
+            ai.setStatus(AiStatus.ENABLE);
+            ai.setAiPid(deployAiRes.getAiPid());
+            ai.setAiPort(deployAiRes.getAiPort());
+            aiRepository.save(ai);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            ai = aiService.getAi(deployAiContext.getAiId());
+            ai.setStatus(AiStatus.DEPLOY_FAIL);
+            ai.setAiLog("部署失败：" + e.getMessage());
+            aiRepository.save(ai);
+        }
+
+    }
+}

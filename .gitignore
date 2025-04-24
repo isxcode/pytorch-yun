@@ -14,14 +14,14 @@
 **/.DS_Store
 
 # 前端打包不提交
-ollama-yun-backend/ollama-yun-main/src/main/resources/templates
-ollama-yun-backend/ollama-yun-main/src/main/resources/static
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/templates
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/static
 
 # 代理安装包不提交
-ollama-yun-backend/ollama-yun-main/src/main/resources/agent
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/agent
 
 # 企业版代码不提交
-ollama-yun-vip
+pytorch-yun-vip
 
 # 资源文件不提交
 resources/file
@@ -32,11 +32,11 @@ resources/tmp
 resources/cdc
 
 # flink-min不提交
-ollama-yun-dist/flink-min
+pytorch-yun-dist/flink-min
 
 # 日志不提交
 logs
 
 # prql二进制文件不提交
-ollama-yun-backend/ollama-yun-main/src/main/resources/libprql_java-osx-arm64.dylib
-ollama-yun-backend/ollama-yun-main/src/main/resources/libprql_java-linux64.so
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/libprql_java-osx-arm64.dylib
+pytorch-yun-backend/pytorch-yun-main/src/main/resources/libprql_java-linux64.so

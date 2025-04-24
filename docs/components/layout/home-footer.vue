@@ -362,11 +362,11 @@ function clickGithubProject() {
 }
 
 function clickGitee() {
-  window.open("https://gitee.com/isxcode/ollama-yun");
+  window.open("https://gitee.com/isxcode/pytorch-yun");
 }
 
 function clickGithub() {
-  window.open("https://github.com/isxcode/ollama-yun/discussions");
+  window.open("https://github.com/isxcode/pytorch-yun/discussions");
 }
 
 function clickSlack() {

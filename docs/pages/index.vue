@@ -50,12 +50,12 @@
           {{ $t("related_technologies") }}
         </div>
         <div class="tech-img-div">
-          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-ollama.png" alt="">
-          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-milvus.png" alt="">
-          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-deepseek.png" alt="">
-          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-k8s.png" alt="">
-          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-ali.png" alt="">
-          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-pytorch.png" alt="">
+          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-1.png" alt="">
+          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-2.png" alt="">
+          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-3.png" alt="">
+          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-4.png" alt="">
+          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-5.png" alt="">
+          <img class="tech-img" src="https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/website/it-img/t-6.png" alt="">
         </div>
       </div>
     </div>
