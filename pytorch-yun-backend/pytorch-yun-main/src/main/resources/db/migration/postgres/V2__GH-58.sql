@@ -39,7 +39,7 @@ COMMENT ON COLUMN PY_MODEL.tenant_id IS '租户id';
 -- 智能体表
 CREATE TABLE PY_AI
 (
-    id                      varchar(200)  not null unique primary key,
+    id                      varchar(200)  not null,
     name                    varchar(200)  not null,
     remark                  varchar(500),
     status                  varchar(200)  not null,
@@ -83,7 +83,7 @@ COMMENT ON COLUMN PY_AI.tenant_id IS '租户id';
 -- 智能应用表
 CREATE TABLE PY_APP
 (
-    id                      varchar(200)  not null unique primary key,
+    id                      varchar(200)  not null,
     name                    varchar(200)  not null,
     logo_id                 varchar(200)  not null,
     ai_id                   varchar(200)  not null,
