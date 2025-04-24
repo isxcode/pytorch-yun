@@ -95,7 +95,7 @@ public class PytorchYunAgentBizService {
         ChatAgentAiContent chatAgentAiContent = new ChatAgentAiContent();
         chatAgentAiContent.setPrompt(chatAgentAiReq.getPrompt());
 
-        return HttpUtils.doPost("http://localhost:" + chatAgentAiReq.getAiPort() + "/chat", chatAgentAiContent,
+        return HttpUtils.doPost("http://127.0.0.1:" + chatAgentAiReq.getAiPort() + "/chat", chatAgentAiContent,
             ChatAgentAiRes.class);
 
     }
