@@ -186,3 +186,9 @@ body {
 .el-menu {
   border-right: none;
 }
+
+.el-dropdown-menu {
+  .el-dropdown-menu__item {
+    font-size: getCssVar('font-size', 'extra-small');
+  }
+}

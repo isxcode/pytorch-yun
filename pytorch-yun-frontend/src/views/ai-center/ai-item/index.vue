@@ -30,9 +30,11 @@
                                 <span class="click-show-more">更多</span>
                                 <template #dropdown>
                                     <el-dropdown-menu>
-                                        <el-dropdown-item>启动/关闭</el-dropdown-item>
-                                        <el-dropdown-item>删除</el-dropdown-item>
-                                        <el-dropdown-item>检测</el-dropdown-item>
+                                        <el-dropdown-item v-if="['ENABLE'].includes(scopeSlot.row.status)" @click="stopData(scopeSlot.row)">下线</el-dropdown-item>
+                                        <el-dropdown-item v-else @click="publishData(scopeSlot.row)">发布</el-dropdown-item>
+                                        <el-dropdown-item @click="showLog(scopeSlot.row)">日志</el-dropdown-item>
+                                        <!-- <el-dropdown-item>删除</el-dropdown-item>
+                                        <el-dropdown-item>检测</el-dropdown-item> -->
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>
@@ -42,6 +44,7 @@
             </div>
         </LoadingPage>
         <AddModal ref="addModalRef" />
+        <ShowLog ref="showLogRef" />
     </div>
 </template>
 
@@ -50,9 +53,10 @@ import { reactive, ref, onMounted } from 'vue'
 import Breadcrumb from '@/layout/bread-crumb/index.vue'
 import LoadingPage from '@/components/loading/index.vue'
 import { BreadCrumbList, TableConfig } from './list.config'
-import { QueryAiItemList, AddAiItemData, UpdateAiItemData } from '@/services/ai-item.service'
-import { ElMessage } from 'element-plus'
+import { QueryAiItemList, AddAiItemData, UpdateAiItemData, DeployAiItemLogData, StopAiItemLogData } from '@/services/ai-item.service'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import AddModal from './add-modal/index.vue'
+import ShowLog from './show-log/index.vue'
 
 interface ApiKey {
     apiKey: string
@@ -66,10 +70,11 @@ interface FormParams {
     id?: string
 }
 
-const keyword = ref('')
-const loading = ref(false)
-const networkError = ref(false)
+const keyword = ref<string>('')
+const loading = ref<boolean>(false)
+const networkError = ref<boolean>(false)
 const addModalRef = ref<any>(null)
+const showLogRef = ref<any>(null)
 
 const breadCrumbList = reactive(BreadCrumbList)
 const tableConfig: any = reactive(TableConfig)
@@ -121,6 +126,41 @@ function editEvent(data: any) {
             })
         })
     }, data)
+}
+
+function publishData(data: any) {
+    ElMessageBox.confirm('确定发布吗？', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        DeployAiItemLogData({
+            id: data.id
+        }).then((res: any) => {
+            ElMessage.success(res.msg)
+            handleCurrentChange(1)
+        }).catch(() => {})
+    })
+}
+
+// 查看日志
+function showLog(e: any) {
+    showLogRef.value.showModal(e.id)
+}
+
+function stopData(data: any) {
+    ElMessageBox.confirm('确定下线吗？', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        StopAiItemLogData({
+            id: data.id
+        }).then((res: any) => {
+            ElMessage.success(res.msg)
+            handleCurrentChange(1)
+        }).catch(() => {})
+    })
 }
 
 function inputEvent(e: string) {
