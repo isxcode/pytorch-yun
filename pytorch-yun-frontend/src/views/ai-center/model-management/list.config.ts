@@ -64,7 +64,7 @@ export const colConfigs: colConfig[] = [
     {
         prop: 'modelFileName',
         title: '模型文件',
-        minWidth: 80,
+        minWidth: 120,
         showOverflowTooltip: true
     },
     {

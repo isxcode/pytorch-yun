@@ -2,7 +2,9 @@
     <Breadcrumb :bread-crumb-list="breadCrumbList" />
     <div class="zqy-seach-table model-management">
         <div class="zqy-table-top">
-            <span></span>
+            <el-button type="primary" @click="addData">
+                添加
+            </el-button>
             <div class="zqy-seach">
                 <el-input v-model="keyword" placeholder="请输入搜索条件 回车进行搜索" clearable :maxlength="200" @input="inputEvent"
                     @keyup.enter="initData(false)" />
@@ -17,13 +19,15 @@
                     </template>
                     <template #options="scopeSlot">
                         <div class="btn-group btn-group-msg">
-                            <span>检测</span>
+                            <!-- <span>检测</span> -->
+                            <span @click="editEvent(scopeSlot.row)">编辑</span>
                             <el-dropdown trigger="click">
                                 <span class="click-show-more">更多</span>
                                 <template #dropdown>
                                     <el-dropdown-menu>
-                                        <el-dropdown-item>删除</el-dropdown-item>
-                                        <el-dropdown-item>备注</el-dropdown-item>
+                                        <el-dropdown-item>编辑</el-dropdown-item>
+                                        <!-- <el-dropdown-item>删除</el-dropdown-item>
+                                        <el-dropdown-item>备注</el-dropdown-item> -->
                                     </el-dropdown-menu>
                                 </template>
                             </el-dropdown>
@@ -32,6 +36,7 @@
                 </BlockTable>
             </div>
         </LoadingPage>
+        <AddModal ref="addModalRef" />
     </div>
 </template>
 
@@ -40,14 +45,54 @@ import { reactive, ref, onMounted } from 'vue'
 import Breadcrumb from '@/layout/bread-crumb/index.vue'
 import LoadingPage from '@/components/loading/index.vue'
 import { BreadCrumbList, TableConfig } from './list.config'
-import { QueryModelList } from '@/services/model-management.service'
+import { AddModelData, QueryModelList, UpdateModelData } from '@/services/model-management.service'
+import AddModal from './add-modal/index.vue'
+import { ElMessage } from 'element-plus'
 
-const keyword = ref('')
-const loading = ref(false)
-const networkError = ref(false)
+interface FormParams {
+    name: string
+    code: string
+    modelLabel: string
+    modelFile: string
+    remark: string
+    id?: string
+}
+
+const keyword = ref<string>('')
+const loading = ref<boolean>(false)
+const networkError = ref<boolean>(false)
+const addModalRef = ref<any>(null)
 
 const breadCrumbList = reactive(BreadCrumbList)
 const tableConfig: any = reactive(TableConfig)
+
+function addData() {
+    addModalRef.value.showModal((formData: FormParams) => {
+        return new Promise((resolve: any, reject: any) => {
+            AddModelData(formData).then((res: any) => {
+                ElMessage.success(res.msg)
+                initData()
+                resolve()
+            }).catch((error: any) => {
+                reject(error)
+            })
+        })
+    })
+}
+
+function editEvent(data: any) {
+    addModalRef.value.showModal((formData: FormParams) => {
+        return new Promise((resolve: any, reject: any) => {
+            UpdateModelData(formData).then((res: any) => {
+                ElMessage.success(res.msg)
+                initData()
+                resolve()
+            }).catch((error: any) => {
+                reject(error)
+            })
+        })
+    }, data)
+}
 
 function initData(tableLoading?: boolean) {
     loading.value = tableLoading ? false : true
