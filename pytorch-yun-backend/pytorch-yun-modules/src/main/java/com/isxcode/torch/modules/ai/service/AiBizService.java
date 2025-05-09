@@ -97,28 +97,28 @@ public class AiBizService {
         ModelEntity model = modelService.getModel(addAiReq.getModelId());
         JPA_TENANT_MODE.set(true);
 
+        // 自动创建对应的应用
+        AppEntity appEntity = new AppEntity();
         if (ModelType.API.equals(model.getModelType())) {
             if (addAiReq.getAuthConfig() == null) {
                 throw new IsxAppException("验证信息缺失");
             }
             aiEntity.setAuthConfig(JSON.toJSONString(addAiReq.getAuthConfig()));
             aiEntity.setStatus(AiStatus.ENABLE);
+            appEntity.setStatus(AiStatus.ENABLE);
         } else if (ModelType.MANUAL.equals(model.getModelType())) {
             if (addAiReq.getClusterConfig() == null) {
                 throw new IsxAppException("集群配置缺失");
             }
             aiEntity.setClusterConfig(JSON.toJSONString(addAiReq.getClusterConfig()));
             aiEntity.setStatus(AiStatus.DISABLE);
+            appEntity.setStatus(AiStatus.DISABLE);
         } else {
             throw new IsxAppException("当前模型不支持");
         }
 
         aiEntity.setCheckDateTime(LocalDateTime.now());
         aiEntity = aiRepository.save(aiEntity);
-
-        // 自动创建对应的应用
-        AppEntity appEntity = new AppEntity();
-        appEntity.setStatus(AiStatus.ENABLE);
         appEntity.setName(addAiReq.getName());
         appEntity.setAiId(aiEntity.getId());
         appEntity.setCheckDateTime(LocalDateTime.now());

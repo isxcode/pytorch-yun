@@ -1,5 +1,6 @@
 package com.isxcode.torch.agent.service;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import com.isxcode.torch.api.agent.req.ChatAgentAiContent;
 import com.isxcode.torch.api.agent.req.*;
@@ -83,8 +84,13 @@ public class PytorchYunAgentBizService {
 
     public GetAgentAiLogRes getAiLog(GetAgentAiLogReq getAgentAiLogReq) {
 
-
         String aiPath = getAgentAiLogReq.getAgentHomePath() + "/zhihuiyun-agent/ai/" + getAgentAiLogReq.getAiId();
+
+        // 如果ai.log文件不存在则报错，再部署中
+        if (!FileUtil.exist(aiPath + "/ai.log")) {
+            throw new IsxAppException("模型在部署中，请稍后");
+        }
+
         String[] getAiLog = {"bash", "-c", "cat " + aiPath + "/ai.log"};
 
         return GetAgentAiLogRes.builder().log(RuntimeUtil.execForStr(getAiLog)).build();
