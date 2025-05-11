@@ -22,6 +22,7 @@
                 :isTalking="isTalking"
                 :requestLoading="requestLoading"
                 :talkMsgList="talkMsgList"
+                @stopThink="stopThink"
             ></ZhyChat>
             <div class="ai-input-container" :class="{ 'ai-input-container__bottom': isTalking }">
                 <el-input
@@ -59,7 +60,7 @@ import { onMounted, reactive, ref, nextTick } from 'vue'
 import ZhyChat from './zhy-chat/index.vue'
 import AppItem from './app-item/index.vue'
 import LoadingPage from '@/components/loading/index.vue'
-import { GetChatDetailData, GetChatDetailList, GetMaxChatData, SendMessageToAi } from '@/services/ai-cheat.service.ts'
+import { GetChatDetailData, GetChatDetailList, GetMaxChatData, SendMessageToAi, StopChatThink } from '@/services/ai-cheat.service.ts'
 import { useAuthStore } from '@/store/useAuth'
 import HistoryList from './history-list/index.vue'
 
@@ -247,6 +248,15 @@ function onKeyupEvent(e: any) {
     if (e.type === 'keydown' && e.key === 'Enter') {
         sendQuestionEvent()
     }
+}
+
+function stopThink() {
+    StopChatThink({
+        chatSessionId: chatId.value || null
+    }).then((res: any) => {
+        
+    }).catch((err: any) => {
+    })
 }
 
 onMounted(() => {
