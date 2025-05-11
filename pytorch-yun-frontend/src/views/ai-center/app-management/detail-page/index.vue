@@ -8,6 +8,7 @@
             :isTalking="isTalking"
             :requestLoading="requestLoading"
             :talkMsgList="talkMsgList"
+            @stopThink="stopThink"
         ></ZhyChat>
         <div class="ai-input-container" :class="{ 'ai-input-container__bottom': isTalking }">
             <el-input
@@ -20,7 +21,6 @@
                 @keydown.enter.prevent="onKeyupEvent"
             ></el-input>
             <div class="option-container">
-                <el-button v-if="isTalking" link @click="stopChat">新对话</el-button>
                 <el-button
                     :disabled="!talkMessage"
                     :loading="requestLoading"
@@ -35,14 +35,14 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, onMounted, onUnmounted } from 'vue'
+import { reactive, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import Breadcrumb from '@/layout/bread-crumb/index.vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppConfigModal from '../app-config-modal/index.vue'
 import ZhyChat from '../../../home-overview/zhy-chat/index.vue'
 import { ElMessage } from 'element-plus'
 import { ConfigAppData } from '@/services/app-management.service'
-
+import { GetChatDetailData, GetChatDetailList, GetMaxChatData, SendMessageToAi, StopChatThink } from '@/services/ai-cheat.service'
 
 const route = useRoute()
 const router = useRouter()
@@ -50,8 +50,9 @@ const router = useRouter()
 const appConfigModalRef = ref<any>()
 // 消息部分
 const talkMessage = ref<string>('')
-const appId = ref<string>('')
+const appId = ref<any>('')
 const chatId = ref<string>('')
+const maxChatIndexId = ref<number>(0)
 const isTalking = ref<boolean>(true)
 const requestLoading = ref<boolean>(false)  // 发送消息-加载状态
 const talkMsgList = ref<any[]>([])          // 当前对话的记录
@@ -70,6 +71,8 @@ const breadCrumbList = reactive([
 function initData() {
     if (route.query.id) {
         appId.value = route.query.id
+
+        chatId.value = ''
     } else {
         ElMessage.warning('应用不存在')
         router.push({ name: 'app-management' })
@@ -83,7 +86,7 @@ function onKeyupEvent(e: any) {
 }
 
 // 发送问题
-function sendQuestionEvent() {
+async function sendQuestionEvent() {
     if (!talkMessage.value) {
         return
     }
@@ -93,13 +96,74 @@ function sendQuestionEvent() {
         content: talkMessage.value
     })
     requestLoading.value = true
-    talkMessage.value = ''
+    if (!chatId.value) {
+        await getMaxChatData()
+    }
+    SendMessageToAi({
+        chatId: chatId.value || null,
+        appId: appId.value ? appId.value : null,
+        maxChatIndexId: maxChatIndexId.value,
+        chatContent: {
+            content: talkMessage.value,
+            // index: talkMsgList.length - 1,
+            // role: ''
+        }
+    }).then((res: any) => {
+        talkMessage.value = ''
+        maxChatIndexId.value = res.data.responseIndexId
+        getChatResult()
+    }).catch(() => {
+        talkMessage.value = ''
+        requestLoading.value = false
+    })
+}
+
+// 获取对话结果
+function getChatResult() {
+    GetChatDetailData({
+        chatId: chatId.value || null,
+        chatIndex: maxChatIndexId.value
+    }).then((res: any) => {
+        if (res.data.status === 'CHATTING') {
+            setTimeout(() => {
+                getChatResult()
+            }, 1000);
+        } else {
+            requestLoading.value = false
+            nextTick(() => {
+                talkMsgList.value.push({
+                    type: 'ai',
+                    content: res.data.chatContent.content
+                })
+            })
+            // 会话结束获取最新的索引
+            getMaxChatData()
+        }
+    }).catch(() => {
+        requestLoading.value = false
+    })
+}
+
+// 获取最大对话
+function getMaxChatData() {
+    return new Promise((resolve: any, reject: any) => {
+        GetMaxChatData({
+            chatId: chatId.value || null,
+            appId: appId.value ? appId.value : null,
+        }).then((res: any) => {
+            chatId.value = res.data.chatId
+            maxChatIndexId.value = res.data.chatIndexId
+            resolve()
+        }).catch((err: any) => {
+            reject(err)
+        })
+    })
 }
 
 // 应用配置弹窗
 function showAppConfigEvent() {
     appConfigModalRef.value.showModal((formData: any) => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve: any, reject) => {
             ConfigAppData({
                 id: route.query.id,
                 ...formData
@@ -111,6 +175,23 @@ function showAppConfigEvent() {
             })
         })
     })
+}
+
+function stopThink() {
+    StopChatThink({
+        chatSessionId: chatId.value || null
+    }).then((res: any) => {
+        
+    }).catch((err: any) => {
+    })
+}
+
+// 结束对话
+function stopChat() {
+    isTalking.value = false
+    talkMessage.value = ''
+    chatId.value = ''
+    talkMsgList.value = []
 }
 
 onMounted(() => {

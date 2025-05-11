@@ -29,7 +29,7 @@
                     <template #options="scopeSlot">
                         <div class="btn-group btn-group-msg">
                             <span @click="editEvent(scopeSlot.row)">编辑</span>
-                            <el-dropdown trigger="click">
+                            <!-- <el-dropdown trigger="click">
                                 <span class="click-show-more">更多</span>
                                 <template #dropdown>
                                     <el-dropdown-menu>
@@ -37,7 +37,7 @@
                                         <el-dropdown-item>删除</el-dropdown-item>
                                     </el-dropdown-menu>
                                 </template>
-                            </el-dropdown>
+                            </el-dropdown> -->
                         </div>
                     </template>
                 </BlockTable>

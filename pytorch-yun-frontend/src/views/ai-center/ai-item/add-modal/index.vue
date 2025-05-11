@@ -9,7 +9,7 @@
                 />
             </el-form-item>
             <el-form-item label="类型" prop="aiType">
-                <el-select v-model="formData.aiType" placeholder="请选择">
+                <el-select v-model="formData.aiType" placeholder="请选择" @change="typeChangeEvent">
                     <el-option
                         v-for="item in typeList"
                         :key="item.value"
@@ -21,7 +21,7 @@
             <el-form-item label="模型" prop="modelId">
                 <el-select v-model="formData.modelId" placeholder="请选择">
                     <el-option
-                        v-for="item in modelIdList"
+                        v-for="item in modelIdListOptions"
                         :key="item.id"
                         :label="item.name"
                         :value="item.id"
@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, defineExpose, ref, nextTick } from 'vue'
+import { reactive, defineExpose, ref, nextTick, computed } from 'vue'
 import BlockModal from '@/components/block-modal/index.vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { QueryModelList } from '@/services/model-management.service';
@@ -134,6 +134,14 @@ const rules = reactive<FormRules>({
     'clusterConfig.clusterId': [{ required: true, message: '请选择集群', trigger: ['change', 'blur']}],
 })
 
+const modelIdListOptions = computed(() => {
+    if (formData.aiType === 'local') {
+        return modelIdList.value.filter((model: any) => model.modelType === 'MANUAL')
+    } else {
+        return modelIdList.value.filter((model: any) => model.modelType === 'API')
+    }
+})
+
 function showModal(cb: () => void, data: any): void {
     callback.value = cb
     getModelListOptions()
@@ -190,6 +198,10 @@ function okEvent() {
             ElMessage.warning('请将表单输入完整')
         }
     })
+}
+
+function typeChangeEvent() {
+    formData.modelId = ''
 }
 
 function getModelListOptions() {
