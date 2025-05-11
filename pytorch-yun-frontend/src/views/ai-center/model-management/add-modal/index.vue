@@ -9,11 +9,19 @@
                 />
             </el-form-item>
             <el-form-item label="编码" prop="code">
-                <el-input
+                <!-- <el-input
                     v-model="formData.code"
                     maxlength="200"
                     placeholder="请输入"
-                />
+                /> -->
+                <el-select v-model="formData.code" placeholder="请选择">
+                    <el-option
+                        v-for="item in codeList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                    />
+                </el-select>
             </el-form-item>
             <el-form-item label="标签" prop="code">
                 <el-input
@@ -22,7 +30,7 @@
                     placeholder="请输入"
                 />
             </el-form-item>
-            <el-form-item label="模型文件" prop="modelFile">
+            <el-form-item label="模型文件" prop="modelFile" v-if="modelType !== 'API'">
                 <el-select v-model="formData.modelFile" placeholder="请选择">
                     <el-option
                         v-for="item in fileList"
@@ -44,7 +52,7 @@
 import { reactive, defineExpose, ref, nextTick } from 'vue'
 import BlockModal from '@/components/block-modal/index.vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
-import { GetFileCenterList } from '@/services/file-center.service';
+import { GetFileCenterList } from '@/services/file-center.service'
 
 interface FormParams {
     name: string
@@ -59,6 +67,13 @@ const form = ref<FormInstance>()
 const callback = ref<any>()
 const renderSence = ref('new')
 const fileList = ref<any[]>([])
+const codeList = ref([
+    {
+        label: 'Qwen2.5-0.5B',
+        value: 'Qwen2.5-0.5B'
+    }
+])
+const modelType = ref<string>('')
 const modelConfig = reactive({
     title: '添加',
     visible: false,
@@ -99,10 +114,12 @@ function showModal(cb: () => void, data: any): void {
     if (data) {
         modelConfig.title = '编辑'
         renderSence.value = 'edit'
+        modelType.value = data.modelType
         Object.keys(formData).forEach((key: string) => {
             formData[key] = data[key]
         })
     } else {
+        modelType.value = 'MANUAL'
         modelConfig.title = '添加'
         renderSence.value = 'new'
         Object.keys(formData).forEach((key: string) => {

@@ -2,23 +2,86 @@
     <BlockDrawer :drawer-config="drawerConfig">
         <el-scrollbar>
             <div class="app-config-container">
-                <!-- 数据源配置 -->
-                <div class="config-item">
-                    <div class="item-title">基础配置</div>
-                    <el-form
-                        ref="formRef"
-                        label-position="left"
-                        label-width="120px"
-                        :model="formData"
-                        :rules="basicFormRules"
-                    >
-                        <el-form-item label="文字限制" prop="datasourceId">
-                            <el-input-number v-model="formData.baseConfig.topK" :min="0" controls-position="right" />
-                            <!-- <el-select v-model="formData.baseConfig.datasourceId" placeholder="请选择">
-                                <el-option v-for="item in dataSourceList" :key="item.value" :label="item.label"
-                                    :value="item.value" />
-                            </el-select> -->
+                <el-form
+                    ref="formRef"
+                    label-position="left"
+                    label-width="120px"
+                    :model="formData"
+                    :rules="basicFormRules"
+                >
+                    <!-- 数据源配置 -->
+                    <div class="config-item">
+                        <div class="item-title">基础配置</div>
+                        <el-form-item label="文本长度" prop="maxTokens">
+                            <el-tooltip
+                                content="控制生成文本的最大长度"
+                                placement="top"
+                            >
+                                <el-icon style="left: -68px" class="tooltip-msg"><QuestionFilled /></el-icon>
+                            </el-tooltip>
+                            <el-input-number v-model="formData.baseConfig.maxTokens" :min="0" controls-position="right" />
                         </el-form-item>
+                        <el-form-item label="随机数" prop="seed">
+                            <el-tooltip
+                                content="随机数生成器的种子，用于确保结果可复现"
+                                placement="top"
+                            >
+                                <el-icon style="left: -82px" class="tooltip-msg"><QuestionFilled /></el-icon>
+                            </el-tooltip>
+                            <el-input-number v-model="formData.baseConfig.seed" :min="0" controls-position="right" />
+                        </el-form-item>
+                        <el-form-item label="候选词数" prop="topK">
+                            <el-tooltip
+                                content="示例：设为 50 时，仅考虑模型认为最可能的50个候选词"
+                                placement="top"
+                            >
+                                <el-icon style="left: -68px" class="tooltip-msg"><QuestionFilled /></el-icon>
+                            </el-tooltip>
+                            <el-input-number v-model="formData.baseConfig.topK" :min="0" controls-position="right" />
+                        </el-form-item>
+                        <el-form-item label="累积概率" prop="topP">
+                            <el-tooltip
+                                content="示例：设为 0.9 时，选择概率累加达90%的最小词集"
+                                placement="top"
+                            >
+                                <el-icon style="left: -68px" class="tooltip-msg"><QuestionFilled /></el-icon>
+                            </el-tooltip>
+                            <el-input-number
+                                v-model="formData.baseConfig.topP"
+                                :min="0"
+                                :max="1"
+                                :step="0.01"
+                                controls-position="right"
+                            />
+                        </el-form-item>
+                        <el-form-item label="采样随机性" prop="temperature">
+                            <el-tooltip
+                                content="调节采样随机性。值越高（如 1.0）结果越多样；值越低（如 0.1）越保守"
+                                placement="top"
+                            >
+                                <el-icon style="left: -58px" class="tooltip-msg"><QuestionFilled /></el-icon>
+                            </el-tooltip>
+                            <el-input-number
+                                v-model="formData.baseConfig.temperature"
+                                :min="0"
+                                :max="1"
+                                :step="0.01"
+                                controls-position="right"
+                            />
+                        </el-form-item>
+                        <el-form-item label="是否联网检索" prop="enableSearch">
+                            <el-tooltip
+                                content="是否结合外部搜索（如实时检索）增强生成内容的事实性"
+                                placement="top"
+                            >
+                                <el-icon style="left: -46px" class="tooltip-msg"><QuestionFilled /></el-icon>
+                            </el-tooltip>
+                            <el-switch v-model="formData.baseConfig.enableSearch" />
+                        </el-form-item>
+                    </div>
+                    <!-- 数据源配置 -->
+                    <div class="config-item">
+                        <div class="item-title">提示词</div>
                         <el-form-item label="提示词" prop="datasourceId">
                             <el-input v-model="formData.prompt" placeholder="请输入"></el-input>
                             <!-- <el-select v-model="formData.baseConfig.datasourceId" placeholder="请选择">
@@ -26,9 +89,29 @@
                                     :value="item.value" />
                             </el-select> -->
                         </el-form-item>
-                    </el-form>
-                    <el-divider />
-                </div>
+                    </div>
+                    <!-- 数据源配置 -->
+                    <div class="config-item">
+                        <div class="item-title">知识库</div>
+                        <el-form-item label="资源文件" prop="resources">
+                            <el-select
+                                v-model="formData.resources"
+                                placeholder="请选择"
+                                multiple
+                                clearable
+                                collapse-tags
+                                :collapse-tags-tooltip="true"
+                            >
+                                <el-option
+                                    v-for="item in resourcesList"
+                                    :key="item.id"
+                                    :label="item.fileName"
+                                    :value="item.id"
+                                />
+                            </el-select>
+                        </el-form-item>
+                    </div>
+                </el-form>
             </div>
         </el-scrollbar>
     </BlockDrawer>
@@ -40,12 +123,14 @@ import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import BlockDrawer from '@/components/block-drawer/index.vue'
 import { useRoute } from 'vue-router'
 import { GetConfigAppData } from '@/services/app-management.service'
+import { GetFileCenterList } from '@/services/file-center.service';
 
 const route = useRoute()
 
 const basicFormRules = ref([])
 const formRef = ref<any>()
 const callback = ref<any>()
+const resourcesList = ref<any[]>([])
 const drawerConfig = reactive({
     title: '配置',
     visible: false,
@@ -71,20 +156,23 @@ const formData = reactive<{
     resources: any
 }>({
     baseConfig: {
-        topK: 0
+        maxTokens: 0,
+        seed: 0,
+        topK: 0,
+        topP: 0,
+        temperature: 0,
+        repetitionPenalty: 0,
+        enableSearch: false
     },
     prompt: '',
     resources: null
 })
 
-function showModal(cb: () => void, data: any) {
+function showModal(cb: () => void) {
     callback.value = cb
     getConfigData()
-    if (!data) {
+    getFileListOptions()
 
-    } else {
-
-    }
     drawerConfig.visible = true;
 }
 
@@ -92,13 +180,15 @@ function getConfigData() {
     GetConfigAppData({
         id: route.query.id
     }).then((res: any) => {
-        formData.baseConfig = res.data.baseConfig || {
-            topK: 0
-        }
+        Object.keys(formData).forEach((key: string) => {
+            if (res.data[key]) {
+                formData[key] = res.data[key]
+            }
+        })
         formData.prompt = res.data.prompt || ''
         formData.resources = res.data.resources || []
-    }).catch(() => {
-
+    }).catch((error: any) => {
+        console.error('查询详情报错', error)
     })
 }
 
@@ -122,6 +212,18 @@ function okEvent() {
     })
 }
 
+function getFileListOptions() {
+    GetFileCenterList({
+        page: 0,
+        pageSize: 9999,
+        searchKeyWord: ''
+    }).then((res: any) => {
+        resourcesList.value = res.data.content
+    }).catch(() => {
+        resourcesList.value = []
+    })
+}
+
 function closeEvent() {
     drawerConfig.visible = false;
 }
@@ -134,25 +236,24 @@ defineExpose({
 <style lang="scss">
 .app-config-container {
     padding: 12px;
-
-    .config-item {
-        .item-title {
-            font-size: 12px;
-            padding-bottom: 12px;
-            box-sizing: border-box;
-            border-bottom: 1px solid #ebeef5;
-        }
-
-        .el-form {
-            padding: 12px 0 0;
-            box-sizing: border-box;
+    .el-form {
+        padding: 0 0 0;
+        box-sizing: border-box;
+        .config-item {
+            .item-title {
+                font-size: 12px;
+                padding-bottom: 12px;
+                box-sizing: border-box;
+                border-bottom: 1px solid #ebeef5;
+                margin-bottom: 16px;
+            }
 
             .el-form-item {
                 position: relative;
 
                 .tooltip-msg {
                     position: absolute;
-                    top: 7px;
+                    top: 8px;
                     color: getCssVar('color', 'info');
                     font-size: 16px;
                 }

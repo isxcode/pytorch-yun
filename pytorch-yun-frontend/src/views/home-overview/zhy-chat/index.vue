@@ -40,14 +40,14 @@
                 </div>
             </div>
             <div v-if="requestLoading">
-                <span class="stop-think">停止思考</span>
+                <!-- <span class="stop-think" @click="stopThink">停止思考</span> -->
             </div>
         </el-scrollbar>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, watch, nextTick, computed, onMounted, onUnmounted, toRefs, reactive } from 'vue'
+import { ref, defineProps, watch, nextTick, computed, onMounted, onUnmounted, toRefs, defineEmits } from 'vue'
 import { UserFilled, Loading } from '@element-plus/icons-vue'
 import { marked } from 'marked';
 import hljs from 'highlight.js/lib/common';
@@ -58,12 +58,16 @@ interface ChatItem {
     content: string
     loading?: boolean
 }
+
+const emit = defineEmits(['stopThink'])
+
 const elScrollbarRef = ref<any>()
 const props = defineProps<{
     talkMsgList: ChatItem[]
     requestLoading: boolean
     isTalking: boolean
 }>()
+
 const loadingTimer = ref<any>()
 const loadingPoint = ref<string>('.')
 
@@ -103,6 +107,10 @@ function refrashScrollEvent() {
             behavior: 'smooth'
         })
     })
+}
+
+function stopThink() {
+    emit('stopThink')
 }
 
 onMounted(() => {

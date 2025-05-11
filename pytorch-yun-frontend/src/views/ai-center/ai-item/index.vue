@@ -32,7 +32,7 @@
                                     <el-dropdown-menu>
                                         <el-dropdown-item v-if="['ENABLE'].includes(scopeSlot.row.status)" @click="stopData(scopeSlot.row)">下线</el-dropdown-item>
                                         <el-dropdown-item v-else @click="publishData(scopeSlot.row)">发布</el-dropdown-item>
-                                        <el-dropdown-item @click="showLog(scopeSlot.row)">日志</el-dropdown-item>
+                                        <el-dropdown-item v-if="scopeSlot.row.aiType !== 'API'" @click="showLog(scopeSlot.row)">日志</el-dropdown-item>
                                         <!-- <el-dropdown-item>删除</el-dropdown-item>
                                         <el-dropdown-item>检测</el-dropdown-item> -->
                                     </el-dropdown-menu>
