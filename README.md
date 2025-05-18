@@ -85,7 +85,3 @@ git clone https://github.com/isxcode/pytorch-yun.git
 cd pytorch-yun
 ./gradlew.bat install clean package
 ```
-
-### 收藏历史
-
-[![Star History Chart](https://api.star-history.com/svg?repos=isxcode/pytorch-yun&type=Date)](https://www.star-history.com/#isxcode/pytorch-yun&Date)
