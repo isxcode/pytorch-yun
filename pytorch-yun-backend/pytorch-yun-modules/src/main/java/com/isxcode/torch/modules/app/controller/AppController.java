@@ -71,4 +71,28 @@ public class AppController {
 
         appBizService.setDefaultApp(setDefaultAppReq);
     }
+
+    @Operation(summary = "删除应用接口")
+    @PostMapping("/deleteApp")
+    @SuccessResponse("设置成功")
+    public void deleteApp(@Valid @RequestBody DeleteAppReq deleteAppReq) {
+
+        appBizService.deleteApp(deleteAppReq);
+    }
+
+    @Operation(summary = "禁用应用接口")
+    @PostMapping("/disableApp")
+    @SuccessResponse("禁用成功")
+    public void disableApp(@Valid @RequestBody DisableAppReq disableAppReq) {
+
+        appBizService.disableApp(disableAppReq);
+    }
+
+    @Operation(summary = "启用应用接口")
+    @PostMapping("/enableApp")
+    @SuccessResponse("启用成功")
+    public void enableApp(@Valid @RequestBody EnableAppReq enableAppReq) {
+
+        appBizService.enableApp(enableAppReq);
+    }
 }
