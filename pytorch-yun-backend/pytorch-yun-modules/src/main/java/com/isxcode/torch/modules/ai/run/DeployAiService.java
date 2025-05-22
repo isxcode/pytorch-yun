@@ -5,6 +5,7 @@ import com.isxcode.torch.api.agent.constants.AgentUrl;
 import com.isxcode.torch.api.agent.req.DeployAiReq;
 import com.isxcode.torch.api.agent.res.DeployAiRes;
 import com.isxcode.torch.api.ai.constant.AiStatus;
+import com.isxcode.torch.api.app.constants.AppStatus;
 import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
 import com.isxcode.torch.api.cluster.dto.ScpFileEngineNodeDto;
 import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
@@ -17,6 +18,8 @@ import com.isxcode.torch.common.utils.path.PathUtils;
 import com.isxcode.torch.modules.ai.entity.AiEntity;
 import com.isxcode.torch.modules.ai.repository.AiRepository;
 import com.isxcode.torch.modules.ai.service.AiService;
+import com.isxcode.torch.modules.app.entity.AppEntity;
+import com.isxcode.torch.modules.app.repository.AppRepository;
 import com.isxcode.torch.modules.cluster.entity.ClusterNodeEntity;
 import com.isxcode.torch.modules.cluster.mapper.ClusterNodeMapper;
 import com.isxcode.torch.modules.cluster.repository.ClusterNodeRepository;
@@ -50,6 +53,8 @@ public class DeployAiService {
     private final IsxAppProperties isxAppProperties;
 
     private final HttpUrlUtils httpUrlUtils;
+
+    private final AppRepository appRepository;
 
     @Async
     public void deployAi(DeployAiContext deployAiContext) {
@@ -115,6 +120,12 @@ public class DeployAiService {
             ai.setAiPid(deployAiRes.getAiPid());
             ai.setAiPort(deployAiRes.getAiPort());
             aiRepository.save(ai);
+
+            // 部署成功，将初始化应用改成可用模式
+            List<AppEntity> byStatusAndAiId = appRepository.findByStatusAndAiId(AppStatus.INIT, ai.getId());
+            byStatusAndAiId.forEach(appEntity -> appEntity.setStatus(AppStatus.ENABLE));
+            appRepository.saveAll(byStatusAndAiId);
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             ai = aiService.getAi(deployAiContext.getAiId());

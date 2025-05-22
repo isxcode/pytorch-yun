@@ -13,6 +13,7 @@ import com.isxcode.torch.api.ai.res.PageAiRes;
 
 import javax.transaction.Transactional;
 
+import com.isxcode.torch.api.app.constants.AppStatus;
 import com.isxcode.torch.api.app.constants.DefaultAppStatus;
 import com.isxcode.torch.api.cluster.constants.ClusterNodeStatus;
 import com.isxcode.torch.api.cluster.dto.ScpFileEngineNodeDto;
@@ -112,7 +113,7 @@ public class AiBizService {
             }
             aiEntity.setClusterConfig(JSON.toJSONString(addAiReq.getClusterConfig()));
             aiEntity.setStatus(AiStatus.DISABLE);
-            appEntity.setStatus(AiStatus.DISABLE);
+            appEntity.setStatus(AppStatus.INIT);
         } else {
             throw new IsxAppException("当前模型不支持");
         }
