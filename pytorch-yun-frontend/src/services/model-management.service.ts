@@ -13,3 +13,21 @@ export function QueryModelList(params: QueryParams): Promise<any> {
         params: params
     })
 }
+
+// 新建
+export function AddModelData(params: any): Promise<any> {
+    return http.request({
+        method: 'post',
+        url: '/model/addModel',
+        params: params
+    })
+}
+
+// 更新
+export function UpdateModelData(params: any): Promise<any> {
+    return http.request({
+        method: 'post',
+        url: '/model/updateModel',
+        params: params
+    })
+}

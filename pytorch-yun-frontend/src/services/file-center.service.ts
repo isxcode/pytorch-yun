@@ -23,7 +23,8 @@ export function UploadFileData(params: any): Promise<any> {
   return http.uploadFile({
     method: 'post',
     url: '/file/uploadFile',
-    params
+    params,
+    timeout: 1000 * 60 * 30
   })
 }
 

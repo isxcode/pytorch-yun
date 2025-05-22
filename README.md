@@ -17,7 +17,6 @@
 | 安装包下载:      | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/zhihuiyun.tar.gz                                                                                 |
 | 许可证下载:      | https://isxcode.oss-cn-shanghai.aliyuncs.com/zhihuiyun/license.lic                                                                                      |
 | Docker Hub: | https://hub.docker.com/r/isxcode/zhihuiyun                                                                                                              |
-| 阿里云镜像:      | https://zhihuiyun.isxcode.com/zh/docs/zh/1/1-docker                                                                                                     |
 | 产品矩阵:       | [至轻云](https://zhiqingyun.isxcode.com), [至流云](https://zhiliuyun.isxcode.com), [至慧云](https://zhihuiyun.isxcode.com), [至数云](https://zhishuyun.isxcode.com) |
 | 关键词:        | 大模型训练, 智能中心, 模型调用, 模型编排, 人工智能, Pytorch, Pytorch, Docker                                                                                                 |
 |             |                                                                                                                                                         |
@@ -59,33 +58,14 @@ docker run -p 8080:8080 -d isxcode/zhihuiyun
 
 ### 源码构建
 
-> [!WARNING]
-> 编译环境需访问外网，且需提前安装Nodejs和Java，推荐版本如下: </br>
-> Java: zulu8.78.0.19-ca-jdk8.0.412-x64 </br>
-> Nodejs: node-v18.20.3-x64
-
-##### MacOS/Linux
-
 > [!IMPORTANT]
-> 安装包路径: pytorch-yun/pytorch-yun-dist/build/distributions/zhihuiyun.tar.gz
+> 安装包路径: /tmp/pytorch-yun/pytorch-yun-dist/build/distributions/zhihuiyun.tar.gz
 
 ```bash
+cd /tmp
 git clone https://github.com/isxcode/pytorch-yun.git
-cd pytorch-yun
-./gradlew install clean package
+docker run --rm \
+  -v /tmp/pytorch-yun:/pytorch-yun \
+  -w /pytorch-yun -it registry.cn-shanghai.aliyuncs.com/isxcode/zhihuiyun-build:amd-latest \
+  /bin/bash -c "source /etc/profile && gradle install clean package"
 ```
-
-##### Windows10/11
-
-> [!CAUTION]
-> 请使用Git Bash终端工具执行以下命令
-
-```bash
-git clone https://github.com/isxcode/pytorch-yun.git
-cd pytorch-yun
-./gradlew.bat install clean package
-```
-
-### 收藏历史
-
-[![Star History Chart](https://api.star-history.com/svg?repos=isxcode/pytorch-yun&type=Date)](https://www.star-history.com/#isxcode/pytorch-yun&Date)

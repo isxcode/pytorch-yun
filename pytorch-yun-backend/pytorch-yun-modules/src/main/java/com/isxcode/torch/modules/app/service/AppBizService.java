@@ -120,4 +120,26 @@ public class AppBizService {
         app.setDefaultApp(DefaultAppStatus.ENABLE);
         appRepository.save(app);
     }
+
+    public void deleteApp(DeleteAppReq deleteAppReq) {
+
+        AppEntity app = appService.getApp(deleteAppReq.getId());
+        appRepository.delete(app);
+    }
+
+    public void enableApp(EnableAppReq enableAppReq) {
+
+        AppEntity app = appService.getApp(enableAppReq.getId());
+
+        app.setStatus(DefaultAppStatus.ENABLE);
+        appRepository.save(app);
+    }
+
+    public void disableApp(DisableAppReq disableAppReq) {
+
+        AppEntity app = appService.getApp(disableAppReq.getId());
+
+        app.setStatus(DefaultAppStatus.DISABLE);
+        appRepository.save(app);
+    }
 }

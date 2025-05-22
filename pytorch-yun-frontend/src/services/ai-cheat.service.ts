@@ -45,3 +45,11 @@ export function GetHistoryChatList(params: any): Promise<any> {
     })
 }
 
+// 停止思考
+export function StopChatThink(params: any): Promise<any> {
+    return http.request({
+        method: 'post',
+        url: '/chat/stopChat',
+        params: params
+    })
+}
