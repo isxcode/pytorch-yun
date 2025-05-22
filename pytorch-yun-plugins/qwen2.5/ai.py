@@ -59,7 +59,7 @@ async def chat_endpoint(request: ChatRequest):
         model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
 
         generation_config = {
-            "max_new_tokens": 128,
+            "max_new_tokens": 512,
             "temperature": 0.8, # 控制生成文本的随机性。温度越高，生成的文本越随机和创造性；温度越低，文本越趋向于确定性和重复性。
             "top_k": 50, # 只从模型认为最可能的`k`个词中选择下一个词。`k`值越大，选择范围越广，生成的文本越多样；`k`值越小，选择范围越窄，生成的文本越趋向于高概率的词。
             "top_p": 0.9, # 从概率累计达到`p`的那一组词中随机选择下一个词。与Top-K不同，Top-P是动态的，依据每个上下文的不同而变化。
@@ -67,7 +67,7 @@ async def chat_endpoint(request: ChatRequest):
         }
 
         # 设置 stopping criteria
-        stop_strings = ["ContentLoaded","\n\n"]
+        stop_strings = ["ContentLoaded"]
         stopping_criteria = StoppingCriteriaList([StopOnString(stop_strings, tokenizer)])
 
         # 推理
