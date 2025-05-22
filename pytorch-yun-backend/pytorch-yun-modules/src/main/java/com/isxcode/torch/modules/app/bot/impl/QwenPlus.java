@@ -11,16 +11,19 @@ import com.isxcode.torch.api.app.dto.BaseConfig;
 import com.isxcode.torch.api.chat.constants.ChatSessionStatus;
 import com.isxcode.torch.api.chat.dto.ChatContent;
 import com.isxcode.torch.api.model.constant.ModelCode;
+import com.isxcode.torch.backend.api.base.exceptions.IsxAppException;
 import com.isxcode.torch.modules.app.bot.Bot;
 import com.isxcode.torch.modules.app.bot.BotChatContext;
 import com.isxcode.torch.modules.chat.entity.ChatSessionEntity;
 import com.isxcode.torch.modules.chat.repository.ChatSessionRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class QwenPlus extends Bot {
 
     private final ChatSessionRepository chatSessionRepository;
@@ -91,7 +94,8 @@ public class QwenPlus extends Bot {
             chatSessionRepository.save(nowChatSession);
 
         } catch (NoApiKeyException | InputRequiredException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage(), e);
+            throw new IsxAppException(e.getMessage());
         }
     }
 
