@@ -80,7 +80,7 @@ public class ChatBizService {
         if (Strings.isEmpty(getMaxChatIdReq.getAppId())) {
             Optional<AppEntity> byDefaultApp = appRepository.findByDefaultApp(DefaultAppStatus.ENABLE);
             if (!byDefaultApp.isPresent()) {
-                throw new IsxAppException("没有默认可用应用");
+                throw new IsxAppException("请创建智能应用");
             }
             getMaxChatIdReq.setAppId(byDefaultApp.get().getId());
         }
